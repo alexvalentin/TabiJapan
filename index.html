@@ -181,6 +181,8 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .crow .cchk input{width:20px;height:20px}
 .cbtn{font:inherit;font-weight:600;font-size:14px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);cursor:pointer}
 .cbtn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tg{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:6px 10px;font-family:var(--f-mono);font-size:12px;align-items:baseline}
+.tg span:not(:first-child){text-align:right;white-space:nowrap}
 .crow .cmeta{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
 .crow .cmeta a{color:var(--ink);font-weight:600}
 .crow .cmeta b{color:var(--ink);font-weight:600}
@@ -621,7 +623,7 @@ function viewCosts(){
       '<dt>Pe persoană</dt><dd>'+ef(c.e/2)+' € · '+nf(c.y/2)+' ¥ · ≈'+nf(c.r/2)+' RON</dd>'+
       '<dt>Pe noapte (cuplu)</dt><dd>'+ef(Math.round(c.e/x.n*10)/10)+' € · '+nf(c.y/x.n)+' ¥ · ≈'+nf(c.r/x.n)+' RON</dd></dl></div>';
   });
-  h+='<div class="card"><span class="kicker">Total hoteluri · '+HT.reduce(function(a,x){return a+x.n;},0)+' nopți</span><div class="total"><span>Cuplu '+ef(he)+' €</span><span>'+nf(hy)+' ¥</span><span>≈'+nf(hr)+' RON</span></div><div class="total"><span>Pe persoană '+ef(he/2)+' €</span><span>'+nf(hy/2)+' ¥</span><span>≈'+nf(hr/2)+' RON</span></div></div></div>';
+  h+='<div class="card"><span class="kicker">Total hoteluri · '+HT.reduce(function(a,x){return a+x.n;},0)+' nopți</span><div class="tg"><span>Cuplu</span><span>'+ef(he)+' €</span><span>'+nf(hy)+' ¥</span><span>≈'+nf(hr)+' RON</span><span>Pe persoană</span><span>'+ef(he/2)+' €</span><span>'+nf(hy/2)+' ¥</span><span>≈'+nf(hr/2)+' RON</span></div></div></div>';
   /* atractii */
   h+='<div id="sec-atr" class="stack" style="gap:10px"><h3 class="sec" style="font-size:20px;margin:14px 0 0">Atracții și transport</h3>';
   h+='<div class="cs"><div class="card"><span class="kicker">Total</span><b>'+nf(ty)+' ¥</b><small>≈ '+nf(tr)+' RON</small></div>'+
