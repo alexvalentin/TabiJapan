@@ -153,6 +153,8 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;font-size:14px}
 .kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
 .mono{font-family:var(--f-mono);font-size:13px}
+.sub-h{font-family:var(--f-head);font-size:17px;font-weight:700;margin:8px 0 0}
+.total{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--f-mono);font-size:13px}
 .copy{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;margin-left:6px}
 ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 .linkbtn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}
@@ -161,7 +163,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 /* Navigare jos */
 nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);
   padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
-nav.bottom .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav.bottom .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
 nav.bottom a{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:6px 4px;border-radius:10px;font-size:12px;color:var(--muted);font-weight:500;position:relative}
 nav.bottom a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav.bottom a[aria-current="page"]{color:var(--ink);background:var(--surface2)}
@@ -319,6 +321,7 @@ var TABS=[
  {id:"zile",l:"Zile",i:'<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'},
  {id:"bilete",l:"Bilete",i:'<path d="M3 9a2 2 0 0 0 0 6v3h18v-3a2 2 0 0 1 0-6V6H3z"/><path d="M14 6v12" stroke-dasharray="2 3"/>'},
  {id:"transport",l:"Transport",i:'<rect x="5" y="3.5" width="14" height="13" rx="3"/><path d="M5 11h14M8.5 20l1.5-3.5M15.5 20L14 16.5"/>'},
+ {id:"hoteluri",l:"Hoteluri",i:'<path d="M3 20V8l9-4 9 4v12"/><path d="M3 20h18M9 20v-5h6v5M8 11h2M14 11h2"/>'},
  {id:"info",l:"Info",i:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/>'}
 ];
 
@@ -442,6 +445,31 @@ function viewTransport(){
   '<div class="card osaka"><span class="kicker">Joi 26 nov · Osaka</span><h3>Drumul la Universal Studios</h3><p>Pe jos până la Osaka-Namba, Hanshin Namba Line până la Nishikujo, apoi JR Yumesaki Line până la Universal City. Retur pe aceeași rută.</p></div>'+
   '<div class="card"><span class="kicker">Cazări</span><dl class="kv"><dt>Kyoto</dt><dd>The Royal Park Canvas – Kyoto Nijo</dd><dt>Osaka</dt><dd>Toho Hotel Namba Motomachi</dd></dl></div></div>';
 }
+var HT=[
+{cc:"tokyo",city:"Tokyo",name:"Tosei Hotel Asakusa",room:"Cameră twin",book:"https://www.booking.com/hotel/jp/toseihoterukokoneqian-cao.ro.html",addr:"Asakusa 3-26-10, Tokyo, Japonia",map:"Tosei Hotel Asakusa 3-26-10 Asakusa Tokyo",
+ ci:"15 nov, de la 15:00",co:"21 nov, până la 10:00",n:6,price:"729 € · 135.319 ¥ · ≈3.980 RON",pay:"13 nov",paid:"11 nov",
+ rt:"Hotel → Tokyo Station, sâmbătă 21 nov (Shinkansen spre Kyoto)",
+ steps:["Metrou Ginza Line din stația Asakusa până la Nihombashi, circa 18 min, 210 ¥ (≈6 RON). De acolo, circa 5 min pe jos până la Tokyo Station, ieșirea Yaesu.","Alternativ: Ginza Line până la Ueno, apoi JR Yamanote până la Tokyo Station. Circa 20 min, 340 ¥ (≈10 RON).","Check-out e la 10:00. Dacă Shinkansenul pleacă în jur de 10:00, iese din hotel pe la 9:00, ca să ai timp pentru bagaje și peron.","Cât de departe e hotelul de stația Asakusa se vede pe hartă, la adresa de mai sus."]},
+{cc:"kyoto",city:"Kyoto",name:"The Royal Park Canvas – Kyoto Nijo",room:"Cameră twin standard",book:"https://www.booking.com/hotel/jp/za-roiyarupaku-kiyanbasu-jing-du-er-tiao.ro.html",addr:"Nakagyo, Nishinokyo Shokushi-cho 22-7, Kyoto, Japonia",map:"The Royal Park Canvas Kyoto Nijo",
+ ci:"21 nov, de la 15:00",co:"25 nov, până la 11:00",n:4,price:"678 € · 125.800 ¥ · ≈3.700 RON",pay:"17 nov",paid:"15 nov",
+ rt:"Hotel → Kyoto Station, miercuri 25 nov (tren spre Osaka)",
+ steps:["Cea mai apropiată stație e Nijo, pe linia JR Sanin, la circa 2 minute pe jos de hotel.","De la Nijo iei trenul JR până la Kyoto Station. Durata și peronul se văd pe Google Maps sau Ekitan în dimineața plecării.","Check-out e la 11:00. Alege un tren cu cel puțin 30 de minute rezervă față de plecarea din hotel.","Pe 21 nov, la sosire, faci același drum invers, de la Kyoto Station la Nijo."]},
+{cc:"osaka",city:"Osaka",name:"Toho Hotel Namba Motomachi",room:"Cameră twin standard, pentru nefumători",book:"https://www.booking.com/hotel/jp/dong-fang-hoterunanbayuan-ting.ro.html",addr:"Naniwa-ku, Motomachi 2-5-6, Osaka, Japonia",map:"Toho Hotel Namba Motomachi Osaka",
+ ci:"25 nov, de la 15:00",co:"30 nov, până la 11:00",n:5,price:"374 € · 69.441 ¥ · ≈2.042 RON",pay:"23 nov",paid:"la cazare, 25 nov",
+ rt:"Hotel → Shin-Osaka, luni 30 nov (Nozomi spre Tokyo)",
+ steps:["Stații lângă hotel: JR Namba circa 7 min pe jos, Namba (Nankai) circa 8 min, Osaka-Namba circa 11 min. Timpii diferă între surse, verifică pe hartă.","De la Namba, metroul Midosuji Line merge direct spre Shin-Osaka, circa 15–20 min. Confirmă pe Google Maps în ziua plecării.","Check-out e la 11:00. Nozomi pleacă din Shin-Osaka, nu din Osaka Station."]}
+];
+function viewHotels(){
+  var h='<div class="stack"><div><h2 class="sec">Hoteluri</h2><p class="lead">Cazările, orele de check-in și check-out și drumul spre gară pentru trenurile voastre.</p></div>';
+  HT.forEach(function(x){
+    h+='<div class="card '+x.cc+'"><span class="kicker">'+x.city+' · '+x.n+' nopți</span><h3>'+esc(x.name)+'</h3><span class="note">'+esc(x.room)+'</span>'+
+      '<dl class="kv"><dt>Check-in</dt><dd>'+x.ci+'</dd><dt>Check-out</dt><dd>'+x.co+'</dd><dt>Preț cuplu</dt><dd>'+x.price+'</dd><dt>Data plată</dt><dd>'+x.pay+'</dd><dt>Data plății</dt><dd>'+x.paid+'</dd><dt>Adresă</dt><dd>'+esc(x.addr)+'</dd></dl>'+
+      '<div class="btnrow"><a class="linkbtn" href="'+x.book+'" target="_blank" rel="noopener">Booking</a><a class="linkbtn" href="'+mapUrl(x.map)+'" target="_blank" rel="noopener">Hartă</a></div>'+
+      '<h4 class="sub-h">'+esc(x.rt)+'</h4><ul class="plain">'+x.steps.map(function(t){return '<li>'+esc(t)+'</li>';}).join("")+'</ul></div>';
+  });
+  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>1.781 €</span><span>330.560 ¥</span><span>≈9.722 RON</span></div></div></div>';
+  return h;
+}
 function viewInfo(){
   return '<div class="stack"><div><h2 class="sec">Info</h2><p class="lead">Lucruri bune de știut pe drum.</p></div>'+
   '<div class="card"><h3>Intrare în țară</h3><ul class="plain"><li>Românii intră fără viză, pentru turism, până la 90 de zile.</li><li>Visit Japan Web nu e obligatoriu, dar e recomandat înainte de sosire.</li><li>Taxa de plecare, 3.000 ¥ (≈88 RON), e inclusă în biletul de avion.</li></ul></div>'+
@@ -459,7 +487,7 @@ function parseHash(){
   var h=(location.hash||"").replace("#","");
   var m=/^zi-(\d+)$/.exec(h);
   if(m){var n=+m[1];if(n>=15&&n<=30){tab="zile";selDay=n;return;}}
-  if(h==="bilete"||h==="transport"||h==="info"||h==="zile"){tab=h;}
+  if(h==="bilete"||h==="transport"||h==="hoteluri"||h==="info"||h==="zile"){tab=h;}
   if(selDay===null)selDay=today()||15;
 }
 function renderNav(){
@@ -491,7 +519,7 @@ function renderSync(){
 }
 function render(keepScroll){
   var main=document.getElementById("main");
-  var html=tab==="bilete"?viewTickets():tab==="transport"?viewTransport():tab==="info"?viewInfo():viewDays();
+  var html=tab==="bilete"?viewTickets():tab==="transport"?viewTransport():tab==="hoteluri"?viewHotels():tab==="info"?viewInfo():viewDays();
   var prevDays=document.getElementById("days"), sl=prevDays?prevDays.scrollLeft:0;
   main.innerHTML=html;
   renderNav();renderStats();renderSync();renderThemes();
