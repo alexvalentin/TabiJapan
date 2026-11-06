@@ -585,6 +585,10 @@ function wxFetch(city){
     wxPaint();
   }).catch(function(){clearTimeout(to);WXP[city]=false;WXERR[city]=true;wxPaint();});
 }
+var wxLastH=wxJst().h+wxJst().date;
+function wxTick(){var j=wxJst(),k=j.h+j.date;if(k!==wxLastH){wxLastH=k;wxPaint();}wxKick();}
+setInterval(wxTick,60000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)wxTick();});
 function wxKick(){
   if(tab!=="zile")return;
   wxChips();wxScroll();
