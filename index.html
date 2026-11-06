@@ -84,16 +84,16 @@ h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;mar
 .dg-h::before{content:"";width:18px;height:5px;background:var(--cc);border-radius:2px}
 .dg-h b{font-family:var(--f-head);font-size:20px;font-weight:700;color:var(--ink);line-height:1}
 .dg-h span{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.days{display:flex;gap:8px;flex-wrap:wrap}
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
 #daysec{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 8px)}
-.chip{flex:0 0 auto;scroll-snap-align:center;text-decoration:none;min-width:58px;border-radius:10px;background:var(--surface);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.chip{flex:0 0 auto;scroll-snap-align:center;text-decoration:none;min-width:0;border-radius:14px;background:var(--surface);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;position:relative}
 .chip .band{height:5px;background:var(--cc)}
-.chip .code{font-family:var(--f-mono);font-weight:500;font-size:16px;padding:7px 8px 0;text-align:center;font-variant-numeric:tabular-nums}
-.chip .wd{font-size:11px;color:var(--muted);padding:1px 8px 7px;text-align:center;text-transform:uppercase;letter-spacing:.06em}
+.chip .code{font-family:var(--f-mono);font-weight:500;font-size:22px;padding:12px 8px 0;text-align:center;font-variant-numeric:tabular-nums}
+.chip .wd{font-size:14px;color:var(--muted);padding:2px 8px 12px;text-align:center}
 .chip.sel{background:var(--cc);border-color:var(--cc);color:var(--on-city)}
 .chip.sel .band{background:rgba(255,255,255,.35)}
 .chip.sel .wd{color:inherit;opacity:.85}
-.chip.today::after{content:"azi";position:absolute;top:8px;right:5px;font-size:9px;font-family:var(--f-mono);opacity:.9;color:var(--cc)}
+.chip.today::after{content:"azi";position:absolute;top:13px;right:9px;font-size:10px;font-family:var(--f-mono);opacity:.9;color:var(--cc)}
 .chip.sel.today::after{color:var(--on-city)}
 .tokyo{--cc:var(--tokyo)} .kyoto{--cc:var(--kyoto)} .osaka{--cc:var(--osaka)}
 
@@ -351,7 +351,7 @@ function viewDays(){
   var chips=GR.map(function(g){
     var items=D.filter(function(x){return x.d>=g.from&&x.d<=g.to;}).map(function(x){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
-        '<span class="band"></span><span class="code">'+x.code+x.d+'</span><span class="wd">'+x.wd.slice(0,3)+'</span></a>';
+        '<span class="band"></span><span class="code">'+x.code+x.d+'</span><span class="wd">'+x.wd+'</span></a>';
     }).join("");
     return '<div class="dgroup '+g.k+'"><div class="dg-h"><b>'+g.t+'</b><span>'+(g.from===g.to?g.from:g.from+'–'+g.to)+' nov</span></div><div class="days">'+items+'</div></div>';
   }).join("");
