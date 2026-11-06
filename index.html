@@ -181,6 +181,16 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .crow .cchk input{width:20px;height:20px}
 .cbtn{font:inherit;font-weight:600;font-size:14px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);cursor:pointer}
 .cbtn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.crow .cmeta{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
+.crow .cmeta a{color:var(--ink);font-weight:600}
+.crow .cmeta b{color:var(--ink);font-weight:600}
+.addf{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.addf label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);min-width:0}
+.addf .full{grid-column:1/-1}
+.addf input[type=text],.addf input[type=number],.addf select,.addf textarea{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);min-width:0;width:100%;box-sizing:border-box}
+.addf textarea{min-height:64px;resize:vertical}
+.addf .cchk{flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
+.addf .cchk input{width:20px;height:20px}
 .crow .acts{display:flex;justify-content:flex-end}
 .wi{display:inline-block;vertical-align:middle}
 .wi svg{width:100%;height:100%;display:block}
@@ -542,6 +552,19 @@ var COSTS=[
 {id:"c26",c:"Osaka",a:"Tempozan Ferris Wheel",y:1000,r:29,b:0},
 {id:"c27",c:"Osaka",a:"Tren Osaka → Narita",y:14300,r:445,b:0}
 ];
+var CM={c1:{d:18},c2:{d:16},c3:{d:17,s:"Online pe site-ul Tokyo Skytree sau la ghișeu. Prețul diferă după zi și oră (1.800–3.600 ¥).",u:"https://www.tokyo-skytree.jp/en/"},
+c4:{d:20,s:"La poartă, la intrare."},c5:{d:20,s:"La ghișeu, la intrare."},c6:{d:21,u:"https://smart-ex.jp/en/",s:"SmartEX"},
+c7:{d:22,s:"La intrare."},c8:{d:21,s:"La intrare."},c9:{d:23,s:"La intrare."},c10:{d:24},c11:{d:24},
+c12:{d:27,s:"Online pe WILLER (1.900 ¥), cumpărat cu cel puțin 2 zile înainte, sau la ghișeu (2.000 ¥)."},c13:{d:26},
+c14:{d:27,s:"La intrare."},c15:{s:"Nu e încă pus pe nicio zi în aplicație."},c16:{d:28,s:"De la gară sau automatele de bilete, în ziua călătoriei. Nu am preț în aplicație."},
+c17:{d:28,s:"La intrare."},c18:{d:28,s:"La intrare."},c19:{d:28,s:"La intrare."},c20:{d:28,s:"La intrare."},c21:{d:28,s:"La intrare."},
+c22:{d:29,s:"La intrare."},c23:{d:29,s:"La intrare, la observator."},c24:{d:29,s:"La intrare."},c25:{d:29,s:"Bilete electronice online (2.400–3.500 ¥, în funcție de zi)."},c26:{d:29,s:"La intrare."},
+c27:{d:30,u:"https://smart-ex.jp/en/",s:"SmartEX (Shinkansen Shin-Osaka → Tokyo)."}};
+COSTS.forEach(function(x){var m=CM[x.id]||{};x.d=m.d||null;x.s=m.s||"";x.u=m.u||"";});
+var CXK="japonia2026-cost-extra", EXTRA=[];
+try{EXTRA=JSON.parse(localStorage.getItem(CXK)||"[]")||[];}catch(e){EXTRA=[];}
+function cxSave(){try{localStorage.setItem(CXK,JSON.stringify(EXTRA));}catch(e){}}
+function cAll(){return COSTS.concat(EXTRA);}
 var YEN_PER_RON=34;
 var CK="japonia2026-cost", CV={}, CE={};
 try{CV=JSON.parse(localStorage.getItem(CK)||"{}")||{};}catch(e){CV={};}
@@ -549,24 +572,33 @@ function cget(x){var o=CV[x.id];return o?{y:o.y,r:o.r,b:o.b}:{y:x.y,r:x.r,b:x.b}
 function nf(n){return n==null?"—":String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,".");}
 function viewCosts(){
   var ty=0,tr=0,py=0,pr=0;
-  COSTS.forEach(function(x){var v=cget(x);ty+=v.y||0;tr+=v.r||0;if(v.b){py+=v.y||0;pr+=v.r||0;}});
+  cAll().forEach(function(x){var v=cget(x);ty+=v.y||0;tr+=v.r||0;if(v.b){py+=v.y||0;pr+=v.r||0;}});
   var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Atracții și transport. Apasă „Editează” ca să schimbi suma, apoi „Salvează”.</p></div>';
   h+='<div class="cs"><div class="card"><span class="kicker">Total</span><b>'+nf(ty)+' ¥</b><small>≈ '+nf(tr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Plătit (bilete cumpărate)</span><b>'+nf(py)+' ¥</b><small>≈ '+nf(pr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Rămas de plată</span><b>'+nf(ty-py)+' ¥</b><small>≈ '+nf(tr-pr)+' RON</small></div></div>';
   h+='<div class="card"><span class="kicker">Curs folosit · aprox. '+YEN_PER_RON+' ¥ = 1 RON</span><div class="total"><span>1.000 ¥ ≈ '+Math.round(1000/YEN_PER_RON)+' RON</span><span>10.000 ¥ ≈ '+Math.round(10000/YEN_PER_RON)+' RON</span></div><span class="note">Când scrii yenii în „Editează”, lei se calculează singuri. Îi poți schimba apoi cu mâna.</span></div>';
-  ["Tokyo","Kyoto","Osaka","Nara"].forEach(function(city){
-    var rows=COSTS.filter(function(x){return x.c===city;});
+  ["Tokyo","Kyoto","Osaka","Nara","Altele"].forEach(function(city){
+    var rows=cAll().filter(function(x){return x.c===city;});
+    if(!rows.length)return;
     var sy=0,sr=0;rows.forEach(function(x){var v=cget(x);sy+=v.y||0;sr+=v.r||0;});
     h+='<div><h3 class="sec" style="font-size:18px;margin:6px 0 8px">'+city+' <span class="note" style="font-weight:400">'+nf(sy)+' ¥ · ≈ '+nf(sr)+' RON</span></h3><div class="stack" style="gap:8px">';
     rows.forEach(function(x){
       var v=cget(x), ed=!!CE[x.id];
       h+='<div class="crow" id="'+x.id+'"><div class="top"><h3>'+esc(x.a)+'</h3>'+(v.b&&!ed?'<span class="got">Bilet cumpărat</span>':'')+'</div>';
+      if(!ed){
+        var mt='';
+        if(x.d){var dd=dayBy(x.d);mt+='<span><b>Ziua:</b> <a href="#zi-'+x.d+'">'+dd.code+dlab(x.d)+' · '+dd.wd+', '+dlab(x.d)+(x.d>30?' dec':' nov')+'</a></span>';}
+        if(!v.b&&(x.s||x.u)){mt+='<span><b>De unde se cumpără:</b> '+esc(x.s)+(x.u?' <a href="'+esc(x.u)+'" target="_blank" rel="noopener">Deschide site</a>':'')+'</span>';}
+        if(x.det)mt+='<span><b>Detalii:</b> '+esc(x.det)+'</span>';
+        if(x.custom)mt+='<span>Adăugat de voi</span>';
+        if(mt)h+='<div class="cmeta">'+mt+'</div>';
+      }
       if(ed){
         h+='<div class="edit"><label>Preț (¥)<input type="number" inputmode="numeric" min="0" id="y-'+x.id+'" value="'+(v.y==null?'':v.y)+'"></label>'+
            '<label>Preț (RON)<input type="number" inputmode="numeric" min="0" id="r-'+x.id+'" value="'+(v.r==null?'':v.r)+'"></label>'+
            '<label class="cchk"><input type="checkbox" id="b-'+x.id+'"'+(v.b?' checked':'')+'> Bilet cumpărat</label></div>'+
-           '<div class="acts"><button class="cbtn pri" data-cs="'+x.id+'">Salvează</button></div>';
+           '<div class="acts" style="gap:8px">'+(x.custom?'<button class="cbtn" data-cx="'+x.id+'">Șterge</button>':'')+'<button class="cbtn pri" data-cs="'+x.id+'">Salvează</button></div>';
       }else{
         h+='<div class="top"><span class="am">'+nf(v.y)+' ¥ <span>· ≈ '+nf(v.r)+' RON</span></span><button class="cbtn" data-ce="'+x.id+'">Editează</button></div>';
       }
@@ -574,6 +606,16 @@ function viewCosts(){
     });
     h+='</div></div>';
   });
+  h+='<div class="card" id="addcard"><h3 class="sec" style="font-size:18px;margin:0">Adaugă o cheltuială</h3><div class="addf">'+
+    '<label class="full">Atracție sau cheltuială<input type="text" id="n-a" placeholder="ex. Cafenea cu pisici"></label>'+
+    '<label>Oraș<select id="n-c"><option>Tokyo</option><option>Kyoto</option><option>Osaka</option><option>Nara</option><option>Altele</option></select></label>'+
+    '<label>Ziua<select id="n-d"><option value="">Fără zi</option>'+D.filter(function(z){return z.d!==6;}).map(function(z){return '<option value="'+z.d+'">'+z.code+dlab(z.d)+' · '+z.wd+'</option>';}).join("")+'</select></label>'+
+    '<label>Preț (¥)<input type="number" inputmode="numeric" min="0" id="n-y"></label>'+
+    '<label>Preț (RON)<input type="number" inputmode="numeric" min="0" id="n-r"></label>'+
+    '<label class="full">De unde se cumpără<input type="text" id="n-s" placeholder="ex. online, la intrare"></label>'+
+    '<label class="full">Detalii<textarea id="n-t" placeholder="ore, rezervare, observații"></textarea></label>'+
+    '<label class="cchk full"><input type="checkbox" id="n-b"> Bilet cumpărat</label></div>'+
+    '<div class="acts"><button class="cbtn pri" data-cadd="1">Adaugă</button></div></div>';
   h+='<p class="note">Totalurile se calculează din sumele de mai sus. Rămas de plată = ce nu e marcat „Bilet cumpărat”.</p></div>';
   return h;
 }
@@ -769,6 +811,7 @@ function toggle(kind,id){
 }
 document.addEventListener("input",function(e){
   var t=e.target;
+  if(t&&t.id==="n-y"){var rn=document.getElementById("n-r");if(rn)rn.value=t.value===""?"":Math.round(+t.value/YEN_PER_RON);}
   if(t&&t.id&&t.id.indexOf("y-")===0){
     var r=document.getElementById("r-"+t.id.slice(2));
     if(r)r.value=t.value===""?"":Math.round(+t.value/YEN_PER_RON);
@@ -779,6 +822,16 @@ document.addEventListener("click",function(e){
   if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}applyTheme();renderThemes();return;}
   var ce=e.target.closest&&e.target.closest("[data-ce]");
   if(ce){CE[ce.getAttribute("data-ce")]=true;render(true);var f=document.getElementById("y-"+ce.getAttribute("data-ce"));if(f)f.focus();return;}
+  var ca=e.target.closest&&e.target.closest("[data-cadd]");
+  if(ca){
+    var nm=document.getElementById("n-a").value.trim();
+    if(!nm){toast("Scrie numele atracției");return;}
+    var ny=document.getElementById("n-y").value, nr=document.getElementById("n-r").value, nd=document.getElementById("n-d").value;
+    EXTRA.push({id:"x"+Date.now(),custom:1,c:document.getElementById("n-c").value,a:nm,y:ny===""?null:Math.max(0,+ny),r:nr===""?null:Math.max(0,+nr),b:document.getElementById("n-b").checked?1:0,d:nd?+nd:null,s:document.getElementById("n-s").value.trim(),u:"",det:document.getElementById("n-t").value.trim()});
+    cxSave();render(true);toast("Adăugat");return;
+  }
+  var cx=e.target.closest&&e.target.closest("[data-cx]");
+  if(cx){var xid=cx.getAttribute("data-cx");EXTRA=EXTRA.filter(function(z){return z.id!==xid;});delete CV[xid];delete CE[xid];cxSave();try{localStorage.setItem(CK,JSON.stringify(CV));}catch(x){}render(true);toast("Șters");return;}
   var cs=e.target.closest&&e.target.closest("[data-cs]");
   if(cs){
     var id=cs.getAttribute("data-cs"), gy=document.getElementById("y-"+id).value, gr=document.getElementById("r-"+id).value;
