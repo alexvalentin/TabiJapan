@@ -531,6 +531,7 @@ var COSTS=[
 {id:"c26",c:"Osaka",a:"Tempozan Ferris Wheel",y:1000,r:29,b:0},
 {id:"c27",c:"Osaka",a:"Tren Osaka → Narita",y:14300,r:445,b:0}
 ];
+var YEN_PER_RON=34;
 var CK="japonia2026-cost", CV={}, CE={};
 try{CV=JSON.parse(localStorage.getItem(CK)||"{}")||{};}catch(e){CV={};}
 function cget(x){var o=CV[x.id];return o?{y:o.y,r:o.r,b:o.b}:{y:x.y,r:x.r,b:x.b};}
@@ -542,6 +543,7 @@ function viewCosts(){
   h+='<div class="cs"><div class="card"><span class="kicker">Total</span><b>'+nf(ty)+' ¥</b><small>≈ '+nf(tr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Plătit (bilete luate)</span><b>'+nf(py)+' ¥</b><small>≈ '+nf(pr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Rămas de plată</span><b>'+nf(ty-py)+' ¥</b><small>≈ '+nf(tr-pr)+' RON</small></div></div>';
+  h+='<div class="card"><span class="kicker">Curs folosit · aprox. '+YEN_PER_RON+' ¥ = 1 RON</span><div class="total"><span>1.000 ¥ ≈ '+Math.round(1000/YEN_PER_RON)+' RON</span><span>10.000 ¥ ≈ '+Math.round(10000/YEN_PER_RON)+' RON</span></div><span class="note">Când scrii yenii în „Editează”, lei se calculează singuri. Îi poți schimba apoi cu mâna.</span></div>';
   ["Tokyo","Kyoto","Osaka","Nara"].forEach(function(city){
     var rows=COSTS.filter(function(x){return x.c===city;});
     var sy=0,sr=0;rows.forEach(function(x){var v=cget(x);sy+=v.y||0;sr+=v.r||0;});
@@ -754,6 +756,13 @@ function toggle(kind,id){
   lsSave();render(true);
   remoteWrite(kind,id,on);
 }
+document.addEventListener("input",function(e){
+  var t=e.target;
+  if(t&&t.id&&t.id.indexOf("y-")===0){
+    var r=document.getElementById("r-"+t.id.slice(2));
+    if(r)r.value=t.value===""?"":Math.round(+t.value/YEN_PER_RON);
+  }
+});
 document.addEventListener("click",function(e){
   var th=e.target.closest&&e.target.closest("[data-theme-set]");
   if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}applyTheme();renderThemes();return;}
