@@ -153,6 +153,14 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;font-size:14px}
 .kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
 .mono{font-family:var(--f-mono);font-size:13px}
+.wx{margin-bottom:12px}
+.wxsum{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+.wxsum b{font-family:var(--f-head);font-size:28px;font-weight:700;line-height:1}
+.wxsum span{font-size:14px;color:var(--muted)}
+.wxrow{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+.wxh{flex:0 0 54px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;border-radius:10px;background:var(--surface2);font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.wxh b{font-size:15px;color:var(--ink);font-weight:500}
+.wxh .hi{color:var(--warn);font-weight:600}
 .sub-h{font-family:var(--f-head);font-size:17px;font-weight:700;margin:8px 0 0}
 .total{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--f-mono);font-size:13px}
 .copy{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;margin-left:6px}
@@ -401,6 +409,7 @@ function viewDays(){
   if(!d){h+='<p class="note" style="padding:6px 0 0">Alege o zi din listă ca să vezi programul ei. Se deschide singură în ziua respectivă.</p>';return h;}
   h+='<section id="daysec" class="'+d.cc+'"><div class="dayhead"><span class="city">'+d.city+' · '+d.code+d.d+'</span><h2>'+esc(d.title)+'</h2><span class="date">'+d.wd+', '+d.d+' noiembrie 2026</span></div>';
   if(d.note)h+='<div class="notice">'+esc(d.note)+'</div>';
+  h+='<div id="wx">'+wxHtml(d)+'</div>';
   var hk=d.hotel||(d.d>=15&&d.d<=20?"tokyo":null);if(hk){var ht=HOTEL[hk];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
   h+='<ul class="stops">'+d.stops.map(stopHtml).join("")+'</ul>';
   var seenN=d.stops.filter(function(s){return S.seen[s.id];}).length;
@@ -450,15 +459,15 @@ function viewTransport(){
 }
 var HT=[
 {cc:"tokyo",city:"Tokyo",name:"Tosei Hotel Asakusa",room:"Cameră twin",book:"https://www.booking.com/hotel/jp/toseihoterukokoneqian-cao.ro.html",addr:"Asakusa 3-26-10, Tokyo, Japonia",map:"Tosei Hotel Asakusa 3-26-10 Asakusa Tokyo",
- ci:"15 nov, de la 15:00",co:"21 nov, până la 10:00",n:6,price:"729 € · 135.319 ¥ · ≈3.980 RON",pay:"13 nov",paid:"11 nov",
+ ci:"15 nov, de la 15:00",co:"21 nov, până la 10:00",n:6,price:"729 € · 135.319 ¥ · ≈3.980 RON",pp:"364,5 € · 67.660 ¥ · ≈1.990 RON",pay:"13 nov",paid:"11 nov",
  rt:"Hotel → Tokyo Station, sâmbătă 21 nov (Shinkansen spre Kyoto)",
  steps:["Metrou Ginza Line din stația Asakusa până la Nihombashi, circa 18 min, 210 ¥ (≈6 RON). De acolo, circa 5 min pe jos până la Tokyo Station, ieșirea Yaesu.","Alternativ: Ginza Line până la Ueno, apoi JR Yamanote până la Tokyo Station. Circa 20 min, 340 ¥ (≈10 RON).","Check-out e la 10:00. Dacă Shinkansenul pleacă în jur de 10:00, iese din hotel pe la 9:00, ca să ai timp pentru bagaje și peron.","Cât de departe e hotelul de stația Asakusa se vede pe hartă, la adresa de mai sus."]},
 {cc:"kyoto",city:"Kyoto",name:"The Royal Park Canvas – Kyoto Nijo",room:"Cameră twin standard",book:"https://www.booking.com/hotel/jp/za-roiyarupaku-kiyanbasu-jing-du-er-tiao.ro.html",addr:"Nakagyo, Nishinokyo Shokushi-cho 22-7, Kyoto, Japonia",map:"The Royal Park Canvas Kyoto Nijo",
- ci:"21 nov, de la 15:00",co:"25 nov, până la 11:00",n:4,price:"678 € · 125.800 ¥ · ≈3.700 RON",pay:"17 nov",paid:"15 nov",
+ ci:"21 nov, de la 15:00",co:"25 nov, până la 11:00",n:4,price:"678 € · 125.800 ¥ · ≈3.700 RON",pp:"339 € · 62.900 ¥ · ≈1.850 RON",pay:"17 nov",paid:"15 nov",
  rt:"Hotel → Kyoto Station, miercuri 25 nov (tren spre Osaka)",
  steps:["Cea mai apropiată stație e Nijo, pe linia JR Sanin, la circa 2 minute pe jos de hotel.","De la Nijo iei trenul JR până la Kyoto Station. Durata și peronul se văd pe Google Maps sau Ekitan în dimineața plecării.","Check-out e la 11:00. Alege un tren cu cel puțin 30 de minute rezervă față de plecarea din hotel.","Pe 21 nov, la sosire, faci același drum invers, de la Kyoto Station la Nijo."]},
 {cc:"osaka",city:"Osaka",name:"Toho Hotel Namba Motomachi",room:"Cameră twin standard, pentru nefumători",book:"https://www.booking.com/hotel/jp/dong-fang-hoterunanbayuan-ting.ro.html",addr:"Naniwa-ku, Motomachi 2-5-6, Osaka, Japonia",map:"Toho Hotel Namba Motomachi Osaka",
- ci:"25 nov, de la 15:00",co:"30 nov, până la 11:00",n:5,price:"374 € · 69.441 ¥ · ≈2.042 RON",pay:"23 nov",paid:"la cazare, 25 nov",
+ ci:"25 nov, de la 15:00",co:"30 nov, până la 11:00",n:5,price:"374 € · 69.441 ¥ · ≈2.042 RON",pp:"187 € · 34.721 ¥ · ≈1.021 RON",pay:"23 nov",paid:"la cazare, 25 nov",
  rt:"Hotel → Shin-Osaka, luni 30 nov (Nozomi spre Tokyo)",
  steps:["Stații lângă hotel: JR Namba circa 7 min pe jos, Namba (Nankai) circa 8 min, Osaka-Namba circa 11 min. Timpii diferă între surse, verifică pe hartă.","De la Namba, metroul Midosuji Line merge direct spre Shin-Osaka, circa 15–20 min. Confirmă pe Google Maps în ziua plecării.","Check-out e la 11:00. Nozomi pleacă din Shin-Osaka, nu din Osaka Station."]}
 ];
@@ -466,12 +475,69 @@ function viewHotels(){
   var h='<div class="stack"><div><h2 class="sec">Hoteluri</h2><p class="lead">Cazările, orele de check-in și check-out și drumul spre gară pentru trenurile voastre.</p></div>';
   HT.forEach(function(x){
     h+='<div class="card '+x.cc+'"><span class="kicker">'+x.city+' · '+x.n+' nopți</span><h3>'+esc(x.name)+'</h3><span class="note">'+esc(x.room)+'</span>'+
-      '<dl class="kv"><dt>Check-in</dt><dd>'+x.ci+'</dd><dt>Check-out</dt><dd>'+x.co+'</dd><dt>Preț cuplu</dt><dd>'+x.price+'</dd><dt>Data plată</dt><dd>'+x.pay+'</dd><dt>Data plății</dt><dd>'+x.paid+'</dd><dt>Adresă</dt><dd>'+esc(x.addr)+'</dd></dl>'+
+      '<dl class="kv"><dt>Check-in</dt><dd>'+x.ci+'</dd><dt>Check-out</dt><dd>'+x.co+'</dd><dt>Preț cuplu</dt><dd>'+x.price+'</dd><dt>Pe persoană</dt><dd>'+x.pp+'</dd><dt>Data plată</dt><dd>'+x.pay+'</dd><dt>Data plății</dt><dd>'+x.paid+'</dd><dt>Adresă</dt><dd>'+esc(x.addr)+'</dd></dl>'+
       '<div class="btnrow"><a class="linkbtn" href="'+x.book+'" target="_blank" rel="noopener">Booking</a><a class="linkbtn" href="'+mapUrl(x.map)+'" target="_blank" rel="noopener">Hartă</a></div>'+
       '<h4 class="sub-h">'+esc(x.rt)+'</h4><ul class="plain">'+x.steps.map(function(t){return '<li>'+esc(t)+'</li>';}).join("")+'</ul></div>';
   });
-  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>1.781 €</span><span>330.560 ¥</span><span>≈9.722 RON</span></div></div></div>';
+  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>Cuplu</span><span>1.781 €</span><span>330.560 ¥</span><span>≈9.722 RON</span></div><div class="total"><span>Pe persoană</span><span>890,5 €</span><span>165.280 ¥</span><span>≈4.861 RON</span></div></div></div>';
   return h;
+}
+var WXC={tokyo:{n:"Tokyo",la:35.6762,lo:139.6503},kyoto:{n:"Kyoto",la:35.0116,lo:135.7681},osaka:{n:"Osaka",la:34.6937,lo:135.5023},nara:{n:"Nara",la:34.6851,lo:135.8048}};
+var WXD={}, WXERR={}, WXP={}, WXT={};
+function wxCity(d){if(d.d===14)return null;if(d.d===28)return "nara";return d.cc;}
+function wxDesc(c){
+  if(c===0)return "Senin";if(c===1)return "Mai mult senin";if(c===2)return "Parțial noros";if(c===3)return "Înnorat";
+  if(c===45||c===48)return "Ceață";if(c>=51&&c<=57)return "Burniță";if(c>=61&&c<=67)return "Ploaie";
+  if(c>=71&&c<=77)return "Ninsoare";if(c>=80&&c<=82)return "Averse";if(c===85||c===86)return "Averse de zăpadă";if(c>=95)return "Furtună";return "";
+}
+function wxCache(city){
+  var o=null;try{o=JSON.parse(localStorage.getItem("tabi-wx-"+city)||"null");}catch(e){}
+  return o;
+}
+function wxHtml(d){
+  var city=wxCity(d);if(!city)return "";
+  var c=WXC[city], o=WXD[city]||wxCache(city), date="2026-11-"+(d.d<10?"0":"")+d.d;
+  var head='<span class="kicker">Vremea · '+c.n+'</span>';
+  if(!o||!o.d){
+    return '<div class="card wx">'+head+'<p class="note">'+(WXERR[city]?"Prognoza nu se poate încărca acum. Încearcă din nou când ai internet.":"Se încarcă prognoza…")+'</p></div>';
+  }
+  var i=o.d.time.indexOf(date);
+  if(i<0){return '<div class="card wx">'+head+'<p class="note">Prognoza pentru ziua asta apare din '+(d.d-15)+' noiembrie, cu cel mult 16 zile înainte.</p></div>';}
+  var mx=Math.round(o.d.temperature_2m_max[i]), mn=Math.round(o.d.temperature_2m_min[i]), rp=o.d.precipitation_probability_max[i];
+  var cells="";
+  for(var k=0;k<o.h.time.length;k++){
+    var t=o.h.time[k];
+    if(t.indexOf(date+"T")!==0)continue;
+    var hh=parseInt(t.slice(11,13),10);
+    if(hh<6||hh>22)continue;
+    var p=o.h.precipitation_probability[k];
+    cells+='<div class="wxh"><span>'+t.slice(11,13)+':00</span><b>'+Math.round(o.h.temperature_2m[k])+'°</b><span class="'+(p>=50?'hi':'')+'">'+(p==null?'-':p+'%')+'</span></div>';
+  }
+  var at=new Date(o.t), hm=("0"+at.getHours()).slice(-2)+":"+("0"+at.getMinutes()).slice(-2);
+  return '<div class="card wx">'+head+'<div class="wxsum"><b>'+mx+'°</b><span>min '+mn+'°</span><span>'+wxDesc(o.d.weather_code[i])+'</span><span>ploaie '+(rp==null?'-':rp+'%')+'</span></div>'+
+    '<div class="wxrow">'+cells+'</div><span class="note">Pe oră, 06:00–22:00, ora Japoniei. Actualizat la '+hm+'.</span></div>';
+}
+function wxPaint(){
+  var el=document.getElementById("wx");if(!el||selDay===null)return;
+  el.innerHTML=wxHtml(dayBy(selDay));
+}
+function wxKick(){
+  if(tab!=="zile"||selDay===null)return;
+  var city=wxCity(dayBy(selDay));if(!city)return;
+  var o=WXD[city]||wxCache(city);
+  if(o)WXD[city]=o;
+  if(o&&Date.now()-o.t<3600000)return;
+  if(WXP[city]||(WXT[city]&&Date.now()-WXT[city]<60000))return;
+  WXP[city]=true;WXT[city]=Date.now();
+  var c=WXC[city], ctl=window.AbortController?new AbortController():null;
+  var to=setTimeout(function(){if(ctl)ctl.abort();},9000);
+  var url="https://api.open-meteo.com/v1/forecast?latitude="+c.la+"&longitude="+c.lo+"&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=16";
+  fetch(url,ctl?{signal:ctl.signal}:{}).then(function(r){if(!r.ok)throw new Error("http");return r.json();}).then(function(j){
+    clearTimeout(to);WXP[city]=false;WXERR[city]=false;
+    var n={t:Date.now(),h:j.hourly,d:j.daily};WXD[city]=n;
+    try{localStorage.setItem("tabi-wx-"+city,JSON.stringify(n));}catch(e){}
+    wxPaint();
+  }).catch(function(){clearTimeout(to);WXP[city]=false;WXERR[city]=true;wxPaint();});
 }
 function viewInfo(){
   return '<div class="stack"><div><h2 class="sec">Info</h2><p class="lead">Lucruri bune de știut pe drum.</p></div>'+
@@ -525,7 +591,7 @@ function render(keepScroll){
   var html=tab==="bilete"?viewTickets():tab==="transport"?viewTransport():tab==="hoteluri"?viewHotels():tab==="info"?viewInfo():viewDays();
   var prevDays=document.getElementById("days"), sl=prevDays?prevDays.scrollLeft:0;
   main.innerHTML=html;
-  renderNav();renderStats();renderSync();renderThemes();
+  renderNav();renderStats();renderSync();renderThemes();wxKick();
   var dz=document.getElementById("days");
   if(dz){
     if(keepScroll){dz.scrollLeft=sl;}
