@@ -541,7 +541,7 @@ function viewCosts(){
   COSTS.forEach(function(x){var v=cget(x);ty+=v.y||0;tr+=v.r||0;if(v.b){py+=v.y||0;pr+=v.r||0;}});
   var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Atracții și transport. Apasă „Editează” ca să schimbi suma, apoi „Salvează”.</p></div>';
   h+='<div class="cs"><div class="card"><span class="kicker">Total</span><b>'+nf(ty)+' ¥</b><small>≈ '+nf(tr)+' RON</small></div>'+
-     '<div class="card"><span class="kicker">Plătit (bilete luate)</span><b>'+nf(py)+' ¥</b><small>≈ '+nf(pr)+' RON</small></div>'+
+     '<div class="card"><span class="kicker">Plătit (bilete cumpărate)</span><b>'+nf(py)+' ¥</b><small>≈ '+nf(pr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Rămas de plată</span><b>'+nf(ty-py)+' ¥</b><small>≈ '+nf(tr-pr)+' RON</small></div></div>';
   h+='<div class="card"><span class="kicker">Curs folosit · aprox. '+YEN_PER_RON+' ¥ = 1 RON</span><div class="total"><span>1.000 ¥ ≈ '+Math.round(1000/YEN_PER_RON)+' RON</span><span>10.000 ¥ ≈ '+Math.round(10000/YEN_PER_RON)+' RON</span></div><span class="note">Când scrii yenii în „Editează”, lei se calculează singuri. Îi poți schimba apoi cu mâna.</span></div>';
   ["Tokyo","Kyoto","Osaka","Nara"].forEach(function(city){
@@ -550,11 +550,11 @@ function viewCosts(){
     h+='<div><h3 class="sec" style="font-size:18px;margin:6px 0 8px">'+city+' <span class="note" style="font-weight:400">'+nf(sy)+' ¥ · ≈ '+nf(sr)+' RON</span></h3><div class="stack" style="gap:8px">';
     rows.forEach(function(x){
       var v=cget(x), ed=!!CE[x.id];
-      h+='<div class="crow" id="'+x.id+'"><div class="top"><h3>'+esc(x.a)+'</h3>'+(v.b&&!ed?'<span class="got">luat</span>':'')+'</div>';
+      h+='<div class="crow" id="'+x.id+'"><div class="top"><h3>'+esc(x.a)+'</h3>'+(v.b&&!ed?'<span class="got">Bilet cumpărat</span>':'')+'</div>';
       if(ed){
         h+='<div class="edit"><label>Preț (¥)<input type="number" inputmode="numeric" min="0" id="y-'+x.id+'" value="'+(v.y==null?'':v.y)+'"></label>'+
            '<label>Preț (RON)<input type="number" inputmode="numeric" min="0" id="r-'+x.id+'" value="'+(v.r==null?'':v.r)+'"></label>'+
-           '<label class="cchk"><input type="checkbox" id="b-'+x.id+'"'+(v.b?' checked':'')+'> Bilet luat</label></div>'+
+           '<label class="cchk"><input type="checkbox" id="b-'+x.id+'"'+(v.b?' checked':'')+'> Bilet cumpărat</label></div>'+
            '<div class="acts"><button class="cbtn pri" data-cs="'+x.id+'">Salvează</button></div>';
       }else{
         h+='<div class="top"><span class="am">'+nf(v.y)+' ¥ <span>· ≈ '+nf(v.r)+' RON</span></span><button class="cbtn" data-ce="'+x.id+'">Editează</button></div>';
@@ -563,7 +563,7 @@ function viewCosts(){
     });
     h+='</div></div>';
   });
-  h+='<p class="note">Totalurile se calculează din sumele de mai sus. Rămas de plată = ce nu e marcat „luat”.</p></div>';
+  h+='<p class="note">Totalurile se calculează din sumele de mai sus. Rămas de plată = ce nu e marcat „Bilet cumpărat”.</p></div>';
   return h;
 }
 function viewHotels(){
