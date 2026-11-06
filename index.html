@@ -324,7 +324,7 @@ var D=[
  {n:"The National Art Center",s:"door",p:"Expoziția Louvre 2.400 ¥ la ghișeu · ≈71 RON"},
  {n:"Tokyo Tower",s:"door",p:"Main Deck 1.500 ¥ ≈44 RON · Top Deck ≈3.300 ¥ ≈97 RON"},{n:"Asakusa"}]},
 {d:21,wd:"Sâmbătă",cc:"kyoto",city:"Kyoto",code:"K",title:"Shinkansen spre Kyoto",hotel:"kyoto",stops:[
- {n:"Shinkansen Tokyo → Kyoto",t:"~10:00",s:"buy",x:1,note:"2 pasageri, rezervare prin SmartEX. De la cazare până la Tokyo Station e o stație de metrou.",links:["smartex"]},
+ {n:"Shinkansen Tokyo → Kyoto",t:"~10:00",s:"booked",lbl:"Bilet cumpărat",x:1,note:"2 pasageri, rezervare prin SmartEX. De la cazare până la Tokyo Station e o stație de metrou.",links:["smartex"]},
  {n:"Bagaje și check-in la hotel",x:1},
  {n:"Nijo Castle",s:"door",p:"1.300 ¥ · ≈38 RON"},{n:"Kyoto Gyoen National Garden"},
  {n:"În trecere: Manga Museum, Museum of Kyoto, Samurai Ninja Museum",x:1},
@@ -372,7 +372,7 @@ var D=[
  {n:"Abeno Harukas",s:"door",p:"Observator ≈2.200 ¥ · ≈65 RON"},
  {n:"Shinsekai și Tsutenkaku Tower",s:"door",p:"Turnul 1.000–1.200 ¥ · ≈29–35 RON"}]},
 {d:30,wd:"Luni",cc:"tokyo",city:"Tokyo",code:"T",title:"Înapoi la Tokyo",stops:[
- {n:"Shinkansen Nozomi Shin-Osaka → Tokyo",s:"buy",x:1,note:"Plecare din Shin-Osaka, nu din Osaka Station. Circa 2 h 30. Loc pe partea A pentru priveliștea spre Muntele Fuji.",links:["smartex"]}]},
+ {n:"Shinkansen Nozomi Shin-Osaka → Tokyo",s:"booked",lbl:"Bilet cumpărat",x:1,note:"Plecare din Shin-Osaka, nu din Osaka Station. Circa 2 h 30. Loc pe partea A pentru priveliștea spre Muntele Fuji.",links:["smartex"]}]},
 {d:31,wd:"Marți",cc:"tokyo",city:"Zbor spre București",code:"T",title:"Zbor Narita → București",note:"Detaliile zborului de întoarcere (oră, escală) se adaugă mai târziu.",stops:[{n:"Zbor Narita → București",x:1}]}
 ];
 D.forEach(function(day){day.stops.forEach(function(s,i){s.id="d"+day.d+"-"+(i+1);s.day=day;});});
@@ -551,7 +551,7 @@ var COSTS=[
 {id:"c24",c:"Osaka",a:"Tsutenkaku Tower",y:1200,r:35,b:0},
 {id:"c25",c:"Osaka",a:"Osaka Aquarium Kaiyukan",y:2800,r:81,b:0},
 {id:"c26",c:"Osaka",a:"Tempozan Ferris Wheel",y:1000,r:29,b:0},
-{id:"c27",c:"Osaka",a:"Tren Osaka → Narita",y:14300,r:445,b:0}
+{id:"c27",c:"Osaka",a:"Tren Osaka → Narita",y:14300,r:445,b:1}
 ];
 var CM={c1:{d:18},c2:{d:16},c3:{d:17,s:"Online pe site-ul Tokyo Skytree sau la ghișeu. Prețul diferă după zi și oră (1.800–3.600 ¥).",u:"https://www.tokyo-skytree.jp/en/"},
 c4:{d:20,s:"La poartă, la intrare."},c5:{d:20,s:"La ghișeu, la intrare."},c6:{d:21,u:"https://smart-ex.jp/en/",s:"SmartEX"},
