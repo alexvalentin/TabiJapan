@@ -95,7 +95,7 @@ h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;mar
 .chip{flex:0 0 auto;scroll-snap-align:center;text-decoration:none;min-width:0;border-radius:14px;background:var(--surface);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;position:relative}
 .chip .band{height:5px;background:var(--cc)}
 .chip .code{font-family:var(--f-mono);font-weight:500;font-size:22px;padding:12px 8px 0;text-align:center;font-variant-numeric:tabular-nums}
-.chip .wd{font-size:14px;color:var(--muted);padding:2px 8px 12px;text-align:center}
+.chip .wd{font-size:14px;color:var(--muted);padding:2px 8px 4px;text-align:center}
 .chip.sel{background:var(--cc);border-color:var(--cc);color:var(--on-city)}
 .chip.sel .band{background:rgba(255,255,255,.35)}
 .chip.sel .wd{color:inherit;opacity:.85}
@@ -154,11 +154,18 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
 .mono{font-family:var(--f-mono);font-size:13px}
 .wx{margin-bottom:12px}
+.wi{display:inline-block;vertical-align:middle}
+.wi svg{width:100%;height:100%;display:block}
+.chip .wc{display:flex;align-items:center;justify-content:center;gap:4px;font-family:var(--f-mono);font-size:12px;color:var(--muted);min-height:20px;padding:0 6px 10px}
+.chip.sel .wc{color:inherit;opacity:.95}
+.chip .wc .wi{width:18px;height:18px}
+.wxsum .wi{width:36px;height:36px;align-self:center}
+.wxh .wi{width:24px;height:24px}
 .wxsum{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
 .wxsum b{font-family:var(--f-head);font-size:28px;font-weight:700;line-height:1}
 .wxsum span{font-size:14px;color:var(--muted)}
 .wxrow{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
-.wxh{flex:0 0 54px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;border-radius:10px;background:var(--surface2);font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.wxh{flex:0 0 58px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;border-radius:10px;background:var(--surface2);font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .wxh b{font-size:15px;color:var(--ink);font-weight:500}
 .wxh .hi{color:var(--warn);font-weight:600}
 .sub-h{font-family:var(--f-head);font-size:17px;font-weight:700;margin:8px 0 0}
@@ -401,7 +408,7 @@ function viewDays(){
   var chips=GR.map(function(g){
     var items=D.filter(function(x){return x.d>=g.from&&x.d<=g.to;}).map(function(x){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
-        '<span class="band"></span><span class="code">'+x.code+x.d+'</span><span class="wd">'+x.wd+'</span></a>';
+        '<span class="band"></span><span class="code">'+x.code+x.d+'</span><span class="wd">'+x.wd+'</span><span class="wc"></span></a>';
     }).join("");
     return '<div class="dgroup '+g.k+'"><div class="dg-h"><b>'+g.t+'</b><span>'+(g.from===g.to?g.from:g.from+'–'+g.to)+' nov</span></div><div class="days">'+items+'</div></div>';
   }).join("");
@@ -486,6 +493,31 @@ function viewHotels(){
 var WXC={tokyo:{n:"Tokyo",la:35.6762,lo:139.6503},kyoto:{n:"Kyoto",la:35.0116,lo:135.7681},osaka:{n:"Osaka",la:34.6937,lo:135.5023},nara:{n:"Nara",la:34.6851,lo:135.8048}};
 var WXD={}, WXERR={}, WXP={}, WXT={};
 function wxCity(d){if(d.d===14)return null;if(d.d===28)return "nara";return d.cc;}
+function wxIcon(c){
+  var sun='<circle cx="12" cy="12" r="4.5" fill="#f2b632" stroke="none"/><g stroke="#f2b632" stroke-width="2" stroke-linecap="round"><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></g>';
+  var cl='<path d="M7 18.5h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7 9.6 4.5 4.5 0 0 0 7 18.5z" fill="#c4ccd6" stroke="#8a95a3" stroke-width="1.2" stroke-linejoin="round"/>';
+  var clp='<g transform="translate(3 4) scale(.75)">'+cl+'</g>';
+  var b;
+  if(c===0||c===1)b=sun;
+  else if(c===2)b='<g transform="translate(-3 -3) scale(.8)">'+sun+'</g>'+'<g transform="translate(3 4) scale(.8)">'+cl+'</g>';
+  else if(c===3)b=cl;
+  else if(c===45||c===48)b=clp+'<g stroke="#8a95a3" stroke-width="1.8" stroke-linecap="round"><path d="M5 20h14M8 22.5h8"/></g>';
+  else if((c>=51&&c<=67)||(c>=80&&c<=82))b=cl+'<g stroke="#3b8fd6" stroke-width="2" stroke-linecap="round"><path d="M8.5 20.5l-1 2M12.5 20.5l-1 2M16.5 20.5l-1 2"/></g>';
+  else if((c>=71&&c<=77)||c===85||c===86)b=cl+'<g stroke="#6fb4e8" stroke-width="2" stroke-linecap="round"><path d="M8 21h.01M12 22h.01M16 21h.01"/></g>';
+  else if(c>=95)b=cl+'<path d="M12.5 15l-2.5 4h3l-1.5 3.5" fill="none" stroke="#f2b632" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  else b=cl;
+  return '<span class="wi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none">'+b+'</svg></span>';
+}
+function wxChips(){
+  var els=document.querySelectorAll(".chip[data-d]");
+  for(var i=0;i<els.length;i++){
+    var n=+els[i].getAttribute("data-d"), d=dayBy(n), city=wxCity(d), w=els[i].querySelector(".wc");
+    if(!w||!city)continue;
+    var o=WXD[city]||wxCache(city);if(!o||!o.d)continue;
+    var k=o.d.time.indexOf("2026-11-"+(n<10?"0":"")+n);if(k<0)continue;
+    w.innerHTML=wxIcon(o.d.weather_code[k])+Math.round(o.d.temperature_2m_max[k])+"°";
+  }
+}
 function wxDesc(c){
   if(c===0)return "Senin";if(c===1)return "Mai mult senin";if(c===2)return "Parțial noros";if(c===3)return "Înnorat";
   if(c===45||c===48)return "Ceață";if(c>=51&&c<=57)return "Burniță";if(c>=61&&c<=67)return "Ploaie";
@@ -512,19 +544,18 @@ function wxHtml(d){
     var hh=parseInt(t.slice(11,13),10);
     if(hh<6||hh>22)continue;
     var p=o.h.precipitation_probability[k];
-    cells+='<div class="wxh"><span>'+t.slice(11,13)+':00</span><b>'+Math.round(o.h.temperature_2m[k])+'°</b><span class="'+(p>=50?'hi':'')+'">'+(p==null?'-':p+'%')+'</span></div>';
+    cells+='<div class="wxh"><span>'+t.slice(11,13)+':00</span>'+wxIcon(o.h.weather_code[k])+'<b>'+Math.round(o.h.temperature_2m[k])+'°</b><span class="'+(p>=50?'hi':'')+'">'+(p==null?'-':p+'%')+'</span></div>';
   }
   var at=new Date(o.t), hm=("0"+at.getHours()).slice(-2)+":"+("0"+at.getMinutes()).slice(-2);
-  return '<div class="card wx">'+head+'<div class="wxsum"><b>'+mx+'°</b><span>min '+mn+'°</span><span>'+wxDesc(o.d.weather_code[i])+'</span><span>ploaie '+(rp==null?'-':rp+'%')+'</span></div>'+
+  return '<div class="card wx">'+head+'<div class="wxsum">'+wxIcon(o.d.weather_code[i])+'<b>'+mx+'°</b><span>min '+mn+'°</span><span>'+wxDesc(o.d.weather_code[i])+'</span><span>ploaie '+(rp==null?'-':rp+'%')+'</span></div>'+
     '<div class="wxrow">'+cells+'</div><span class="note">Pe oră, 06:00–22:00, ora Japoniei. Actualizat la '+hm+'.</span></div>';
 }
 function wxPaint(){
+  wxChips();
   var el=document.getElementById("wx");if(!el||selDay===null)return;
   el.innerHTML=wxHtml(dayBy(selDay));
 }
-function wxKick(){
-  if(tab!=="zile"||selDay===null)return;
-  var city=wxCity(dayBy(selDay));if(!city)return;
+function wxFetch(city){
   var o=WXD[city]||wxCache(city);
   if(o)WXD[city]=o;
   if(o&&Date.now()-o.t<3600000)return;
@@ -539,6 +570,11 @@ function wxKick(){
     try{localStorage.setItem("tabi-wx-"+city,JSON.stringify(n));}catch(e){}
     wxPaint();
   }).catch(function(){clearTimeout(to);WXP[city]=false;WXERR[city]=true;wxPaint();});
+}
+function wxKick(){
+  if(tab!=="zile")return;
+  wxChips();
+  for(var c in WXC)wxFetch(c);
 }
 function viewInfo(){
   return '<div class="stack"><div><h2 class="sec">Info</h2><p class="lead">Lucruri bune de știut pe drum.</p></div>'+
