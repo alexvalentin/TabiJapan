@@ -564,15 +564,66 @@ var CXK="japonia2026-cost-extra", EXTRA=[];
 try{EXTRA=JSON.parse(localStorage.getItem(CXK)||"[]")||[];}catch(e){EXTRA=[];}
 function cxSave(){try{localStorage.setItem(CXK,JSON.stringify(EXTRA));}catch(e){}}
 function cAll(){return COSTS.concat(EXTRA);}
+var FL=[
+{id:"f1",fl:1,a:"Zbor București → Doha",d:14,det:"Qatar Airways, plecare la 16:20.",y:null,r:null,b:0},
+{id:"f2",fl:1,a:"Zbor Doha → Narita",d:15,det:"Detaliile (ora, escala, locurile) se adaugă mai târziu.",y:null,r:null,b:0},
+{id:"f3",fl:1,a:"Zbor Narita → București",d:31,det:"Ora zborului se adaugă mai târziu.",y:null,r:null,b:0}
+];
+var HC=[{e:729,y:135319,r:3980},{e:678,y:125800,r:3700},{e:374,y:69441,r:2042}];
+function ef(n){return n%1?n.toFixed(1).replace(".",","):nf(n);}
 var YEN_PER_RON=34;
 var CK="japonia2026-cost", CV={}, CE={};
 try{CV=JSON.parse(localStorage.getItem(CK)||"{}")||{};}catch(e){CV={};}
 function cget(x){var o=CV[x.id];return o?{y:o.y,r:o.r,b:o.b}:{y:x.y,r:x.r,b:x.b};}
 function nf(n){return n==null?"—":String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,".");}
+function costRow(x){
+  var v=cget(x), ed=!!CE[x.id], h='';
+  h+='<div class="crow" id="'+x.id+'"><div class="top"><h3>'+esc(x.a)+'</h3>'+(v.b&&!ed?'<span class="got">'+(x.fl?'Bilet cumpărat':'Bilet cumpărat')+'</span>':'')+'</div>';
+  if(!ed){
+    var mt='';
+    if(x.d){var dd=dayBy(x.d);mt+='<span><b>Ziua:</b> <a href="#zi-'+x.d+'">'+dd.wd+', '+dlab(x.d)+(x.d>30?' dec':' nov')+'</a></span>';}
+    if(!v.b&&(x.s||x.u)){mt+='<span><b>De unde se cumpără:</b> '+esc(x.s)+(x.u?' <a href="'+esc(x.u)+'" target="_blank" rel="noopener">Deschide site</a>':'')+'</span>';}
+    if(x.det)mt+='<span><b>Detalii:</b> '+esc(x.det)+'</span>';
+    if(x.custom)mt+='<span>Adăugat de voi</span>';
+    if(mt)h+='<div class="cmeta">'+mt+'</div>';
+  }
+  if(ed){
+    h+='<div class="edit">'+(x.fl?'':'<label>Preț (¥)<input type="number" inputmode="numeric" min="0" id="y-'+x.id+'" value="'+(v.y==null?'':v.y)+'"></label>')+
+       '<label>'+(x.fl?'Preț total, 2 persoane (RON)':'Preț (RON)')+'<input type="number" inputmode="numeric" min="0" id="r-'+x.id+'" value="'+(v.r==null?'':v.r)+'"></label>'+
+       '<label class="cchk"><input type="checkbox" id="b-'+x.id+'"'+(v.b?' checked':'')+'> Bilet cumpărat</label></div>'+
+       '<div class="acts" style="gap:8px">'+(x.custom?'<button class="cbtn" data-cx="'+x.id+'">Șterge</button>':'')+'<button class="cbtn pri" data-cs="'+x.id+'">Salvează</button></div>';
+  }else if(x.fl){
+    h+='<div class="top"><span class="am">'+(v.r==null?'—':nf(v.r)+' RON <span>· '+nf(v.r/2)+' RON / persoană</span>')+'</span><button class="cbtn" data-ce="'+x.id+'">Editează</button></div>';
+  }else{
+    h+='<div class="top"><span class="am">'+nf(v.y)+' ¥ <span>· ≈ '+nf(v.r)+' RON</span></span><button class="cbtn" data-ce="'+x.id+'">Editează</button></div>';
+  }
+  return h+'</div>';
+}
 function viewCosts(){
   var ty=0,tr=0,py=0,pr=0;
   cAll().forEach(function(x){var v=cget(x);ty+=v.y||0;tr+=v.r||0;if(v.b){py+=v.y||0;pr+=v.r||0;}});
-  var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Atracții și transport. Apasă „Editează” ca să schimbi suma, apoi „Salvează”.</p></div>';
+  var fr=0,fpaid=0;FL.forEach(function(x){var v=cget(x);fr+=v.r||0;if(v.b)fpaid+=v.r||0;});
+  var he=0,hy=0,hr=0;HC.forEach(function(c){he+=c.e;hy+=c.y;hr+=c.r;});
+  var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Bilete de avion, hoteluri, atracții și transport. La sume apasă „Editează”, apoi „Salvează”.</p></div>';
+  h+='<div class="card"><span class="kicker">Total general · lei</span><b style="font-family:var(--f-mono);font-size:22px;font-weight:500">≈ '+nf(fr+hr+tr)+' RON</b><div class="total"><span>Avion '+nf(fr)+'</span><span>Hoteluri '+nf(hr)+'</span><span>Atracții și transport '+nf(tr)+'</span></div></div>';
+  h+='<div class="btnrow"><button class="cbtn" data-scroll="sec-avion">Bilete avion</button><button class="cbtn" data-scroll="sec-hot">Hoteluri</button><button class="cbtn" data-scroll="sec-atr">Atracții</button></div>';
+  /* avion */
+  h+='<div id="sec-avion" class="stack" style="gap:8px"><h3 class="sec" style="font-size:20px;margin:8px 0 0">Bilete avion <span class="note" style="font-weight:400">'+(fr?nf(fr)+' RON total':'prețuri de completat')+'</span></h3>';
+  FL.forEach(function(x){h+=costRow(x);});
+  h+='</div>';
+  /* hoteluri */
+  h+='<div id="sec-hot" class="stack" style="gap:8px"><h3 class="sec" style="font-size:20px;margin:14px 0 0">Cheltuieli Hoteluri <span class="note" style="font-weight:400">≈ '+nf(hr)+' RON</span></h3>';
+  HT.forEach(function(x,k){
+    var c=HC[k];
+    h+='<div class="crow"><div class="top"><h3>'+esc(x.name)+'</h3><span class="got" style="background:var(--surface2);color:var(--muted)">'+x.city+'</span></div>'+
+      '<div class="cmeta"><span><b>Ședere:</b> '+x.n+' nopți · '+(x.n+1)+' zile</span><span><b>Check-in:</b> '+x.ci+'</span><span><b>Check-out:</b> '+x.co+'</span></div>'+
+      '<dl class="kv"><dt>Preț cuplu</dt><dd>'+ef(c.e)+' € · '+nf(c.y)+' ¥ · ≈'+nf(c.r)+' RON</dd>'+
+      '<dt>Pe persoană</dt><dd>'+ef(c.e/2)+' € · '+nf(c.y/2)+' ¥ · ≈'+nf(c.r/2)+' RON</dd>'+
+      '<dt>Pe noapte (cuplu)</dt><dd>'+ef(Math.round(c.e/x.n*10)/10)+' € · '+nf(c.y/x.n)+' ¥ · ≈'+nf(c.r/x.n)+' RON</dd></dl></div>';
+  });
+  h+='<div class="card"><span class="kicker">Total hoteluri · '+HT.reduce(function(a,x){return a+x.n;},0)+' nopți</span><div class="total"><span>Cuplu '+ef(he)+' €</span><span>'+nf(hy)+' ¥</span><span>≈'+nf(hr)+' RON</span></div><div class="total"><span>Pe persoană '+ef(he/2)+' €</span><span>'+nf(hy/2)+' ¥</span><span>≈'+nf(hr/2)+' RON</span></div></div></div>';
+  /* atractii */
+  h+='<div id="sec-atr" class="stack" style="gap:10px"><h3 class="sec" style="font-size:20px;margin:14px 0 0">Atracții și transport</h3>';
   h+='<div class="cs"><div class="card"><span class="kicker">Total</span><b>'+nf(ty)+' ¥</b><small>≈ '+nf(tr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Plătit (bilete cumpărate)</span><b>'+nf(py)+' ¥</b><small>≈ '+nf(pr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Rămas de plată</span><b>'+nf(ty-py)+' ¥</b><small>≈ '+nf(tr-pr)+' RON</small></div></div>';
@@ -582,27 +633,7 @@ function viewCosts(){
     if(!rows.length)return;
     var sy=0,sr=0;rows.forEach(function(x){var v=cget(x);sy+=v.y||0;sr+=v.r||0;});
     h+='<div><h3 class="sec" style="font-size:18px;margin:6px 0 8px">'+city+' <span class="note" style="font-weight:400">'+nf(sy)+' ¥ · ≈ '+nf(sr)+' RON</span></h3><div class="stack" style="gap:8px">';
-    rows.forEach(function(x){
-      var v=cget(x), ed=!!CE[x.id];
-      h+='<div class="crow" id="'+x.id+'"><div class="top"><h3>'+esc(x.a)+'</h3>'+(v.b&&!ed?'<span class="got">Bilet cumpărat</span>':'')+'</div>';
-      if(!ed){
-        var mt='';
-        if(x.d){var dd=dayBy(x.d);mt+='<span><b>Ziua:</b> <a href="#zi-'+x.d+'">'+dd.wd+', '+dlab(x.d)+(x.d>30?' dec':' nov')+'</a></span>';}
-        if(!v.b&&(x.s||x.u)){mt+='<span><b>De unde se cumpără:</b> '+esc(x.s)+(x.u?' <a href="'+esc(x.u)+'" target="_blank" rel="noopener">Deschide site</a>':'')+'</span>';}
-        if(x.det)mt+='<span><b>Detalii:</b> '+esc(x.det)+'</span>';
-        if(x.custom)mt+='<span>Adăugat de voi</span>';
-        if(mt)h+='<div class="cmeta">'+mt+'</div>';
-      }
-      if(ed){
-        h+='<div class="edit"><label>Preț (¥)<input type="number" inputmode="numeric" min="0" id="y-'+x.id+'" value="'+(v.y==null?'':v.y)+'"></label>'+
-           '<label>Preț (RON)<input type="number" inputmode="numeric" min="0" id="r-'+x.id+'" value="'+(v.r==null?'':v.r)+'"></label>'+
-           '<label class="cchk"><input type="checkbox" id="b-'+x.id+'"'+(v.b?' checked':'')+'> Bilet cumpărat</label></div>'+
-           '<div class="acts" style="gap:8px">'+(x.custom?'<button class="cbtn" data-cx="'+x.id+'">Șterge</button>':'')+'<button class="cbtn pri" data-cs="'+x.id+'">Salvează</button></div>';
-      }else{
-        h+='<div class="top"><span class="am">'+nf(v.y)+' ¥ <span>· ≈ '+nf(v.r)+' RON</span></span><button class="cbtn" data-ce="'+x.id+'">Editează</button></div>';
-      }
-      h+='</div>';
-    });
+    rows.forEach(function(x){h+=costRow(x);});
     h+='</div></div>';
   });
   h+='<div class="card" id="addcard"><h3 class="sec" style="font-size:18px;margin:0">Adaugă o cheltuială</h3><div class="addf">'+
@@ -615,7 +646,7 @@ function viewCosts(){
     '<label class="full">Detalii<textarea id="n-t" placeholder="ore, rezervare, observații"></textarea></label>'+
     '<label class="cchk full"><input type="checkbox" id="n-b"> Bilet cumpărat</label></div>'+
     '<div class="acts"><button class="cbtn pri" data-cadd="1">Adaugă</button></div></div>';
-  h+='<p class="note">Totalurile se calculează din sumele de mai sus. Rămas de plată = ce nu e marcat „Bilet cumpărat”.</p></div>';
+  h+='</div><p class="note">Totalurile se calculează din sumele de mai sus. Rămas de plată = ce nu e marcat „Bilet cumpărat”.</p></div>';
   return h;
 }
 function viewHotels(){
@@ -819,8 +850,10 @@ document.addEventListener("input",function(e){
 document.addEventListener("click",function(e){
   var th=e.target.closest&&e.target.closest("[data-theme-set]");
   if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}applyTheme();renderThemes();return;}
+  var sc=e.target.closest&&e.target.closest("[data-scroll]");
+  if(sc){var el=document.getElementById(sc.getAttribute("data-scroll"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
   var ce=e.target.closest&&e.target.closest("[data-ce]");
-  if(ce){CE[ce.getAttribute("data-ce")]=true;render(true);var f=document.getElementById("y-"+ce.getAttribute("data-ce"));if(f)f.focus();return;}
+  if(ce){CE[ce.getAttribute("data-ce")]=true;render(true);var f=document.getElementById("y-"+ce.getAttribute("data-ce"))||document.getElementById("r-"+ce.getAttribute("data-ce"));if(f)f.focus();return;}
   var ca=e.target.closest&&e.target.closest("[data-cadd]");
   if(ca){
     var nm=document.getElementById("n-a").value.trim();
@@ -833,7 +866,7 @@ document.addEventListener("click",function(e){
   if(cx){var xid=cx.getAttribute("data-cx");EXTRA=EXTRA.filter(function(z){return z.id!==xid;});delete CV[xid];delete CE[xid];cxSave();try{localStorage.setItem(CK,JSON.stringify(CV));}catch(x){}render(true);toast("Șters");return;}
   var cs=e.target.closest&&e.target.closest("[data-cs]");
   if(cs){
-    var id=cs.getAttribute("data-cs"), gy=document.getElementById("y-"+id).value, gr=document.getElementById("r-"+id).value;
+    var id=cs.getAttribute("data-cs"), ye=document.getElementById("y-"+id), gy=ye?ye.value:"", gr=document.getElementById("r-"+id).value;
     CV[id]={y:gy===""?null:Math.max(0,+gy),r:gr===""?null:Math.max(0,+gr),b:document.getElementById("b-"+id).checked?1:0};
     try{localStorage.setItem(CK,JSON.stringify(CV));}catch(x){}
     delete CE[id];render(true);toast("Salvat");return;
