@@ -200,7 +200,7 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
     <div class="top-row">
       <div>
         <h1>Tabi Japan</h1>
-        <div class="sub" id="sub">15–30 noiembrie · Tokyo · Kyoto · Osaka · Nara</div>
+        <div class="sub" id="sub">14–30 noiembrie · Tokyo · Kyoto · Osaka · Nara</div>
       </div>
       <span class="sync" id="sync" role="status"><i></i><span id="synct">local</span></span>
     </div>
@@ -239,6 +239,8 @@ var L={
   ekitan:{l:"Orar Haruka",u:"https://ekitan.com/en/article/haruka-jikoku-ryoukin"}
 };
 var D=[
+{d:14,wd:"Sâmbătă",cc:"tokyo",city:"Zbor spre Tokyo",code:"T",title:"Zbor București → Doha",note:"Detaliile zborului (locuri, Doha → Narita) se adaugă mai târziu.",stops:[
+ {n:"Zbor Qatar Airways, București → Doha",t:"16:20",x:1}]},
 {d:15,wd:"Duminică",cc:"tokyo",city:"Tokyo",code:"T",title:"Ajungem în Narita",note:"Ora aterizării nu e în program. Când o știi, alegem trenul potrivit.",stops:[
  {n:"Aterizare la Narita",note:"Control de pașapoarte și vamă. Dacă completezi Visit Japan Web înainte, treci mai repede."},
  {n:"Narita → Asakusa, varianta recomandată",s:"door",lbl:"Plătști la gară",p:"1.372 ¥ · ≈40 RON",x:1,note:"Keisei Narita Sky Access, apoi tren direct pe Asakusa Line. Circa 1–1,5 ore. Alege un tren care merge direct spre Asakusa și confirmă ora pe Ekitan sau Google Maps după aterizare.",links:["narita"]},
@@ -351,7 +353,7 @@ function renderThemes(){
 }
 applyTheme();
 
-function today(){var n=new Date();return (n.getFullYear()===2026&&n.getMonth()===10&&n.getDate()>=15&&n.getDate()<=30)?n.getDate():null;}
+function today(){var n=new Date();return (n.getFullYear()===2026&&n.getMonth()===10&&n.getDate()>=14&&n.getDate()<=30)?n.getDate():null;}
 function dayBy(n){for(var i=0;i<D.length;i++)if(D[i].d===n)return D[i];return D[0];}
 function mapUrl(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
@@ -386,7 +388,7 @@ function stopHtml(s){
 }
 function viewDays(){
   var td=today();
-  var GR=[{k:"tokyo",t:"Tokyo",from:15,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo",from:30,to:30}];
+  var GR=[{k:"tokyo",t:"Tokyo",from:14,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo",from:30,to:30}];
   var chips=GR.map(function(g){
     var items=D.filter(function(x){return x.d>=g.from&&x.d<=g.to;}).map(function(x){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
@@ -394,11 +396,12 @@ function viewDays(){
     }).join("");
     return '<div class="dgroup '+g.k+'"><div class="dg-h"><b>'+g.t+'</b><span>'+(g.from===g.to?g.from:g.from+'–'+g.to)+' nov</span></div><div class="days">'+items+'</div></div>';
   }).join("");
-  var d=dayBy(selDay), h="";
+  var d=selDay===null?null:dayBy(selDay), h="";
   h+='<div class="strip" id="days">'+chips+'</div>';
+  if(!d){h+='<p class="note" style="padding:6px 0 0">Alege o zi din listă ca să vezi programul ei. Se deschide singură în ziua respectivă.</p>';return h;}
   h+='<section id="daysec" class="'+d.cc+'"><div class="dayhead"><span class="city">'+d.city+' · '+d.code+d.d+'</span><h2>'+esc(d.title)+'</h2><span class="date">'+d.wd+', '+d.d+' noiembrie 2026</span></div>';
   if(d.note)h+='<div class="notice">'+esc(d.note)+'</div>';
-  var hk=d.hotel||(d.d<=20?"tokyo":null);if(hk){var ht=HOTEL[hk];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
+  var hk=d.hotel||(d.d>=15&&d.d<=20?"tokyo":null);if(hk){var ht=HOTEL[hk];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
   h+='<ul class="stops">'+d.stops.map(stopHtml).join("")+'</ul>';
   var seenN=d.stops.filter(function(s){return S.seen[s.id];}).length;
   h+='<p class="foot">'+seenN+' din '+d.stops.length+' bifate în ziua asta</p></section>';
@@ -486,14 +489,14 @@ function viewInfo(){
 function parseHash(){
   var h=(location.hash||"").replace("#","");
   var m=/^zi-(\d+)$/.exec(h);
-  if(m){var n=+m[1];if(n>=15&&n<=30){tab="zile";selDay=n;return;}}
+  if(m){var n=+m[1];if(n>=14&&n<=30){tab="zile";selDay=n;return;}}
   if(h==="bilete"||h==="transport"||h==="hoteluri"||h==="info"||h==="zile"){tab=h;}
-  if(selDay===null)selDay=today()||15;
+  if(selDay===null)selDay=today();
 }
 function renderNav(){
   var left=buyList().filter(function(s){return !S.bought[s.id];}).length;
   document.getElementById("nav").innerHTML=TABS.map(function(t){
-    var href=t.id==="zile"?("#zi-"+selDay):("#"+t.id);
+    var href=t.id==="zile"?(selDay===null?"#zile":"#zi-"+selDay):("#"+t.id);
     return '<a href="'+href+'"'+(tab===t.id?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t.i+'</svg>'+t.l+
       (t.id==="bilete"&&left?'<span class="badge">'+left+'</span>':'')+'</a>';
   }).join("");
@@ -506,10 +509,10 @@ function renderStats(){
   document.getElementById("st2").textContent=left;
   document.getElementById("st2l").textContent=left===1?"bilet de luat":"bilete de luat";
   document.getElementById("bar2").style.width=(b.length?(b.length-left)/b.length*100:0)+"%";
-  var n=new Date(), start=new Date(2026,10,15), diff=Math.ceil((start-n)/864e5), t=today(), sub;
-  if(t)sub="Ziua "+(t-14)+" din 16 · "+dayBy(t).city;
-  else if(diff>0)sub="Mai sunt "+diff+(diff===1?" zi":" zile")+" până pe 15 noiembrie";
-  else sub="15–30 noiembrie 2026";
+  var n=new Date(), start=new Date(2026,10,14), diff=Math.ceil((start-n)/864e5), t=today(), sub;
+  if(t)sub="Ziua "+(t-13)+" din 17 · "+dayBy(t).city;
+  else if(diff>0)sub="Mai sunt "+diff+(diff===1?" zi":" zile")+" până pe 14 noiembrie";
+  else sub="14–30 noiembrie 2026";
   document.getElementById("sub").textContent=sub;
 }
 function renderSync(){
