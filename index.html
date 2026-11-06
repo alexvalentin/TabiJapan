@@ -294,7 +294,6 @@ var L={
   ekitan:{l:"Orar Haruka",u:"https://ekitan.com/en/article/haruka-jikoku-ryoukin"}
 };
 var D=[
-{d:6,wd:"Vineri",cc:"tokyo",city:"Test vreme",code:"T",title:"Test: vremea în Tokyo azi",note:"Zi de probă, doar ca să vezi prognoza. O ștergem înainte de călătorie.",stops:[]},
 {d:14,wd:"Sâmbătă",cc:"tokyo",city:"Zbor spre Tokyo",code:"T",title:"Zbor București → Doha",note:"Detaliile zborului (locuri, Doha → Narita) se adaugă mai târziu.",stops:[
  {n:"Zbor Qatar Airways, București → Doha",t:"16:20",x:1}]},
 {d:15,wd:"Duminică",cc:"tokyo",city:"Tokyo",code:"T",title:"Ajungem în Narita",note:"Ora aterizării nu e în program. Când o știi, alegem trenul potrivit.",stops:[
@@ -448,7 +447,7 @@ function stopHtml(s){
 }
 function viewDays(){
   var td=today();
-  var GR=[{k:"tokyo",t:"Test vreme",from:6,to:6},{k:"tokyo",t:"Zbor București – Narita",from:14,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo și Zbor Narita – București",from:30,to:31,r:"30 nov – 1 dec"}];
+  var GR=[{k:"tokyo",t:"Zbor București – Narita",from:14,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo și Zbor Narita – București",from:30,to:31,r:"30 nov – 1 dec"}];
   var chips=GR.map(function(g){
     var items=D.filter(function(x){return x.d>=g.from&&x.d<=g.to;}).map(function(x){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
@@ -745,7 +744,7 @@ function viewInfo(){
 function parseHash(){
   var h=(location.hash||"").replace("#","");
   var m=/^zi-(\d+)$/.exec(h);
-  if(m){var n=+m[1];if(n===6||(n>=14&&n<=31)){tab="zile";selDay=n;return;}}
+  if(m){var n=+m[1];if(n>=14&&n<=31){tab="zile";selDay=n;return;}}
   if(h==="bilete"||h==="transport"||h==="hoteluri"||h==="cheltuieli"||h==="info"||h==="zile"){tab=h;}
   if(selDay===null)selDay=today();
 }
