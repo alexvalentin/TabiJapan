@@ -22,7 +22,7 @@
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]):not([data-theme="ghibli"]){
+  :root:not([data-theme="light"]):not([data-theme="ghibli"]):not([data-theme="sakura"]){
     --bg:#0c1220; --surface:#151d2f; --surface2:#1b2538; --ink:#e8ecf5; --muted:#9aa6bd; --line:#27324a;
     --tokyo:#6f8dff; --kyoto:#ff7a70; --osaka:#f0a23a;
     --ok:#5fd394; --ok-bg:#12382a; --warn:#f3b36a; --warn-bg:#3a2a12; --info:#a9b6cf; --info-bg:#222d44;
@@ -44,7 +44,16 @@
   --band:#bfdcef;
   --sky:radial-gradient(ellipse 80px 24px at 80% 64px,rgba(255,255,255,.9),transparent 72%),radial-gradient(ellipse 120px 30px at 18% 116px,rgba(255,255,255,.75),transparent 72%),radial-gradient(ellipse 60px 18px at 56% 150px,rgba(255,255,255,.6),transparent 72%),linear-gradient(#bfdcef 0,#dbe9d6 380px);
 }
-:root[data-theme="ghibli"] .card,:root[data-theme="ghibli"] .stat,:root[data-theme="ghibli"] .hotel{border-radius:18px}
+:root[data-theme="ghibli"] .card,:root[data-theme="ghibli"] .stat,:root[data-theme="ghibli"] .hotel,:root[data-theme="sakura"] .card,:root[data-theme="sakura"] .stat,:root[data-theme="sakura"] .hotel{border-radius:18px}
+/* Tema Ghibli roz: petale de cireș, hârtie caldă, cer roz */
+:root[data-theme="sakura"]{
+  --bg:#f8e2ea; --surface:#fffafb; --surface2:#fbeef3; --ink:#4a2838; --muted:#86596f; --line:#ecc8d6;
+  --tokyo:#4a5fb8; --kyoto:#c23f5c; --osaka:#b86a1c;
+  --ok:#2f7a52; --ok-bg:#dcefe2; --warn:#955608; --warn-bg:#fae6c2; --info:#6a4b5e; --info-bg:#f3dbe5;
+  --on-city:#fffafb; --shadow:0 2px 0 rgba(74,40,56,.07); color-scheme:light;
+  --band:#f6c6d6;
+  --sky:radial-gradient(ellipse 80px 24px at 80% 64px,rgba(255,255,255,.9),transparent 72%),radial-gradient(ellipse 120px 30px at 18% 116px,rgba(255,255,255,.75),transparent 72%),radial-gradient(ellipse 60px 18px at 56% 150px,rgba(255,255,255,.6),transparent 72%),linear-gradient(#f6c6d6 0,#f8e2ea 380px);
+}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{
@@ -374,9 +383,9 @@ function lsLoad(){try{var r=JSON.parse(localStorage.getItem(LS)||"{}");S.seen=r.
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
 lsLoad();
 
-var TH=[{id:"auto",l:"Auto"},{id:"light",l:"Luminos"},{id:"dark",l:"Întunecat"},{id:"ghibli",l:"Ghibli"}];
+var TH=[{id:"auto",l:"Auto"},{id:"light",l:"Luminos"},{id:"dark",l:"Întunecat"},{id:"ghibli",l:"Ghibli"},{id:"sakura",l:"Ghibli roz"}];
 var THK="japonia2026-theme", theme="auto";
-var TCOL={auto:"#14213d",light:"#eef0f4",dark:"#0c1220",ghibli:"#bfdcef"};
+var TCOL={auto:"#14213d",light:"#eef0f4",dark:"#0c1220",ghibli:"#bfdcef",sakura:"#f6c6d6"};
 try{theme=localStorage.getItem(THK)||"auto";}catch(e){}
 if(!TCOL[theme])theme="auto";
 function applyTheme(){
