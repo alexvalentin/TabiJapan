@@ -388,7 +388,7 @@ function stopHtml(s){
 }
 function viewDays(){
   var td=today();
-  var GR=[{k:"tokyo",t:"Tokyo",from:14,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo",from:30,to:30}];
+  var GR=[{k:"tokyo",t:"Zbor București – Narita",from:14,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo",from:30,to:30}];
   var chips=GR.map(function(g){
     var items=D.filter(function(x){return x.d>=g.from&&x.d<=g.to;}).map(function(x){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
