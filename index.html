@@ -167,6 +167,8 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .wxrow{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
 .wxh{flex:0 0 58px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;border-radius:10px;background:var(--surface2);font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .wxh b{font-size:15px;color:var(--ink);font-weight:500}
+.wxh.now{background:var(--cc,var(--accent));color:#fff}
+.wxh.now b,.wxh.now span{color:#fff}
 .wxh .hi{color:var(--warn);font-weight:600}
 .sub-h{font-family:var(--f-head);font-size:17px;font-weight:700;margin:8px 0 0}
 .total{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--f-mono);font-size:13px}
@@ -540,23 +542,32 @@ function wxHtml(d){
   var i=o.d.time.indexOf(date);
   if(i<0){return '<div class="card wx">'+head+'<p class="note">Prognoza pentru ziua asta apare din '+(d.d-15)+' noiembrie, cu cel mult 16 zile înainte.</p></div>';}
   var mx=Math.round(o.d.temperature_2m_max[i]), mn=Math.round(o.d.temperature_2m_min[i]), rp=o.d.precipitation_probability_max[i];
-  var cells="";
+  var cells="", jn=wxJst(), isToday=(jn.date===date), jh=jn.h;
   for(var k=0;k<o.h.time.length;k++){
     var t=o.h.time[k];
     if(t.indexOf(date+"T")!==0)continue;
     var hh=parseInt(t.slice(11,13),10);
-    if(hh<6||hh>22)continue;
+    if(isToday&&hh<jh)continue;
     var p=o.h.precipitation_probability[k];
-    cells+='<div class="wxh"><span>'+t.slice(11,13)+':00</span>'+wxIcon(o.h.weather_code[k])+'<b>'+Math.round(o.h.temperature_2m[k])+'°</b><span class="'+(p>=50?'hi':'')+'">'+(p==null?'-':p+'%')+'</span></div>';
+    cells+='<div class="wxh'+(isToday&&hh===jh?' now':'')+'"><span>'+(isToday&&hh===jh?'acum':t.slice(11,13)+':00')+'</span>'+wxIcon(o.h.weather_code[k])+'<b>'+Math.round(o.h.temperature_2m[k])+'°</b><span class="'+(p>=50?'hi':'')+'">'+(p==null?'-':p+'%')+'</span></div>';
   }
   var at=new Date(o.t), hm=("0"+at.getHours()).slice(-2)+":"+("0"+at.getMinutes()).slice(-2);
   return '<div class="card wx">'+head+'<div class="wxsum">'+wxIcon(o.d.weather_code[i])+'<b>'+mx+'°</b><span>min '+mn+'°</span><span>'+wxDesc(o.d.weather_code[i])+'</span><span>ploaie '+(rp==null?'-':rp+'%')+'</span></div>'+
-    '<div class="wxrow">'+cells+'</div><span class="note">Pe oră, 06:00–22:00, ora Japoniei. Actualizat la '+hm+'.</span></div>';
+    '<div class="wxrow">'+cells+'</div><span class="note">Pe oră, ora Japoniei'+(isToday?', de la ora curentă':'')+'. Actualizat la '+hm+'.</span></div>';
+}
+function wxJst(){
+  try{var p=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",hourCycle:"h23"}).formatToParts(new Date()),m={};p.forEach(function(x){m[x.type]=x.value;});return {date:m.year+"-"+m.month+"-"+m.day,h:parseInt(m.hour,10)};}catch(e){var j=new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);return {date:j.getFullYear()+"-"+("0"+(j.getMonth()+1)).slice(-2)+"-"+("0"+j.getDate()).slice(-2),h:j.getHours()};}
+}
+function wxScroll(){
+  var r=document.querySelector(".wxrow");if(!r)return;
+  var n=r.querySelector(".now");
+  if(n){r.scrollLeft=0;return;}
+  var c=r.children[6];if(c)r.scrollLeft=c.offsetLeft-r.offsetLeft-4;
 }
 function wxPaint(){
   wxChips();
   var el=document.getElementById("wx");if(!el||selDay===null)return;
-  el.innerHTML=wxHtml(dayBy(selDay));
+  el.innerHTML=wxHtml(dayBy(selDay));wxScroll();
 }
 function wxFetch(city){
   var o=WXD[city]||wxCache(city);
@@ -576,7 +587,7 @@ function wxFetch(city){
 }
 function wxKick(){
   if(tab!=="zile")return;
-  wxChips();
+  wxChips();wxScroll();
   for(var c in WXC)wxFetch(c);
 }
 function viewInfo(){
