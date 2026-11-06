@@ -588,7 +588,7 @@ function viewCosts(){
       h+='<div class="crow" id="'+x.id+'"><div class="top"><h3>'+esc(x.a)+'</h3>'+(v.b&&!ed?'<span class="got">Bilet cumpărat</span>':'')+'</div>';
       if(!ed){
         var mt='';
-        if(x.d){var dd=dayBy(x.d);mt+='<span><b>Ziua:</b> <a href="#zi-'+x.d+'">'+dd.code+dlab(x.d)+' · '+dd.wd+', '+dlab(x.d)+(x.d>30?' dec':' nov')+'</a></span>';}
+        if(x.d){var dd=dayBy(x.d);mt+='<span><b>Ziua:</b> <a href="#zi-'+x.d+'">'+dd.wd+', '+dlab(x.d)+(x.d>30?' dec':' nov')+'</a></span>';}
         if(!v.b&&(x.s||x.u)){mt+='<span><b>De unde se cumpără:</b> '+esc(x.s)+(x.u?' <a href="'+esc(x.u)+'" target="_blank" rel="noopener">Deschide site</a>':'')+'</span>';}
         if(x.det)mt+='<span><b>Detalii:</b> '+esc(x.det)+'</span>';
         if(x.custom)mt+='<span>Adăugat de voi</span>';
