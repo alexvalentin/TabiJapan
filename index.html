@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Tabi"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>:root{color-scheme:light;padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}[hidden]{display:none!important}img{max-width:100%}</style></head><body>
+<title>Tabi Japan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#14213d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Concept: semnalistica din gările japoneze. Fiecare zi e o "stație" cu cod (T16, K22, O27), culoarea liniei = orașul.
+   Aplicație mobile-first: bară de navigare jos, banda de zile lipită sus, bife sincronizate live între telefoane. */
+:root{
+  --bg:#eef0f4; --surface:#ffffff; --surface2:#f5f6f9; --ink:#14213d; --muted:#5a6578; --line:#d9dee7;
+  --tokyo:#2447c8; --kyoto:#c0332b; --osaka:#b86a00;
+  --ok:#17784a; --ok-bg:#dff3e8; --warn:#9a4a05; --warn-bg:#fdecd2; --info:#41506b; --info-bg:#e6eaf2;
+  --on-city:#ffffff; --shadow:0 1px 2px rgba(20,33,61,.06); --sky:none; --band:var(--bg);
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-head:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-theme="ghibli"]){
+    --bg:#0c1220; --surface:#151d2f; --surface2:#1b2538; --ink:#e8ecf5; --muted:#9aa6bd; --line:#27324a;
+    --tokyo:#6f8dff; --kyoto:#ff7a70; --osaka:#f0a23a;
+    --ok:#5fd394; --ok-bg:#12382a; --warn:#f3b36a; --warn-bg:#3a2a12; --info:#a9b6cf; --info-bg:#222d44;
+    --on-city:#0c1220; --shadow:none; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1220; --surface:#151d2f; --surface2:#1b2538; --ink:#e8ecf5; --muted:#9aa6bd; --line:#27324a;
+  --tokyo:#6f8dff; --kyoto:#ff7a70; --osaka:#f0a23a;
+  --ok:#5fd394; --ok-bg:#12382a; --warn:#f3b36a; --warn-bg:#3a2a12; --info:#a9b6cf; --info-bg:#222d44;
+  --on-city:#0c1220; --shadow:none; color-scheme:dark;
+}
+/* Tema Ghibli: pajiște, hârtie caldă, cer cu nori moi */
+:root[data-theme="ghibli"]{
+  --bg:#dbe9d6; --surface:#fcf9ee; --surface2:#f0eedc; --ink:#243a3a; --muted:#587068; --line:#c3d6bf;
+  --tokyo:#3777b3; --kyoto:#c4553d; --osaka:#c98310;
+  --ok:#2c7a4c; --ok-bg:#d3ebd5; --warn:#955608; --warn-bg:#f7e4b6; --info:#44625f; --info-bg:#d0e4e1;
+  --on-city:#fffdf2; --shadow:0 2px 0 rgba(36,58,58,.07); color-scheme:light;
+  --band:#bfdcef;
+  --sky:radial-gradient(ellipse 80px 24px at 80% 64px,rgba(255,255,255,.9),transparent 72%),radial-gradient(ellipse 120px 30px at 18% 116px,rgba(255,255,255,.75),transparent 72%),radial-gradient(ellipse 60px 18px at 56% 150px,rgba(255,255,255,.6),transparent 72%),linear-gradient(#bfdcef 0,#dbe9d6 380px);
+}
+:root[data-theme="ghibli"] .card,:root[data-theme="ghibli"] .stat,:root[data-theme="ghibli"] .hotel{border-radius:18px}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background-color:var(--bg); background-image:var(--sky); background-repeat:no-repeat; background-size:100% 420px; color:var(--ink); font-family:var(--f-body); font-size:15px; line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 96px; -webkit-tap-highlight-color:transparent;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--band)}
+.wrap{max-width:720px;margin:0 auto}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:6px}
+
+/* Antet */
+header.top{padding-top:18px;display:flex;flex-direction:column;gap:12px}
+.top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;margin:0;letter-spacing:-.01em}
+.sub{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:.02em}
+.sync{font-family:var(--f-mono);font-size:11px;display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--surface);white-space:nowrap}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:block}
+.sync.live{color:var(--ok)} .sync.live i{background:var(--ok)}
+.sync.warn{color:var(--warn)} .sync.warn i{background:var(--warn)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.stat b{font-family:var(--f-head);font-size:22px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar>div{height:100%;background:var(--ok);width:0;transition:width .3s}
+
+.themes{display:flex;gap:6px;flex-wrap:wrap}
+.themes button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:500;min-height:32px}
+.themes button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+/* Banda de zile */
+.strip{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding:12px 0 10px;margin-top:8px}
+.days{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 6px;scrollbar-width:none;margin:0 -2px}
+.days::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;scroll-snap-align:center;text-decoration:none;min-width:58px;border-radius:10px;background:var(--surface);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.chip .band{height:5px;background:var(--cc)}
+.chip .code{font-family:var(--f-mono);font-weight:500;font-size:16px;padding:7px 8px 0;text-align:center;font-variant-numeric:tabular-nums}
+.chip .wd{font-size:11px;color:var(--muted);padding:1px 8px 7px;text-align:center;text-transform:uppercase;letter-spacing:.06em}
+.chip.sel{background:var(--cc);border-color:var(--cc);color:var(--on-city)}
+.chip.sel .band{background:rgba(255,255,255,.35)}
+.chip.sel .wd{color:inherit;opacity:.85}
+.chip.today::after{content:"azi";position:absolute;top:8px;right:5px;font-size:9px;font-family:var(--f-mono);opacity:.9;color:var(--cc)}
+.chip.sel.today::after{color:var(--on-city)}
+.tokyo{--cc:var(--tokyo)} .kyoto{--cc:var(--kyoto)} .osaka{--cc:var(--osaka)}
+
+/* Zi */
+.dayhead{display:flex;flex-direction:column;gap:4px;padding:6px 0 14px}
+.dayhead .city{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--cc);font-weight:500}
+.dayhead h2{font-family:var(--f-head);font-size:26px;line-height:1.1;margin:0;font-weight:700;text-wrap:balance}
+.dayhead .date{color:var(--muted);font-size:14px}
+.notice{background:var(--info-bg);color:var(--info);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.hotel{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.hotel small{display:block;color:var(--muted);font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.hotel div{min-width:0}
+ul.stops{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;position:relative}
+.stop{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 6px;padding:12px 0;border-bottom:1px solid var(--line)}
+.stop:last-child{border-bottom:0}
+.chk{width:44px;height:44px;display:grid;place-items:center;background:none;border:0;padding:0;margin:-6px 0 0 -8px}
+.chk span{width:26px;height:26px;border-radius:8px;border:2px solid var(--muted);display:grid;place-items:center;transition:background .15s,border-color .15s}
+.chk svg{width:16px;height:16px;opacity:0;stroke:var(--on-city)}
+.chk[aria-pressed="true"] span{background:var(--cc);border-color:var(--cc)}
+.chk[aria-pressed="true"] svg{opacity:1}
+.stop .body{min-width:0;display:flex;flex-direction:column;gap:5px}
+.line1{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.time{font-family:var(--f-mono);font-size:13px;font-weight:500;color:var(--cc);white-space:nowrap}
+.name{font-family:var(--f-head);font-size:19px;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.stop.done .name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;border:0;line-height:1.3;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.pill.booked,.pill.got{background:var(--ok-bg);color:var(--ok)}
+.pill.buy{background:var(--warn-bg);color:var(--warn);cursor:pointer;min-height:28px}
+.pill.door,.pill.free{background:var(--info-bg);color:var(--info)}
+.pill svg{width:12px;height:12px;stroke:currentColor}
+.price{font-family:var(--f-mono);font-size:12.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+.note{font-size:13.5px;color:var(--muted);max-width:60ch}
+.links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.links a{color:var(--cc);font-weight:600;text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px}
+
+/* Carduri generale */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;min-width:0}
+.card h3{margin:0;font-family:var(--f-head);font-size:20px;font-weight:700;line-height:1.15}
+.card p{margin:0}
+.kicker{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--cc,var(--muted));font-weight:500}
+.stack{display:flex;flex-direction:column;gap:12px;padding-top:14px}
+h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
+.lead{color:var(--muted);margin:4px 0 0;max-width:60ch}
+.group-h{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--cc);margin:14px 0 0;font-weight:500;display:flex;gap:8px;align-items:center}
+.group-h::before{content:"";width:18px;height:5px;background:var(--cc);border-radius:2px}
+.trow{display:grid;grid-template-columns:44px minmax(0,1fr);gap:2px 6px;padding:12px 0;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:0}
+.trow .when{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.trow.done .name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
+.mono{font-family:var(--f-mono);font-size:13px}
+.copy{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;margin-left:6px}
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.linkbtn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Navigare jos */
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+nav.bottom .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav.bottom a{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:6px 4px;border-radius:10px;font-size:12px;color:var(--muted);font-weight:500;position:relative}
+nav.bottom a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.bottom a[aria-current="page"]{color:var(--ink);background:var(--surface2)}
+nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:var(--warn);color:var(--surface);font-family:var(--f-mono);font-size:10px;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:13px;z-index:60;max-width:90vw;text-align:center}
+.foot{color:var(--muted);font-size:12px;padding:18px 0 0;font-family:var(--f-mono)}
+@media (min-width:640px){ h1{font-size:36px} .name{font-size:20px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="top-row">
+      <div>
+        <h1>Tabi Japan</h1>
+        <div class="sub" id="sub">16–30 noiembrie · Tokyo · Kyoto · Osaka · Nara</div>
+      </div>
+      <span class="sync" id="sync" role="status"><i></i><span id="synct">local</span></span>
+    </div>
+    <div class="themes" id="themes" role="group" aria-label="Temă"></div>
+    <div class="stats">
+      <div class="stat"><b id="st1">0/0</b><span>atracții bifate</span><div class="bar"><div id="bar1"></div></div></div>
+      <div class="stat"><b id="st2">0</b><span id="st2l">bilete de luat</span><div class="bar"><div id="bar2"></div></div></div>
+    </div>
+  </header>
+  <main id="main" aria-live="polite"></main>
+  <p class="foot">Cursul folosit: aprox. 34 ¥ pentru 1 RON.</p>
+</div>
+
+<nav class="bottom" aria-label="Secțiuni">
+  <div class="in" id="nav"></div>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- DATE ---------- */
+var HOTEL={
+  kyoto:{n:"The Royal Park Canvas – Kyoto Nijo",q:"The Royal Park Canvas Kyoto Nijo"},
+  osaka:{n:"Toho Hotel Namba Motomachi",q:"Toho Hotel Namba Motomachi Osaka"}
+};
+var L={
+  yoyogi:{l:"Site Yoyogi",u:"https://yoyogiforestoflights.tokyo/en"},
+  ltike:{l:"Bilete Lawson",u:"https://l-tike.com"},
+  smartex:{l:"SmartEX",u:"https://smart-ex.jp/en/"},
+  e5489:{l:"e5489 (Haruka)",u:"https://www.jr-odekake.net/goyoyaku/"},
+  jrw:{l:"JR West",u:"https://www.westjr.co.jp/global/en/ticket/overview/"},
+  ekitan:{l:"Orar Haruka",u:"https://ekitan.com/en/article/haruka-jikoku-ryoukin"}
+};
+var D=[
+{d:16,wd:"Luni",cc:"tokyo",city:"Tokyo",code:"T",title:"Shibuya la apus",stops:[
+ {n:"Shinjuku City"},{n:"Meiji Park"},{n:"Meiji Jingu"},{n:"Harajuku Street"},{n:"Shibuya Scramble Crossing"},
+ {n:"Shibuya Sky",t:"15:20–15:40",s:"booked",lbl:"Rezervat",p:"3.400 ¥ după 15:00 · ≈100 RON",note:"Apusul e în jur de 16:30."},
+ {n:"Yoyogi Park, lumini de seară",t:"18:00",s:"buy",q:"Yoyogi Park",note:"Deschis 17:30–22:00, ultima intrare la 21:00, traseu de 1,8 km. Biletul se ia pentru 16 nov, ora 18:00.",links:["yoyogi","ltike"]},
+ {n:"Omoide Yokocho"},{n:"Golden Gai"}]},
+{d:17,wd:"Marți",cc:"tokyo",city:"Tokyo",code:"T",title:"Ueno, Asakusa, Skytree",stops:[
+ {n:"Ueno Park"},{n:"Ameyoko Market"},{n:"Kappabashi"},{n:"Senso-ji"},
+ {n:"Tokyo Skytree",s:"buy",p:"1.800–3.600 ¥ în funcție de zi și oră · ≈53–106 RON"}]},
+{d:18,wd:"Miercuri",cc:"tokyo",city:"Tokyo",code:"T",title:"Tokyo DisneySea",stops:[
+ {n:"Tokyo DisneySea",s:"booked",lbl:"Bilete luate",p:"10.900 ¥ / persoană · ≈320 RON",note:"Drum: hotel, Ueno, Tokyo Station, Maihama. Aproximativ 45–55 de minute într-o direcție."}]},
+{d:19,wd:"Joi",cc:"tokyo",city:"Tokyo",code:"T",title:"Palatul Imperial și Akihabara",stops:[
+ {n:"Imperial Palace East Gardens",note:"Închis luni și vineri, joi e deschis."},{n:"Imperial Palace"},{n:"Itoya Annex Ginza"},
+ {n:"Pokémon Café Tokyo Nihombashi",t:"15:20–16:50",s:"booked",lbl:"Rezervat"},
+ {n:"Akihabara"},{n:"Mandarake Complex"}]},
+{d:20,wd:"Vineri",cc:"tokyo",city:"Tokyo",code:"T",title:"Grădini și Tokyo Tower",stops:[
+ {n:"Shinjuku Gyoen",s:"door",p:"500 ¥ · ≈15 RON",note:"Închis luni, vineri e deschis."},{n:"Meiji Jingu Gaien"},{n:"Hie Shrine"},
+ {n:"The National Art Center",s:"door",p:"Expoziția Louvre 2.400 ¥ la ghișeu · ≈71 RON"},
+ {n:"Tokyo Tower",s:"door",p:"Main Deck 1.500 ¥ ≈44 RON · Top Deck ≈3.300 ¥ ≈97 RON"},{n:"Asakusa"}]},
+{d:21,wd:"Sâmbătă",cc:"kyoto",city:"Kyoto",code:"K",title:"Shinkansen spre Kyoto",hotel:"kyoto",stops:[
+ {n:"Shinkansen Tokyo → Kyoto",t:"~10:00",s:"buy",x:1,note:"2 pasageri, rezervare prin SmartEX. De la cazare până la Tokyo Station e o stație de metrou.",links:["smartex"]},
+ {n:"Bagaje și check-in la hotel",x:1},
+ {n:"Nijo Castle",s:"door",p:"1.300 ¥ · ≈38 RON"},{n:"Kyoto Gyoen National Garden"},
+ {n:"În trecere: Manga Museum, Museum of Kyoto, Samurai Ninja Museum",x:1},
+ {n:"Pontocho",note:"Cină și plimbare."},{n:"Înapoi pe jos prin Nijo Castle, apoi la hotel",x:1}]},
+{d:22,wd:"Duminică",cc:"kyoto",city:"Kyoto",code:"K",title:"Templele din est",hotel:"kyoto",stops:[
+ {n:"Fushimi Inari Taisha"},
+ {n:"To-ji",note:"Iluminatul de seară costă 1.000 ¥ (≈29 RON), bilet separat."},
+ {n:"Kiyomizu-dera",s:"door",p:"500 ¥ · ≈15 RON",note:"Iluminat de seară între 21 și 30 nov, cu bilet separat."},
+ {n:"Heian-jingu",s:"door",p:"Grădina 600 ¥ · ≈18 RON"},
+ {n:"Chion-in",s:"door",p:"300–500 ¥ · ≈9–15 RON",note:"Seara 800 ¥ (≈24 RON)."},
+ {n:"Ninenzaka"}]},
+{d:23,wd:"Luni",cc:"kyoto",city:"Kyoto",code:"K",title:"Arashiyama",hotel:"kyoto",stops:[
+ {n:"Arashiyama Bamboo Forest"},
+ {n:"Tenryu-ji",s:"door",p:"Grădina 500 ¥ + sălile 300 ¥ · ≈24 RON"},
+ {n:"Gio-ji",s:"door",p:"300 ¥ · ≈9 RON"},{n:"Saga Toriimoto Preserved Street"},
+ {n:"Adashino Nenbutsuji",s:"door",p:"500 ¥ · ≈15 RON"},{n:"Chikurin (pădurea de bambus)"},
+ {n:"Kinkaku-ji",s:"door",p:"500 ¥ · ≈15 RON",note:"Din Arashiyama cu Uber sau autobuz."}]},
+{d:24,wd:"Marți",cc:"kyoto",city:"Kyoto",code:"K",title:"Kimono și Gion",hotel:"kyoto",note:"Ultima zi în Kyoto. De stabilit cu atelierul ora la care returnezi kimonoul, ca să ajungi la teatru la 19:00.",stops:[
+ {n:"Închiriere kimono",t:"9:00",s:"booked",lbl:"Rezervat"},
+ {n:"Ședință foto",t:"10:30",s:"booked",lbl:"Rezervat"},
+ {n:"Gion și Hanamikoji"},{n:"Yasaka Shrine"},{n:"Dai-un-in"},
+ {n:"Kodaiji",s:"door",p:"800 ¥ · ≈24 RON",note:"Biletul de seară e separat."},
+ {n:"Hokan-ji"},{n:"Nio-mon Gate"},{n:"Otani Sobyo Temple"},
+ {n:"Teatru în Gion (Gion Kobu Kaburenjo)",t:"19:00",s:"booked",lbl:"Rezervat"}]},
+{d:25,wd:"Miercuri",cc:"osaka",city:"Osaka",code:"O",title:"Spre Osaka, Dotonbori",hotel:"osaka",stops:[
+ {n:"Tren Kyoto → Osaka",s:"buy",x:1,note:"Haruka (Hello Kitty Haruka), circa 29 de minute. Biletul se ia online pe e5489 sau de la gară.",links:["e5489","ekitan"]},
+ {n:"Toho Hotel Namba Motomachi",q:"Toho Hotel Namba Motomachi Osaka"},
+ {n:"Namba Yasaka Shrine"},{n:"Hozenji Yokocho"},{n:"Dotonbori"},{n:"Amerikamura"}]},
+{d:26,wd:"Joi",cc:"osaka",city:"Osaka",code:"O",title:"Universal Studios Japan",hotel:"osaka",stops:[
+ {n:"Universal Studios Japan",s:"booked",lbl:"Bilete luate",note:"Pe jos până la Osaka-Namba, Hanshin Namba Line până la Nishikujo, apoi JR Yumesaki Line până la Universal City. Retur pe aceeași rută."}]},
+{d:27,wd:"Vineri",cc:"osaka",city:"Osaka",code:"O",title:"Castel și Umeda Sky",hotel:"osaka",stops:[
+ {n:"Osaka Castle",s:"door",p:"1.200 ¥ · ≈35 RON"},{n:"Osaka Tenmangu Shrine"},{n:"Tenjinbashi-suji Shopping Street"},
+ {n:"Umeda Sky Building",t:"16:15–16:30",s:"buy",p:"1.900 ¥ online (WILLER) · 2.000 ¥ la ghișeu · ≈56–59 RON",note:"Deschis 9:30–22:30, ultima intrare 22:00. Apusul e în jur de 16:50. Online se cumpără cu cel puțin 2 zile înainte."},
+ {n:"Daimaru Umeda"}]},
+{d:28,wd:"Sâmbătă",cc:"osaka",city:"Osaka",code:"O",title:"O zi la Nara",hotel:"osaka",mapCity:"Nara",note:"Prețurile pentru Nara nu sunt verificate încă.",stops:[
+ {n:"Ikoma Sanjo Amusement Park",note:"Prin Ikoma Station și telefericul, cu întoarcere la Ikoma Station tot cu telefericul."},
+ {n:"Kofuku-ji"},{n:"Nara Park (căprioarele)",q:"Nara Park"},{n:"Isuien Garden"},
+ {n:"Yoshikien Garden",s:"free",lbl:"Gratuit pentru turiști străini"},{n:"Naidaimon Gate"},{n:"Todai-ji (Daibutsuden)"},
+ {n:"Nigatsu-do"},{n:"Kasuga Taisha"},
+ {n:"Înapoi spre Kintetsu-Nara",x:1,note:"25–30 de minute pe jos sau autobuz local."},{n:"Naramachi"}]},
+{d:29,wd:"Duminică",cc:"osaka",city:"Osaka",code:"O",title:"Acvariu și Shinsekai",hotel:"osaka",stops:[
+ {n:"Osaka Aquarium Kaiyukan",s:"buy",p:"2.400–3.500 ¥ · ≈71–103 RON",note:"Bilete electronice online."},
+ {n:"Tempozan Ferris Wheel",s:"door",p:"700–800 ¥ · ≈21–24 RON"},
+ {n:"Shitennoji",s:"door",p:"500 ¥ + 300 ¥ · ≈24 RON"},
+ {n:"Abeno Harukas",s:"door",p:"Observator ≈2.200 ¥ · ≈65 RON"},
+ {n:"Shinsekai și Tsutenkaku Tower",s:"door",p:"Turnul 1.000–1.200 ¥ · ≈29–35 RON"}]},
+{d:30,wd:"Luni",cc:"tokyo",city:"Tokyo",code:"T",title:"Înapoi la Tokyo",stops:[
+ {n:"Shinkansen Nozomi Shin-Osaka → Tokyo",s:"buy",x:1,note:"Plecare din Shin-Osaka, nu din Osaka Station. Circa 2 h 30. Loc pe partea A pentru priveliștea spre Muntele Fuji.",links:["smartex"]}]}
+];
+D.forEach(function(day){day.stops.forEach(function(s,i){s.id="d"+day.d+"-"+(i+1);s.day=day;});});
+
+var TABS=[
+ {id:"zile",l:"Zile",i:'<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'},
+ {id:"bilete",l:"Bilete",i:'<path d="M3 9a2 2 0 0 0 0 6v3h18v-3a2 2 0 0 1 0-6V6H3z"/><path d="M14 6v12" stroke-dasharray="2 3"/>'},
+ {id:"transport",l:"Transport",i:'<rect x="5" y="3.5" width="14" height="13" rx="3"/><path d="M5 11h14M8.5 20l1.5-3.5M15.5 20L14 16.5"/>'},
+ {id:"info",l:"Info",i:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/>'}
+];
+
+/* ---------- STARE ---------- */
+var S={seen:{},bought:{}};
+var mode="local";       // local | live | off
+var tab="zile", selDay=null;
+var LS="japonia2026-v1";
+
+function lsLoad(){try{var r=JSON.parse(localStorage.getItem(LS)||"{}");S.seen=r.seen||{};S.bought=r.bought||{};}catch(e){}}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
+lsLoad();
+
+var TH=[{id:"auto",l:"Auto"},{id:"light",l:"Luminos"},{id:"dark",l:"Întunecat"},{id:"ghibli",l:"Ghibli"}];
+var THK="japonia2026-theme", theme="auto";
+var TCOL={auto:"#14213d",light:"#eef0f4",dark:"#0c1220",ghibli:"#bfdcef"};
+try{theme=localStorage.getItem(THK)||"auto";}catch(e){}
+if(!TCOL[theme])theme="auto";
+function applyTheme(){
+  var r=document.documentElement;
+  if(theme==="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",theme);
+  var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",TCOL[theme]);
+}
+function renderThemes(){
+  var el=document.getElementById("themes");if(!el)return;
+  el.innerHTML=TH.map(function(t){return '<button data-theme-set="'+t.id+'" aria-pressed="'+(theme===t.id)+'">'+t.l+'</button>';}).join("");
+}
+applyTheme();
+
+function today(){var n=new Date();return (n.getFullYear()===2026&&n.getMonth()===10&&n.getDate()>=16&&n.getDate()<=30)?n.getDate():null;}
+function dayBy(n){for(var i=0;i<D.length;i++)if(D[i].d===n)return D[i];return D[0];}
+function mapUrl(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+/* ---------- RANDARE ---------- */
+var TICK='<svg viewBox="0 0 16 16" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>';
+
+function pill(s){
+  if(s.s==="booked")return '<span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span>';
+  if(s.s==="buy"){var got=!!S.bought[s.id];
+    return '<button class="pill '+(got?'got':'buy')+'" data-k="bought" data-id="'+s.id+'" aria-pressed="'+got+'">'+(got?TICK+'Bilet luat':'Bilet de luat')+'</button>';}
+  if(s.s==="door")return '<span class="pill door">'+esc(s.lbl||"Plătești la intrare")+'</span>';
+  if(s.s==="free")return '<span class="pill free">'+esc(s.lbl||"Gratuit")+'</span>';
+  return "";
+}
+function linksHtml(s,city,withMap){
+  var a=[];
+  if(withMap&&!s.x)a.push('<a href="'+mapUrl(s.q||(s.n+" "+city))+'" target="_blank" rel="noopener">Hartă</a>');
+  (s.links||[]).forEach(function(k){a.push('<a href="'+L[k].u+'" target="_blank" rel="noopener">'+L[k].l+'</a>');});
+  return a.length?'<div class="links">'+a.join("")+'</div>':"";
+}
+function stopHtml(s){
+  var seen=!!S.seen[s.id], city=s.day.mapCity||s.day.city;
+  return '<li class="stop'+(seen?' done':'')+'">'+
+    '<button class="chk" data-k="seen" data-id="'+s.id+'" aria-pressed="'+seen+'" aria-label="Bifează: '+esc(s.n)+'"><span>'+TICK+'</span></button>'+
+    '<div class="body">'+
+      '<div class="line1">'+(s.t?'<span class="time">'+esc(s.t)+'</span>':'')+'<span class="name">'+esc(s.n)+'</span></div>'+
+      ((s.s||s.p)?'<div class="meta">'+pill(s)+(s.p?'<span class="price">'+esc(s.p)+'</span>':'')+'</div>':'')+
+      (s.note?'<div class="note">'+esc(s.note)+'</div>':'')+
+      linksHtml(s,city,true)+
+    '</div></li>';
+}
+function viewDays(){
+  var td=today();
+  var chips=D.map(function(x){
+    return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
+      '<span class="band"></span><span class="code">'+x.code+x.d+'</span><span class="wd">'+x.wd.slice(0,3)+'</span></a>';
+  }).join("");
+  var d=dayBy(selDay), h="";
+  h+='<div class="strip"><div class="days" id="days">'+chips+'</div></div>';
+  h+='<section class="'+d.cc+'"><div class="dayhead"><span class="city">'+d.city+' · '+d.code+d.d+'</span><h2>'+esc(d.title)+'</h2><span class="date">'+d.wd+', '+d.d+' noiembrie 2026</span></div>';
+  if(d.note)h+='<div class="notice">'+esc(d.note)+'</div>';
+  if(d.hotel){var ht=HOTEL[d.hotel];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
+  h+='<ul class="stops">'+d.stops.map(stopHtml).join("")+'</ul>';
+  var seenN=d.stops.filter(function(s){return S.seen[s.id];}).length;
+  h+='<p class="foot">'+seenN+' din '+d.stops.length+' bifate în ziua asta</p></section>';
+  return h;
+}
+function buyList(){var r=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="buy")r.push(s);});});return r;}
+function viewTickets(){
+  var all=buyList(), left=all.filter(function(s){return !S.bought[s.id];}).length;
+  var h='<div class="stack"><div><h2 class="sec">Bilete</h2><p class="lead">'+(left?left+' de luat din '+all.length+'. Bifează când ai biletul.':'Toate biletele sunt luate.')+'</p></div>';
+  var order=["tokyo","kyoto","osaka"], names={tokyo:"Tokyo",kyoto:"Kyoto",osaka:"Osaka"};
+  var shown=false;
+  order.forEach(function(c){
+    var rows=all.filter(function(s){return s.day.cc===c&&!(c==="tokyo"&&s.day.d===30);});
+    if(c==="osaka")rows=rows.concat(all.filter(function(s){return s.day.d===30;}));
+    if(!rows.length)return;
+    h+='<div class="'+c+'"><div class="group-h">'+names[c]+'</div><div class="card" style="padding:4px 14px;margin-top:8px">';
+    rows.forEach(function(s){
+      var got=!!S.bought[s.id];
+      h+='<div class="trow '+c+(got?' done':'')+'"><button class="chk" data-k="bought" data-id="'+s.id+'" aria-pressed="'+got+'" aria-label="Bilet luat: '+esc(s.n)+'"><span>'+TICK+'</span></button>'+
+        '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span>'+
+        (s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s.note?'<span class="note">'+esc(s.note)+'</span>':'')+linksHtml(s,s.day.mapCity||s.day.city,false)+'</div></div>';
+    });
+    h+='</div></div>';shown=true;
+  });
+  var booked=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="booked")booked.push(s);});});
+  h+='<div><div class="group-h" style="--cc:var(--ok)">Deja rezervate sau luate</div><div class="card" style="padding:4px 14px;margin-top:8px">';
+  booked.forEach(function(s){h+='<div class="trow"><span></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span><span><span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span></span></div></div>';});
+  h+='</div></div></div>';
+  return h;
+}
+function viewTransport(){
+  return '<div class="stack"><div><h2 class="sec">Transport</h2><p class="lead">Trenurile dintre orașe și drumurile mai lungi din plan.</p></div>'+
+  '<div class="card tokyo"><span class="kicker">Sâmbătă 21 nov · Tokyo → Kyoto</span><h3>Shinkansen, în jur de 10:00</h3>'+
+    '<p>Rezervare pentru 2 pasageri prin SmartEX. De la cazare până la Tokyo Station e o stație de metrou.</p>'+
+    '<dl class="kv"><dt>ID SmartEX</dt><dd><span class="mono" id="sx">0347941143</span><button class="copy" data-copy="0347941143">Copiază</button></dd></dl>'+
+    '<div class="btnrow"><a class="linkbtn" href="https://smart-ex.jp/en/" target="_blank" rel="noopener">SmartEX</a></div></div>'+
+  '<div class="card kyoto"><span class="kicker">Miercuri 25 nov · Kyoto → Osaka</span><h3>Haruka, circa 29 de minute</h3>'+
+    '<p>Nu e Shinkansen. Se poate lua bilet online pe e5489, care cere un cod PIN de 4 cifre pe care îl alegi tu, sau direct de la gară. Bagajul mare se pune în raftul de la capetele vagonului sau lângă uși. Există și vagoane nerezervate.</p>'+
+    '<div class="btnrow"><a class="linkbtn" href="https://www.jr-odekake.net/goyoyaku/" target="_blank" rel="noopener">e5489</a><a class="linkbtn" href="https://www.westjr.co.jp/global/en/ticket/overview/" target="_blank" rel="noopener">JR West</a><a class="linkbtn" href="https://ekitan.com/en/article/haruka-jikoku-ryoukin" target="_blank" rel="noopener">Orar Haruka</a></div></div>'+
+  '<div class="card osaka"><span class="kicker">Luni 30 nov · Osaka → Tokyo</span><h3>Nozomi din Shin-Osaka</h3>'+
+    '<p>Pleci din Shin-Osaka, nu din Osaka Station. Drumul durează circa 2 h 30. Ia loc pe partea A pentru Muntele Fuji. Bagajul tău (79 × 46,5 × 27,5 cm, în total 153 cm) e sub limita de 160 cm.</p>'+
+    '<div class="btnrow"><a class="linkbtn" href="https://smart-ex.jp/en/" target="_blank" rel="noopener">SmartEX</a></div></div>'+
+  '<div class="card tokyo"><span class="kicker">Miercuri 18 nov · Tokyo</span><h3>Drumul la DisneySea</h3><p>Hotel, Ueno, Tokyo Station, Maihama. Aproximativ 45–55 de minute într-o direcție.</p></div>'+
+  '<div class="card osaka"><span class="kicker">Joi 26 nov · Osaka</span><h3>Drumul la Universal Studios</h3><p>Pe jos până la Osaka-Namba, Hanshin Namba Line până la Nishikujo, apoi JR Yumesaki Line până la Universal City. Retur pe aceeași rută.</p></div>'+
+  '<div class="card"><span class="kicker">Cazări</span><dl class="kv"><dt>Kyoto</dt><dd>The Royal Park Canvas – Kyoto Nijo</dd><dt>Osaka</dt><dd>Toho Hotel Namba Motomachi</dd></dl></div></div>';
+}
+function viewInfo(){
+  return '<div class="stack"><div><h2 class="sec">Info</h2><p class="lead">Lucruri bune de știut pe drum.</p></div>'+
+  '<div class="card"><h3>Intrare în țară</h3><ul class="plain"><li>Românii intră fără viză, pentru turism, până la 90 de zile.</li><li>Visit Japan Web nu e obligatoriu, dar e recomandat înainte de sosire.</li><li>Taxa de plecare, 3.000 ¥ (≈88 RON), e inclusă în biletul de avion.</li></ul></div>'+
+  '<div class="card"><h3>Internet</h3><ul class="plain"><li>eSIM: Ubigi, Airalo sau Nomad. Nomad cu 20 GB costă circa 23–27 USD.</li><li>Închiriere de la CDJapan: 50 GB pentru 16 zile, 3.900 ¥ (≈115 RON).</li></ul></div>'+
+  '<div class="card"><h3>Bagaj în Shinkansen</h3><p>Regula de 160 cm (suma celor trei dimensiuni) se aplică doar pe liniile Tokaido, Sanyo și Kyushu. Bagajul tău are 153 cm, deci intră.</p></div>'+
+  '<div class="card"><h3>Idei în plus</h3><ul class="plain">'+
+    '<li>DAWN avatar robot café, Tokyo: intrare 2.200 ¥ (≈65 RON), Diner 5.500 ¥ (≈162 RON). Pentru Diner e obligatorie rezervarea.</li>'+
+    '<li>Seara, cu bilet separat: Kiyomizu-dera (21–30 nov), To-ji, Chion-in, Kodaiji.</li>'+
+    '<li>Osaka Amazing Pass costă 3.500 ¥ (≈103 RON) pe o zi și nu se justifică pentru planul vostru.</li></ul></div>'+
+  '<div class="card"><h3>Cum merge aplicația</h3><p>Tema se schimbă din bara de sus (Auto, Luminos, Întunecat, Ghibli). Bifele și biletele luate se salvează live. Pe orice telefon unde deschizi link-ul, vezi aceleași bife, dacă ai drept de editare. Altfel se salvează doar pe telefonul tău.</p></div></div>';
+}
+
+/* ---------- RUTARE ---------- */
+function parseHash(){
+  var h=(location.hash||"").replace("#","");
+  var m=/^zi-(\d+)$/.exec(h);
+  if(m){var n=+m[1];if(n>=16&&n<=30){tab="zile";selDay=n;return;}}
+  if(h==="bilete"||h==="transport"||h==="info"||h==="zile"){tab=h;}
+  if(selDay===null)selDay=today()||16;
+}
+function renderNav(){
+  var left=buyList().filter(function(s){return !S.bought[s.id];}).length;
+  document.getElementById("nav").innerHTML=TABS.map(function(t){
+    var href=t.id==="zile"?("#zi-"+selDay):("#"+t.id);
+    return '<a href="'+href+'"'+(tab===t.id?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t.i+'</svg>'+t.l+
+      (t.id==="bilete"&&left?'<span class="badge">'+left+'</span>':'')+'</a>';
+  }).join("");
+}
+function renderStats(){
+  var tot=0,seen=0;D.forEach(function(d){d.stops.forEach(function(s){tot++;if(S.seen[s.id])seen++;});});
+  var b=buyList(), left=b.filter(function(s){return !S.bought[s.id];}).length;
+  document.getElementById("st1").textContent=seen+"/"+tot;
+  document.getElementById("bar1").style.width=(tot?seen/tot*100:0)+"%";
+  document.getElementById("st2").textContent=left;
+  document.getElementById("st2l").textContent=left===1?"bilet de luat":"bilete de luat";
+  document.getElementById("bar2").style.width=(b.length?(b.length-left)/b.length*100:0)+"%";
+  var n=new Date(), start=new Date(2026,10,16), diff=Math.ceil((start-n)/864e5), t=today(), sub;
+  if(t)sub="Ziua "+(t-15)+" din 15 · "+dayBy(t).city;
+  else if(diff>0)sub="Mai sunt "+diff+(diff===1?" zi":" zile")+" până pe 16 noiembrie";
+  else sub="16–30 noiembrie 2026";
+  document.getElementById("sub").textContent=sub;
+}
+function renderSync(){
+  var el=document.getElementById("sync"), tx=document.getElementById("synct");
+  el.className="sync"+(mode==="live"?" live":mode==="off"?" warn":"");
+  tx.textContent=mode==="live"?"live":mode==="off"?"doar local":"local";
+}
+function render(keepScroll){
+  var main=document.getElementById("main");
+  var html=tab==="bilete"?viewTickets():tab==="transport"?viewTransport():tab==="info"?viewInfo():viewDays();
+  var prevDays=document.getElementById("days"), sl=prevDays?prevDays.scrollLeft:0;
+  main.innerHTML=html;
+  renderNav();renderStats();renderSync();renderThemes();
+  var dz=document.getElementById("days");
+  if(dz){
+    if(keepScroll){dz.scrollLeft=sl;}
+    else{var sel=dz.querySelector(".sel");if(sel){dz.scrollLeft=sel.offsetLeft-(dz.clientWidth-sel.offsetWidth)/2;}}
+  }
+}
+
+/* ---------- ACTIUNI ---------- */
+var toastT;
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},2600);}
+var db=null, chain={};
+function remoteWrite(kind,id,on){
+  if(!db||mode!=="live")return;
+  var key=kind+"/"+id;
+  chain[key]=(chain[key]||Promise.resolve()).then(function(){
+    var ref=db.collection(kind).doc(id);
+    return on?ref.set({v:1}):ref.delete();
+  }).catch(function(){
+    if(mode==="live"){mode="off";renderSync();toast("Nu poți scrie live. Se salvează doar pe acest telefon.");}
+  });
+}
+function toggle(kind,id){
+  var set=S[kind], on=!set[id];
+  if(on)set[id]=1;else delete set[id];
+  lsSave();render(true);
+  remoteWrite(kind,id,on);
+}
+document.addEventListener("click",function(e){
+  var th=e.target.closest&&e.target.closest("[data-theme-set]");
+  if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}applyTheme();renderThemes();return;}
+  var b=e.target.closest&&e.target.closest("[data-k]");
+  if(b){toggle(b.getAttribute("data-k"),b.getAttribute("data-id"));return;}
+  var c=e.target.closest&&e.target.closest("[data-copy]");
+  if(c){
+    var v=c.getAttribute("data-copy");
+    try{navigator.clipboard.writeText(v).then(function(){toast("Copiat");},function(){sel();});}catch(x){sel();}
+    function sel(){var n=document.getElementById("sx");if(n){var r=document.createRange();r.selectNodeContents(n);var s=window.getSelection();s.removeAllRanges();s.addRange(r);}toast("Selectat. Copiază manual.");}
+  }
+});
+window.addEventListener("hashchange",function(){parseHash();render(false);window.scrollTo(0,0);});
+
+/* ---------- LIVE (db) ---------- */
+function toSet(snap){var o={};snap.docs.forEach(function(d){o[d.id]=1;});return o;}
+async function initDb(){
+  try{
+    if(!window.claude||!window.claude.use)return;
+    db=await window.claude.use("db");
+  }catch(e){db=null;}
+  if(!db)return;
+  var timer=setTimeout(function(){if(mode!=="live"){mode="off";renderSync();}},10000);
+  var got={seen:false,bought:false};
+  ["seen","bought"].forEach(function(kind){
+    try{
+      db.collection(kind).onSnapshot(function(snap){
+        S[kind]=toSet(snap);got[kind]=true;lsSave();
+        if(!snap.metadata.fromCache){clearTimeout(timer);mode="live";}
+        render(true);
+      },function(){clearTimeout(timer);mode="off";renderSync();});
+    }catch(e){mode="off";renderSync();}
+  });
+}
+
+parseHash();render(false);
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initDb);else initDb();
+})();
+</script>
+
+<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){try{navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}});}</script>
+</body></html>
