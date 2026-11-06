@@ -215,7 +215,7 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
     <div class="top-row">
       <div>
         <h1>Tabi Japan</h1>
-        <div class="sub" id="sub">14–30 noiembrie · Tokyo · Kyoto · Osaka · Nara</div>
+        <div class="sub" id="sub">14 noiembrie – 1 decembrie · Tokyo · Kyoto · Osaka · Nara</div>
       </div>
       <span class="sync" id="sync" role="status"><i></i><span id="synct">local</span></span>
     </div>
@@ -331,7 +331,8 @@ var D=[
  {n:"Abeno Harukas",s:"door",p:"Observator ≈2.200 ¥ · ≈65 RON"},
  {n:"Shinsekai și Tsutenkaku Tower",s:"door",p:"Turnul 1.000–1.200 ¥ · ≈29–35 RON"}]},
 {d:30,wd:"Luni",cc:"tokyo",city:"Tokyo",code:"T",title:"Înapoi la Tokyo",stops:[
- {n:"Shinkansen Nozomi Shin-Osaka → Tokyo",s:"buy",x:1,note:"Plecare din Shin-Osaka, nu din Osaka Station. Circa 2 h 30. Loc pe partea A pentru priveliștea spre Muntele Fuji.",links:["smartex"]}]}
+ {n:"Shinkansen Nozomi Shin-Osaka → Tokyo",s:"buy",x:1,note:"Plecare din Shin-Osaka, nu din Osaka Station. Circa 2 h 30. Loc pe partea A pentru priveliștea spre Muntele Fuji.",links:["smartex"]}]},
+{d:31,wd:"Marți",cc:"tokyo",city:"Zbor spre București",code:"T",title:"Zbor Narita → București",note:"Detaliile zborului de întoarcere (oră, escală) se adaugă mai târziu.",stops:[{n:"Zbor Narita → București",x:1}]}
 ];
 D.forEach(function(day){day.stops.forEach(function(s,i){s.id="d"+day.d+"-"+(i+1);s.day=day;});});
 
@@ -369,7 +370,9 @@ function renderThemes(){
 }
 applyTheme();
 
-function today(){var n=new Date();return (n.getFullYear()===2026&&n.getMonth()===10&&n.getDate()>=14&&n.getDate()<=30)?n.getDate():null;}
+function dlab(n){return n>30?n-30:n;}
+function wxDate(n){return n>30?"2026-12-0"+(n-30):"2026-11-"+(n<10?"0":"")+n;}
+function today(){var n=new Date();if(n.getFullYear()!==2026)return null;if(n.getMonth()===10&&n.getDate()>=14&&n.getDate()<=30)return n.getDate();if(n.getMonth()===11&&n.getDate()===1)return 31;return null;}
 function dayBy(n){for(var i=0;i<D.length;i++)if(D[i].d===n)return D[i];return D[0];}
 function mapUrl(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
@@ -404,18 +407,18 @@ function stopHtml(s){
 }
 function viewDays(){
   var td=today();
-  var GR=[{k:"tokyo",t:"Test vreme",from:6,to:6},{k:"tokyo",t:"Zbor București – Narita",from:14,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo",from:30,to:30}];
+  var GR=[{k:"tokyo",t:"Test vreme",from:6,to:6},{k:"tokyo",t:"Zbor București – Narita",from:14,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo și Zbor Narita – București",from:30,to:31,r:"30 nov – 1 dec"}];
   var chips=GR.map(function(g){
     var items=D.filter(function(x){return x.d>=g.from&&x.d<=g.to;}).map(function(x){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
-        '<span class="band"></span><span class="code">'+x.code+x.d+'</span><span class="wd">'+x.wd+'</span><span class="wc"></span></a>';
+        '<span class="band"></span><span class="code">'+x.code+dlab(x.d)+'</span><span class="wd">'+x.wd+'</span><span class="wc"></span></a>';
     }).join("");
-    return '<div class="dgroup '+g.k+'"><div class="dg-h"><b>'+g.t+'</b><span>'+(g.from===g.to?g.from:g.from+'–'+g.to)+' nov</span></div><div class="days">'+items+'</div></div>';
+    return '<div class="dgroup '+g.k+'"><div class="dg-h"><b>'+g.t+'</b><span>'+(g.r?g.r:(g.from===g.to?g.from:g.from+'–'+g.to)+' nov')+'</span></div><div class="days">'+items+'</div></div>';
   }).join("");
   var d=selDay===null?null:dayBy(selDay), h="";
   h+='<div class="strip" id="days">'+chips+'</div>';
   if(!d){h+='<p class="note" style="padding:6px 0 0">Alege o zi din listă ca să vezi programul ei. Se deschide singură în ziua respectivă.</p>';return h;}
-  h+='<section id="daysec" class="'+d.cc+'"><div class="dayhead"><span class="city">'+d.city+' · '+d.code+d.d+'</span><h2>'+esc(d.title)+'</h2><span class="date">'+d.wd+', '+d.d+' noiembrie 2026</span></div>';
+  h+='<section id="daysec" class="'+d.cc+'"><div class="dayhead"><span class="city">'+d.city+' · '+d.code+dlab(d.d)+'</span><h2>'+esc(d.title)+'</h2><span class="date">'+d.wd+', '+dlab(d.d)+(d.d>30?' decembrie':' noiembrie')+' 2026</span></div>';
   if(d.note)h+='<div class="notice">'+esc(d.note)+'</div>';
   h+='<div id="wx">'+wxHtml(d)+'</div>';
   var hk=d.hotel||(d.d>=15&&d.d<=20?"tokyo":null);if(hk){var ht=HOTEL[hk];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
@@ -514,7 +517,7 @@ function wxChips(){
     var n=+els[i].getAttribute("data-d"), d=dayBy(n), city=wxCity(d), w=els[i].querySelector(".wc");
     if(!w||!city)continue;
     var o=WXD[city]||wxCache(city);if(!o||!o.d)continue;
-    var k=o.d.time.indexOf("2026-11-"+(n<10?"0":"")+n);if(k<0)continue;
+    var k=o.d.time.indexOf(wxDate(n));if(k<0)continue;
     w.innerHTML=wxIcon(o.d.weather_code[k])+Math.round(o.d.temperature_2m_max[k])+"°";
   }
 }
@@ -529,7 +532,7 @@ function wxCache(city){
 }
 function wxHtml(d){
   var city=wxCity(d);if(!city)return "";
-  var c=WXC[city], o=WXD[city]||wxCache(city), date="2026-11-"+(d.d<10?"0":"")+d.d;
+  var c=WXC[city], o=WXD[city]||wxCache(city), date=wxDate(d.d);
   var head='<span class="kicker">Vremea · '+c.n+'</span>';
   if(!o||!o.d){
     return '<div class="card wx">'+head+'<p class="note">'+(WXERR[city]?"Prognoza nu se poate încărca acum. Încearcă din nou când ai internet.":"Se încarcă prognoza…")+'</p></div>';
@@ -592,7 +595,7 @@ function viewInfo(){
 function parseHash(){
   var h=(location.hash||"").replace("#","");
   var m=/^zi-(\d+)$/.exec(h);
-  if(m){var n=+m[1];if(n===6||(n>=14&&n<=30)){tab="zile";selDay=n;return;}}
+  if(m){var n=+m[1];if(n===6||(n>=14&&n<=31)){tab="zile";selDay=n;return;}}
   if(h==="bilete"||h==="transport"||h==="hoteluri"||h==="info"||h==="zile"){tab=h;}
   if(selDay===null)selDay=today();
 }
@@ -615,7 +618,7 @@ function renderStats(){
   var n=new Date(), start=new Date(2026,10,14), diff=Math.ceil((start-n)/864e5), t=today(), sub;
   if(t)sub="Ziua "+(t-13)+" din 17 · "+dayBy(t).city;
   else if(diff>0)sub="Mai sunt "+diff+(diff===1?" zi":" zile")+" până pe 14 noiembrie";
-  else sub="14–30 noiembrie 2026";
+  else sub="14 noiembrie – 1 decembrie 2026";
   document.getElementById("sub").textContent=sub;
 }
 function renderSync(){
