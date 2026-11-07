@@ -496,6 +496,25 @@ function viewDays(){
   return h;
 }
 function buyList(){var r=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="buy")r.push(s);});});return r;}
+var PREP=[
+ {id:"p1",n:"10.000 ¥ de persoană",p:"≈294 RON de persoană"},
+ {id:"p2",n:"Cântar de bagaje, chestii pentru haine"},
+ {id:"p3",n:"Visit Japan Web, cu datele personale"},
+ {id:"p4",n:"Rezerve pentru aparatul foto"},
+ {id:"p5",n:"eSIM pentru telefon"},
+ {id:"p6",n:"Baterie portabilă de luat"},
+ {id:"p7",n:"Asigurare de călătorie"}
+];
+function prepHtml(){
+  var done=PREP.filter(function(x){return S.bought[x.id];}).length;
+  var h='<div><div class="group-h" style="--cc:var(--ok)">De pregătit înainte de plecare</div><div class="card" style="padding:4px 14px;margin-top:8px">';
+  PREP.forEach(function(x){
+    var got=!!S.bought[x.id];
+    h+='<div class="trow'+(got?' done':'')+'" style="--cc:var(--ok)"><button class="chk" data-k="bought" data-id="'+x.id+'" aria-pressed="'+got+'" aria-label="Făcut: '+esc(x.n)+'"><span>'+TICK+'</span></button>'+
+      '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(got?'Făcut':'De făcut')+'</span><span class="name">'+esc(x.n)+'</span>'+(x.p?'<span class="price">'+esc(x.p)+'</span>':'')+'</div></div>';
+  });
+  return h+'</div><p class="lead" style="margin-top:8px">'+done+' din '+PREP.length+' făcute.</p></div>';
+}
 function viewTickets(){
   var all=buyList(), left=all.filter(function(s){return !S.bought[s.id];}).length;
   var h='<div class="stack"><div><h2 class="sec">Bilete</h2><p class="lead">'+(left?left+' de luat din '+all.length+'. Bifează când ai biletul.':'Toate biletele sunt luate.')+'</p></div>';
@@ -514,6 +533,7 @@ function viewTickets(){
     });
     h+='</div></div>';shown=true;
   });
+  h+=prepHtml();
   var booked=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="booked")booked.push(s);});});
   h+='<div><div class="group-h" style="--cc:var(--ok)">Deja rezervate sau luate</div><div class="card" style="padding:4px 14px;margin-top:8px">';
   booked.forEach(function(s){h+='<div class="trow"><span></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span><span><span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span></span></div></div>';});
