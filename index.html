@@ -229,6 +229,15 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
 .foot{color:var(--muted);font-size:12px;padding:18px 0 0;font-family:var(--f-mono)}
 @media (min-width:640px){ h1{font-size:36px} .name{font-size:20px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+.ob{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--bg);background-image:var(--sky);background-repeat:no-repeat;background-size:100% 420px;overflow:auto}
+.obc{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.obc h1{margin:0;font-family:var(--f-head);font-size:30px;line-height:1.1}
+.obc p{margin:0;color:var(--muted)}
+.obc input{font:inherit;font-size:20px;letter-spacing:.12em;text-align:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);color:var(--ink);width:100%;box-sizing:border-box}
+.obc .cbtn{width:100%;padding:12px}
+.obc .obskip{font:inherit;font-size:14px;background:none;border:0;color:var(--muted);text-decoration:underline;padding:6px;cursor:pointer}
+.obc .oberr{color:var(--warn);font-size:14px;min-height:18px}
 </style>
 
 <div id="splash" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -1014,9 +1023,28 @@ async function sbSync(){
     if(sbAgain){sbAgain=false;sbKick(400);}
   }
 }
+function sbGate(){
+  if(sbOn()||document.getElementById("ob"))return;
+  var sk="";try{sk=localStorage.getItem("tabi-sb-skip")||"";}catch(e){}
+  if(sk)return;
+  var d=document.createElement("div");d.id="ob";d.className="ob";
+  d.innerHTML='<div class="obc"><h1>Tabi Japan</h1><p>Scrie codul vostru ca să vedeți aceleași bife și cheltuieli pe toate telefoanele. Îl scrii o singură dată, apoi rămâi conectat.</p>'+
+    '<input type="text" id="ob-code" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Cod" aria-label="Cod de grup">'+
+    '<div class="oberr" id="ob-err"></div><button class="cbtn pri" id="ob-go">Conectează</button>'+
+    '<button class="obskip" id="ob-skip">Continuă fără sincronizare</button></div>';
+  document.body.appendChild(d);
+  function go(){
+    var v=document.getElementById("ob-code").value.trim();
+    if(v.length<4){document.getElementById("ob-err").textContent="Codul trebuie să aibă cel puțin 4 caractere.";return;}
+    d.remove();sbConnect(v);
+  }
+  document.getElementById("ob-go").addEventListener("click",go);
+  document.getElementById("ob-code").addEventListener("keydown",function(e){if(e.key==="Enter")go();});
+  document.getElementById("ob-skip").addEventListener("click",function(){try{localStorage.setItem("tabi-sb-skip","1");}catch(e){}d.remove();});
+}
 function sbStart(){
   clearInterval(sbPoll);
-  if(!sbOn()){if(mode!=="live")mode="local";renderSync();return;}
+  if(!sbOn()){if(mode!=="live")mode="local";renderSync();sbGate();return;}
   mode="off";renderSync();
   sbPoll=setInterval(function(){if(!document.hidden)sbSync();},8000);
   sbSync();
@@ -1026,12 +1054,13 @@ function sbConnect(code){
   if(code.length<4){toast("Codul trebuie să aibă cel puțin 4 caractere");return;}
   sbCode=code;
   try{localStorage.setItem(SBC,code);}catch(e){}
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
   toast("Conectat. Se sincronizează…");
   sbStart();render(true);
 }
 function sbDisconnect(){
   sbCode="";sbErr="";clearInterval(sbPoll);clearTimeout(sbTimer);
-  try{localStorage.removeItem(SBC);localStorage.removeItem(SBI);}catch(e){}
+  try{localStorage.removeItem(SBC);localStorage.removeItem(SBI);localStorage.setItem("tabi-sb-skip","1");}catch(e){}
   sbQ={};sbSaveQ();mode="local";renderSync();render(true);toast("Deconectat. Datele rămân pe acest telefon.");
 }
 function sbInfo(){
