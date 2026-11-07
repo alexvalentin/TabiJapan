@@ -501,7 +501,7 @@ var PREP=[
  {id:"p2",n:"Cântar de bagaje, chestii pentru haine"},
  {id:"p3",n:"Visit Japan Web, cu datele personale"},
  {id:"p4",n:"Rezerve pentru aparatul foto"},
- {id:"p5",n:"eSIM pentru telefon"},
+ {id:"p5",n:"eSIM pentru telefon",w:"Vineri 13 nov",note:"De cumpărat și instalat pe 13 noiembrie, pe Wi-Fi. Câte unul de persoană, de exemplu Nomad 20 GB / 30 zile. Lasă linia oprită până la Narita, apoi pornește-o și pune datele mobile pe ea."},
  {id:"p6",n:"Baterie portabilă de luat"},
  {id:"p7",n:"Asigurare de călătorie"}
 ];
@@ -511,7 +511,7 @@ function prepHtml(){
   PREP.forEach(function(x){
     var got=!!S.bought[x.id];
     h+='<div class="trow'+(got?' done':'')+'" style="--cc:var(--ok)"><button class="chk" data-k="bought" data-id="'+x.id+'" aria-pressed="'+got+'" aria-label="Făcut: '+esc(x.n)+'"><span>'+TICK+'</span></button>'+
-      '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(got?'Făcut':'De făcut')+'</span><span class="name">'+esc(x.n)+'</span>'+(x.p?'<span class="price">'+esc(x.p)+'</span>':'')+'</div></div>';
+      '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(got?'Făcut':(x.w||'De făcut'))+'</span><span class="name">'+esc(x.n)+'</span>'+(x.p?'<span class="price">'+esc(x.p)+'</span>':'')+(x.note?'<span class="note">'+esc(x.note)+'</span>':'')+'</div></div>';
   });
   return h+'</div><p class="lead" style="margin-top:8px">'+done+' din '+PREP.length+' făcute.</p></div>';
 }
