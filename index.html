@@ -771,7 +771,8 @@ function viewInfo(){
     '<li>DAWN avatar robot café, Tokyo: intrare 2.200 ¥ (≈65 RON), Diner 5.500 ¥ (≈162 RON). Pentru Diner e obligatorie rezervarea.</li>'+
     '<li>Seara, cu bilet separat: Kiyomizu-dera (21–30 nov), To-ji, Chion-in, Kodaiji.</li>'+
     '<li>Osaka Amazing Pass costă 3.500 ¥ (≈103 RON) pe o zi și nu se justifică pentru planul vostru.</li></ul></div>'+
-  '<div class="card"><h3>Cum merge aplicația</h3><p>Tema se schimbă din bara de sus (Auto, Luminos, Întunecat, Ghibli). Bifele și biletele luate se salvează live. Pe orice telefon unde deschizi link-ul, vezi aceleași bife, dacă ai drept de editare. Altfel se salvează doar pe telefonul tău.</p></div></div>';
+  viewSync()+
+  '<div class="card"><h3>Cum merge aplicația</h3><p>Tema se alege separat pe fiecare telefon. Bifele „văzut” și „bilet cumpărat”, sumele din Cheltuieli și rândurile adăugate de voi se sincronizează între telefoane, dacă folosiți același cod de grup. Fără internet, schimbările se păstrează pe telefon și se trimit când revine semnalul.</p></div></div>';
 }
 
 /* ---------- RUTARE ---------- */
@@ -841,6 +842,7 @@ function toggle(kind,id){
   if(on)set[id]=1;else delete set[id];
   lsSave();render(true);
   remoteWrite(kind,id,on);
+  sbPush(kind+":"+id,{on:on?1:0});
 }
 document.addEventListener("input",function(e){
   var t=e.target;
@@ -863,17 +865,21 @@ document.addEventListener("click",function(e){
     if(!nm){toast("Scrie numele atracției");return;}
     var ny=document.getElementById("n-y").value, nr=document.getElementById("n-r").value, nd=document.getElementById("n-d").value;
     EXTRA.push({id:"x"+Date.now(),custom:1,c:document.getElementById("n-c").value,a:nm,y:ny===""?null:Math.max(0,+ny),r:nr===""?null:Math.max(0,+nr),b:document.getElementById("n-b").checked?1:0,d:nd?+nd:null,s:document.getElementById("n-s").value.trim(),u:"",det:document.getElementById("n-t").value.trim()});
-    cxSave();render(true);toast("Adăugat");return;
+    cxSave();sbPush("extra:"+EXTRA[EXTRA.length-1].id,EXTRA[EXTRA.length-1]);render(true);toast("Adăugat");return;
   }
   var cx=e.target.closest&&e.target.closest("[data-cx]");
-  if(cx){var xid=cx.getAttribute("data-cx");EXTRA=EXTRA.filter(function(z){return z.id!==xid;});delete CV[xid];delete CE[xid];cxSave();try{localStorage.setItem(CK,JSON.stringify(CV));}catch(x){}render(true);toast("Șters");return;}
+  if(cx){var xid=cx.getAttribute("data-cx");EXTRA=EXTRA.filter(function(z){return z.id!==xid;});delete CV[xid];delete CE[xid];cxSave();try{localStorage.setItem(CK,JSON.stringify(CV));}catch(x){}sbPush("extra:"+xid,{del:1});render(true);toast("Șters");return;}
   var cs=e.target.closest&&e.target.closest("[data-cs]");
   if(cs){
     var id=cs.getAttribute("data-cs"), ye=document.getElementById("y-"+id), gy=ye?ye.value:"", gr=document.getElementById("r-"+id).value;
     CV[id]={y:gy===""?null:Math.max(0,+gy),r:gr===""?null:Math.max(0,+gr),b:document.getElementById("b-"+id).checked?1:0};
     try{localStorage.setItem(CK,JSON.stringify(CV));}catch(x){}
-    delete CE[id];render(true);toast("Salvat");return;
+    sbPush("cost:"+id,CV[id]);delete CE[id];render(true);toast("Salvat");return;
   }
+  var sbc=e.target.closest&&e.target.closest("[data-sbc]");
+  if(sbc){sbConnect(document.getElementById("sb-code").value);return;}
+  var sbd=e.target.closest&&e.target.closest("[data-sbd]");
+  if(sbd){sbDisconnect();return;}
   var b=e.target.closest&&e.target.closest("[data-k]");
   if(b){toggle(b.getAttribute("data-k"),b.getAttribute("data-id"));return;}
   var c=e.target.closest&&e.target.closest("[data-copy]");
@@ -906,8 +912,157 @@ async function initDb(){
   });
 }
 
+/* ---------- SINCRONIZARE SUPABASE ---------- */
+var SB_URL="https://seatpazjgjzgpvviidzn.supabase.co", SB_KEY="sb_publishable_Jgei_6d_A4fqEoAD6T9EGQ_RNx7icBz";
+var SBC="tabi-sb-code", SBQ="tabi-sb-queue", SBI="tabi-sb-init";
+var sbCode="", sbQ={}, sbBusy=false, sbAgain=false, sbTimer=null, sbPoll=null, sbLast=0, sbErr="", sbDirty=false;
+try{sbCode=(localStorage.getItem(SBC)||"").trim();}catch(e){}
+try{sbQ=JSON.parse(localStorage.getItem(SBQ)||"{}")||{};}catch(e){sbQ={};}
+function sbSaveQ(){try{localStorage.setItem(SBQ,JSON.stringify(sbQ));}catch(e){}}
+function sbOn(){return sbCode.length>=12;}
+function sbRpc(fn,body){
+  var c=window.AbortController?new AbortController():null, t=setTimeout(function(){if(c)c.abort();},12000);
+  return fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(body),signal:c?c.signal:undefined})
+    .then(function(r){clearTimeout(t);if(!r.ok)throw new Error("http "+r.status);return r.status===204?null:r.text().then(function(x){return x?JSON.parse(x):null;});},
+          function(e){clearTimeout(t);throw e;});
+}
+function sbPush(k,v){
+  if(!sbOn())return;
+  sbQ[k]=v;sbSaveQ();sbKick(250);
+}
+function sbKick(ms){
+  if(!sbOn())return;
+  clearTimeout(sbTimer);sbTimer=setTimeout(sbSync,ms==null?0:ms);
+}
+function sbId(x){return typeof x==="string"&&/^[A-Za-z0-9_-]{1,40}$/.test(x);}
+function sbStr(x,n){return typeof x==="string"?x.slice(0,n):"";}
+function sbNum(x){return typeof x==="number"&&isFinite(x)&&x>=0?x:null;}
+function sbClean(r){
+  if(!r||typeof r!=="object"||!sbId(r.id))return null;
+  return {id:r.id,custom:1,c:sbStr(r.c,20),a:sbStr(r.a,120),y:sbNum(r.y),r:sbNum(r.r),b:r.b?1:0,d:sbNum(r.d),s:sbStr(r.s,200),u:"",det:sbStr(r.det,500)};
+}
+function sbApply(rows){
+  var ch=false, rem={};
+  rows.forEach(function(row){
+    var k=row.k, v=row.v; rem[k]=1;
+    if(!k||sbQ.hasOwnProperty(k))return;
+    var i=k.indexOf(":"), kind=k.slice(0,i), id=k.slice(i+1);
+    if(!sbId(id)||!v||typeof v!=="object")return;
+    if(kind==="seen"||kind==="bought"){
+      var on=v.on?1:0;
+      if(on&&!S[kind][id]){S[kind][id]=1;ch=true;}
+      if(!on&&S[kind][id]){delete S[kind][id];ch=true;}
+    }else if(kind==="cost"){
+      var n={y:sbNum(v.y),r:sbNum(v.r),b:v.b?1:0}, o=CV[id];
+      if(!o||o.y!==n.y||o.r!==n.r||o.b!==n.b){CV[id]=n;ch=true;}
+    }else if(kind==="extra"){
+      var pos=-1;EXTRA.forEach(function(z,j){if(z.id===id)pos=j;});
+      if(v.del){if(pos>=0){EXTRA.splice(pos,1);delete CV[id];delete CE[id];ch=true;}}
+      else{var n2=sbClean(v);if(n2&&n2.a){if(pos<0){EXTRA.push(n2);ch=true;}else if(JSON.stringify(EXTRA[pos])!==JSON.stringify(n2)){EXTRA[pos]=n2;ch=true;}}}
+    }
+  });
+  return {changed:ch,rem:rem};
+}
+function sbSeed(rem){
+  // prima conectare: trimite ce există deja pe acest telefon și lipsește din cloud
+  var flag="";try{flag=localStorage.getItem(SBI)||"";}catch(e){}
+  if(flag===sbCode)return;
+  ["seen","bought"].forEach(function(kind){for(var id in S[kind]){var k=kind+":"+id;if(!rem[k]&&!sbQ.hasOwnProperty(k))sbQ[k]={on:1};}});
+  for(var id in CV){var k2="cost:"+id;if(!rem[k2]&&!sbQ.hasOwnProperty(k2))sbQ[k2]=CV[id];}
+  EXTRA.forEach(function(z){var k3="extra:"+z.id;if(!rem[k3]&&!sbQ.hasOwnProperty(k3))sbQ[k3]=z;});
+  sbSaveQ();
+  try{localStorage.setItem(SBI,sbCode);}catch(e){}
+}
+function sbEditing(){
+  var a=document.activeElement, tg=a&&a.tagName;
+  if(tg==="INPUT"||tg==="TEXTAREA"||tg==="SELECT")return true;
+  for(var k in CE)return true;
+  return false;
+}
+function sbPersist(){
+  try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}
+  try{localStorage.setItem(CK,JSON.stringify(CV));}catch(e){}
+  cxSave();
+}
+async function sbSync(){
+  if(!sbOn())return;
+  if(sbBusy){sbAgain=true;return;}
+  if(typeof navigator!=="undefined"&&navigator.onLine===false){sbErr="offline";mode="off";renderSync();return;}
+  sbBusy=true;
+  try{
+    var keys=Object.keys(sbQ);
+    for(var i=0;i<keys.length;i++){
+      var k=keys[i], v=sbQ[k], sent=JSON.stringify(v);
+      await sbRpc("tabi_set",{p_grp:sbCode,p_k:k,p_v:v});
+      if(sbQ.hasOwnProperty(k)&&JSON.stringify(sbQ[k])===sent){delete sbQ[k];sbSaveQ();}
+    }
+    var rows=await sbRpc("tabi_get",{p_grp:sbCode});
+    if(!Array.isArray(rows))rows=[];
+    var first=false;try{first=(localStorage.getItem(SBI)||"")!==sbCode;}catch(e){}
+    var res=sbApply(rows);
+    if(first){sbSeed(res.rem);if(Object.keys(sbQ).length)sbAgain=true;}
+    sbErr="";sbLast=Date.now();mode="live";
+    if(res.changed){sbPersist();sbDirty=true;}
+    if(sbDirty&&!sbEditing()){sbDirty=false;render(true);}else renderSync();
+    sbInfo();
+  }catch(e){
+    sbErr=String(e&&e.message||e);mode="off";renderSync();sbInfo();
+  }finally{
+    sbBusy=false;
+    if(sbAgain){sbAgain=false;sbKick(400);}
+  }
+}
+function sbStart(){
+  clearInterval(sbPoll);
+  if(!sbOn()){if(mode!=="live")mode="local";renderSync();return;}
+  mode="off";renderSync();
+  sbPoll=setInterval(function(){if(!document.hidden)sbSync();},8000);
+  sbSync();
+}
+function sbConnect(code){
+  code=(code||"").trim();
+  if(code.length<12){toast("Codul trebuie să aibă cel puțin 12 caractere");return;}
+  sbCode=code;
+  try{localStorage.setItem(SBC,code);}catch(e){}
+  toast("Conectat. Se sincronizează…");
+  sbStart();render(true);
+}
+function sbDisconnect(){
+  sbCode="";sbErr="";clearInterval(sbPoll);clearTimeout(sbTimer);
+  try{localStorage.removeItem(SBC);localStorage.removeItem(SBI);}catch(e){}
+  sbQ={};sbSaveQ();mode="local";renderSync();render(true);toast("Deconectat. Datele rămân pe acest telefon.");
+}
+function sbInfo(){
+  var el=document.getElementById("sb-status");if(!el)return;
+  el.textContent=sbStatus();
+}
+function sbStatus(){
+  if(!sbOn())return "Neconectat. Datele se salvează doar pe acest telefon.";
+  var n=Object.keys(sbQ).length;
+  if(sbErr)return "Fără legătură la server ("+(sbErr==="offline"?"fără internet":sbErr)+"). "+(n?n+" schimbări așteaptă să fie trimise.":"Se reîncearcă singur.");
+  if(!sbLast)return "Se conectează…";
+  var d=new Date(sbLast), t=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)+":"+("0"+d.getSeconds()).slice(-2);
+  return "Sincronizat la "+t+(n?", "+n+" de trimis":"")+".";
+}
+function viewSync(){
+  var h='<div class="card" id="sbcard"><h3>Sincronizare între telefoane</h3>';
+  if(sbOn()){
+    h+='<p>Conectat cu codul <b>'+esc(sbCode.slice(0,3))+'••••••••</b></p><p class="note" id="sb-status">'+esc(sbStatus())+'</p>'+
+       '<div class="acts"><button class="cbtn" data-sbd="1">Deconectează</button></div>';
+  }else{
+    h+='<p>Scrie același cod pe fiecare telefon, ca să vedeți aceleași bife și cheltuieli în timp real. Alege-l lung (minimum 12 caractere) și nu îl da altcuiva.</p>'+
+       '<div class="addf"><label class="full">Cod de grup<input type="text" id="sb-code" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="minimum 12 caractere"></label></div>'+
+       '<p class="note" id="sb-status">'+esc(sbStatus())+'</p><div class="acts"><button class="cbtn pri" data-sbc="1">Conectează</button></div>';
+  }
+  return h+'</div>';
+}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)sbKick(0);});
+window.addEventListener("online",function(){sbKick(0);});
+window.addEventListener("focus",function(){sbKick(0);});
+document.addEventListener("focusout",function(){if(sbDirty)setTimeout(function(){if(sbDirty&&!sbEditing()){sbDirty=false;render(true);}},300);});
+
 parseHash();render(false);
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initDb);else initDb();
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){initDb();sbStart();});else{initDb();sbStart();}
 })();
 </script>
 
