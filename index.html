@@ -919,7 +919,9 @@ var sbCode="", sbQ={}, sbBusy=false, sbAgain=false, sbTimer=null, sbPoll=null, s
 try{sbCode=(localStorage.getItem(SBC)||"").trim();}catch(e){}
 try{sbQ=JSON.parse(localStorage.getItem(SBQ)||"{}")||{};}catch(e){sbQ={};}
 function sbSaveQ(){try{localStorage.setItem(SBQ,JSON.stringify(sbQ));}catch(e){}}
-function sbOn(){return sbCode.length>=12;}
+var SB_PFX="tabi-japan-2026-";
+function sbOn(){return sbCode.length>=4;}
+function sbGrp(){return SB_PFX+sbCode;}
 function sbRpc(fn,body){
   var c=window.AbortController?new AbortController():null, t=setTimeout(function(){if(c)c.abort();},12000);
   return fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(body),signal:c?c.signal:undefined})
@@ -993,10 +995,10 @@ async function sbSync(){
     var keys=Object.keys(sbQ);
     for(var i=0;i<keys.length;i++){
       var k=keys[i], v=sbQ[k], sent=JSON.stringify(v);
-      await sbRpc("tabi_set",{p_grp:sbCode,p_k:k,p_v:v});
+      await sbRpc("tabi_set",{p_grp:sbGrp(),p_k:k,p_v:v});
       if(sbQ.hasOwnProperty(k)&&JSON.stringify(sbQ[k])===sent){delete sbQ[k];sbSaveQ();}
     }
-    var rows=await sbRpc("tabi_get",{p_grp:sbCode});
+    var rows=await sbRpc("tabi_get",{p_grp:sbGrp()});
     if(!Array.isArray(rows))rows=[];
     var first=false;try{first=(localStorage.getItem(SBI)||"")!==sbCode;}catch(e){}
     var res=sbApply(rows);
@@ -1021,7 +1023,7 @@ function sbStart(){
 }
 function sbConnect(code){
   code=(code||"").trim();
-  if(code.length<12){toast("Codul trebuie să aibă cel puțin 12 caractere");return;}
+  if(code.length<4){toast("Codul trebuie să aibă cel puțin 4 caractere");return;}
   sbCode=code;
   try{localStorage.setItem(SBC,code);}catch(e){}
   toast("Conectat. Se sincronizează…");
@@ -1047,11 +1049,11 @@ function sbStatus(){
 function viewSync(){
   var h='<div class="card" id="sbcard"><h3>Sincronizare între telefoane</h3>';
   if(sbOn()){
-    h+='<p>Conectat cu codul <b>'+esc(sbCode.slice(0,3))+'••••••••</b></p><p class="note" id="sb-status">'+esc(sbStatus())+'</p>'+
+    h+='<p>Conectat cu codul <b>'+new Array(sbCode.length+1).join('•')+'</b></p><p class="note" id="sb-status">'+esc(sbStatus())+'</p>'+
        '<div class="acts"><button class="cbtn" data-sbd="1">Deconectează</button></div>';
   }else{
-    h+='<p>Scrie același cod pe fiecare telefon, ca să vedeți aceleași bife și cheltuieli în timp real. Alege-l lung (minimum 12 caractere) și nu îl da altcuiva.</p>'+
-       '<div class="addf"><label class="full">Cod de grup<input type="text" id="sb-code" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="minimum 12 caractere"></label></div>'+
+    h+='<p>Scrie același cod pe fiecare telefon, ca să vedeți aceleași bife și cheltuieli în timp real. Minimum 4 caractere. Nu îl da altcuiva.</p>'+
+       '<div class="addf"><label class="full">Cod de grup<input type="text" id="sb-code" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="minimum 4 caractere"></label></div>'+
        '<p class="note" id="sb-status">'+esc(sbStatus())+'</p><div class="acts"><button class="cbtn pri" data-sbc="1">Conectează</button></div>';
   }
   return h+'</div>';
