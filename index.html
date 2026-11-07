@@ -87,9 +87,17 @@ h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;mar
 .bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
 .bar>div{height:100%;background:var(--ok);width:0;transition:width .3s}
 
-.themes{display:flex;gap:6px;flex-wrap:wrap}
-.themes button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:500;min-height:32px}
-.themes button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.top-r{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.themes{position:relative}
+.thb{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 9px 4px 5px;min-height:32px;color:var(--ink)}
+.thb svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.4}
+.sw{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.2);display:block;flex:0 0 auto}
+.thm{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:216px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:2px}
+.thi{display:flex;align-items:center;gap:12px;border:0;background:none;border-radius:13px;padding:10px 12px;font-size:16px;color:var(--ink);text-align:left;width:100%}
+.thi .sw{width:28px;height:28px}
+.thi span{flex:1}
+.thi[aria-checked="true"]{background:var(--info-bg);font-weight:700}
+.thi svg{width:18px;height:18px;stroke:var(--ok);fill:none;stroke-width:2.4}
 /* Ecran de pornire: cerul si dealurile din spatele steagului */
 #splash{position:fixed;inset:0;z-index:200;background:linear-gradient(#7ab9e6 50%,#4f9d5c 50%);display:grid;place-items:center;animation:splashOut .5s ease 2.6s forwards;cursor:pointer}
 #splash svg{position:absolute;inset:0;width:100%;height:100%}
@@ -272,9 +280,8 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
         <h1>Tabi Japan</h1>
         <div class="sub" id="sub">14 noiembrie – 1 decembrie · Tokyo · Kyoto · Osaka · Nara</div>
       </div>
-      <span class="sync warn" id="sync" role="status"><i></i><span id="synct">Local</span></span>
+      <div class="top-r"><span class="sync warn" id="sync" role="status"><i></i><span id="synct">Local</span></span><div class="themes" id="themes"></div></div>
     </div>
-    <div class="themes" id="themes" role="group" aria-label="Temă"></div>
     <div class="stats">
       <div class="stat"><b id="st1">0/0</b><span>atracții bifate</span><div class="bar"><div id="bar1"></div></div></div>
       <div class="stat"><b id="st2">0</b><span id="st2l">bilete de luat</span><div class="bar"><div id="bar2"></div></div></div>
@@ -410,19 +417,24 @@ function lsLoad(){try{var r=JSON.parse(localStorage.getItem(LS)||"{}");S.seen=r.
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
 lsLoad();
 
-var TH=[{id:"auto",l:"Auto"},{id:"light",l:"Luminos"},{id:"dark",l:"Întunecat"},{id:"ghibli",l:"Ghibli"},{id:"sakura",l:"Ghibli roz"}];
-var THK="japonia2026-theme", theme="auto";
+var TH=[{id:"light",l:"Luminos"},{id:"dark",l:"Întunecat"},{id:"ghibli",l:"Ghibli"},{id:"sakura",l:"Ghibli roz"}];
+var THK="japonia2026-theme", theme="ghibli";
 var TCOL={auto:"#14213d",light:"#eef0f4",dark:"#0c1220",ghibli:"#bfdcef",sakura:"#f6c6d6"};
-try{theme=localStorage.getItem(THK)||"auto";}catch(e){}
-if(!TCOL[theme])theme="auto";
+try{theme=localStorage.getItem(THK)||"ghibli";}catch(e){}
+if(!TCOL[theme]||theme==="auto")theme="ghibli";
 function applyTheme(){
   var r=document.documentElement;
   if(theme==="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",theme);
   var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",TCOL[theme]);
 }
+var thOpen=false;
+var SWC={light:["#ffffff","#e0501b"],dark:["#101826","#ff7a3d"],ghibli:["#bfdcef","#3f7a5c"],sakura:["#f6c6d6","#c23f5c"]};
+function thSw(id){var c=SWC[id]||["#ccc","#888"];return '<i class="sw" style="background:linear-gradient(135deg,'+c[0]+' 50%,'+c[1]+' 50%)"></i>';}
 function renderThemes(){
   var el=document.getElementById("themes");if(!el)return;
-  el.innerHTML=TH.map(function(t){return '<button data-theme-set="'+t.id+'" aria-pressed="'+(theme===t.id)+'">'+t.l+'</button>';}).join("");
+  var cur=TH.filter(function(t){return t.id===theme;})[0]||TH[2];
+  el.innerHTML='<button class="thb" data-thtoggle="1" aria-haspopup="menu" aria-expanded="'+thOpen+'" aria-label="Temă: '+cur.l+'">'+thSw(cur.id)+'<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.5l4 4 4-4"/></svg></button>'+
+    (thOpen?'<div class="thm" role="menu">'+TH.map(function(t){return '<button class="thi" role="menuitemradio" aria-checked="'+(t.id===theme)+'" data-theme-set="'+t.id+'">'+thSw(t.id)+'<span>'+t.l+'</span>'+(t.id===theme?'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>':'')+'</button>';}).join("")+'</div>':'');
 }
 applyTheme();
 
@@ -867,7 +879,9 @@ document.addEventListener("input",function(e){
 });
 document.addEventListener("click",function(e){
   var th=e.target.closest&&e.target.closest("[data-theme-set]");
-  if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}applyTheme();renderThemes();return;}
+  var tt=e.target.closest&&e.target.closest("[data-thtoggle]");
+  if(tt){thOpen=!thOpen;renderThemes();return;}
+  if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}thOpen=false;applyTheme();renderThemes();return;}
   var sc=e.target.closest&&e.target.closest("[data-scroll]");
   if(sc){var el=document.getElementById(sc.getAttribute("data-scroll"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
   var ce=e.target.closest&&e.target.closest("[data-ce]");
@@ -902,6 +916,8 @@ document.addEventListener("click",function(e){
     function sel(){var n=document.getElementById("sx");if(n){var r=document.createRange();r.selectNodeContents(n);var s=window.getSelection();s.removeAllRanges();s.addRange(r);}toast("Selectat. Copiază manual.");}
   }
 });
+document.addEventListener("click",function(e){if(thOpen&&e.target.isConnected&&!(e.target.closest&&e.target.closest("#themes"))){thOpen=false;renderThemes();}});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&thOpen){thOpen=false;renderThemes();}});
 window.addEventListener("hashchange",function(){parseHash();render(false);var sc=tab==="zile"?document.getElementById("daysec"):null;if(sc)sc.scrollIntoView({block:"start"});else window.scrollTo(0,0);});
 
 /* ---------- LIVE (db) ---------- */
