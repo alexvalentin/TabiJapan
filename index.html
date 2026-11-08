@@ -226,6 +226,8 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .total{display:grid;grid-template-columns:96px repeat(3,minmax(0,1fr));max-width:520px;gap:4px 8px;align-items:baseline;font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums;padding:3px 0}
 .total span{white-space:nowrap}
 @media(max-width:420px){.total{grid-template-columns:72px repeat(3,auto);justify-content:space-between;font-size:11px;gap:4px 6px}}
+.rates{display:flex;flex-wrap:wrap;gap:4px 20px;font-family:var(--f-mono);font-size:13px;margin:8px 0}
+.rates span{white-space:nowrap}
 .tl{display:flex;flex-direction:column;margin-top:8px}
 .tl>div{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
 .tl .tlh{border-top:1px solid var(--line);padding:6px 0;font-size:12px}
@@ -770,6 +772,40 @@ function flKey(o){return [o.d,o.f,o.t,o.al,o.no,o.dep,o.arr,o.ao,o.note].join("|
 function flDet(f){var a=[];if(f.al)a.push(f.al);if(f.no)a.push(f.no);if(f.dep||f.arr)a.push((f.dep||"—")+" → "+(f.arr||"—")+(f.ao?" (+"+f.ao+" zi)":""));return a.join(" · ");}
 function flCost(f){return {id:f.id,fl:1,a:"Zbor "+f.f+" → "+f.t,d:f.d,det:flDet(f),y:null,r:null,b:0};}
 var HC=[{e:729,y:135319,r:3980},{e:678,y:125800,r:3700},{e:374,y:69441,r:2042}];
+var HOK="japonia2026-ho", HO={}, HEE=null;
+try{HO=JSON.parse(localStorage.getItem(HOK)||"{}")||{};}catch(e){HO={};}
+function hoSave(){try{localStorage.setItem(HOK,JSON.stringify(HO));}catch(e){}}
+function hx(k){var x=HT[k],c=HC[k],o=HO[x.cc]||{};
+  return {n:o.n!=null?o.n:x.n,ci:o.ci||x.ci,co:o.co||x.co,e:o.e!=null?o.e:c.e,y:o.y!=null?o.y:c.y,r:o.r!=null?o.r:c.r};}
+function hoKey(o){return o?[o.n,o.ci,o.co,o.e,o.y,o.r].join("|"):"";}
+function hoSum(){var t={e:0,y:0,r:0,n:0};HT.forEach(function(x,k){var h=hx(k);t.e+=h.e;t.y+=h.y;t.r+=h.r;t.n+=h.n;});return t;}
+function hoPrice(e,y,r){return ef(e)+' € · '+nf(y)+' ¥ · ≈'+nf(r)+' RON';}
+function hoForm(x,k){
+  var h=hx(k),v=function(a){return esc(String(a));};
+  return '<div class="fedit"><span class="kicker">Editează detaliile</span><div class="addf">'+
+    '<label>Check-in<input type="text" id="ho-ci" value="'+v(h.ci)+'" autocomplete="off"></label>'+
+    '<label>Check-out<input type="text" id="ho-co" value="'+v(h.co)+'" autocomplete="off"></label>'+
+    '<label>Nopți<input type="number" inputmode="numeric" min="1" id="ho-n" value="'+v(h.n)+'"></label>'+
+    '<label>Preț cuplu, €<input type="number" inputmode="decimal" step="any" id="ho-e" value="'+v(h.e)+'"></label>'+
+    '<label>Preț cuplu, ¥<input type="number" inputmode="numeric" id="ho-y" value="'+v(h.y)+'"></label>'+
+    '<label>Preț cuplu, RON<input type="number" inputmode="numeric" id="ho-r" value="'+v(h.r)+'"></label></div>'+
+    '<div class="acts" style="gap:8px;flex-wrap:wrap"><button class="cbtn" data-hr="'+x.cc+'">Valorile inițiale</button><button class="cbtn" data-hc="1">Anulează</button><button class="cbtn pri" data-hs="'+x.cc+'">Salvează</button></div></div>';
+}
+function hoAct(el){
+  var num=function(i){var e=document.getElementById(i),n=e&&e.value!==""?parseFloat(String(e.value).replace(",",".")):NaN;return isFinite(n)&&n>=0?n:null;};
+  var txt=function(i){var e=document.getElementById(i);return e?e.value.trim().slice(0,60):"";};
+  if(el.hasAttribute("data-he")){HEE=el.getAttribute("data-he");render(true);return;}
+  if(el.hasAttribute("data-hc")){HEE=null;render(true);return;}
+  if(el.hasAttribute("data-hr")){var c0=el.getAttribute("data-hr");delete HO[c0];hoSave();sbPush("ho:"+c0,{del:1});HEE=null;render(true);toast("Valorile inițiale");return;}
+  if(el.hasAttribute("data-hs")){
+    var cc=el.getAttribute("data-hs"),n=num("ho-n"),e=num("ho-e"),y=num("ho-y"),r=num("ho-r");
+    if(!n||n<1){toast("Scrie numărul de nopți");return;}
+    if(r==null&&y!=null)r=Math.round(y/YEN_PER_RON);
+    if(r==null&&e==null&&y==null){toast("Scrie un preț");return;}
+    var o={n:Math.round(n),ci:txt("ho-ci"),co:txt("ho-co"),e:e||0,y:y||0,r:r||0};
+    HO[cc]=o;hoSave();sbPush("ho:"+cc,o);HEE=null;render(true);toast("Salvat");return;
+  }
+}
 function ef(n){return n%1?n.toFixed(1).replace(".",","):nf(n);}
 var YEN_PER_RON=34;
 var CK="japonia2026-cost", CV={}, CE={};
@@ -803,7 +839,7 @@ function viewCosts(){
   var ty=0,tr=0,py=0,pr=0;
   cAll().forEach(function(x){var v=cget(x);ty+=v.y||0;tr+=v.r||0;if(v.b){py+=v.y||0;pr+=v.r||0;}});
   var fr=0,fpaid=0;flAll().map(flCost).forEach(function(x){var v=cget(x);fr+=v.r||0;if(v.b)fpaid+=v.r||0;});
-  var he=0,hy=0,hr=0;HC.forEach(function(c){he+=c.e;hy+=c.y;hr+=c.r;});
+  var hs0=hoSum(),he=hs0.e,hy=hs0.y,hr=hs0.r;
   var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Bilete de avion, hoteluri, atracții și transport. La sume apasă „Editează”, apoi „Salvează”.</p></div>';
   var gt=fr+hr+tr;
   h+='<div class="card"><span class="kicker">Total general · lei</span><b style="font-family:var(--f-mono);font-size:22px;font-weight:500">≈ '+nf(gt)+' RON</b><span class="pp">≈ '+nf(gt/2)+' RON / persoană</span><div class="tl"><div class="tlh"><span>Cheltuiala</span><i>2 persoane</i><i>1 persoană</i></div>'+
@@ -816,20 +852,20 @@ function viewCosts(){
   /* hoteluri */
   h+='<div id="sec-hot" class="stack" style="gap:8px"><h3 class="sec" style="font-size:20px;margin:14px 0 0">Cheltuieli Hoteluri <span class="note" style="font-weight:400">≈ '+nf(hr)+' RON</span></h3>';
   HT.forEach(function(x,k){
-    var c=HC[k];
+    var c=hx(k);x=Object.assign({},x,{n:c.n,ci:c.ci,co:c.co});
     h+='<div class="crow"><div class="top"><h3>'+esc(x.name)+'</h3><span class="got" style="background:var(--surface2);color:var(--muted)">'+x.city+'</span></div>'+
       '<div class="cmeta"><span><b>Ședere:</b> '+x.n+' nopți · '+(x.n+1)+' zile</span><span><b>Check-in:</b> '+x.ci+'</span><span><b>Check-out:</b> '+x.co+'</span></div>'+
       '<dl class="kv"><dt>Preț cuplu</dt><dd>'+ef(c.e)+' € · '+nf(c.y)+' ¥ · ≈'+nf(c.r)+' RON</dd>'+
       '<dt>Pe persoană</dt><dd>'+ef(c.e/2)+' € · '+nf(c.y/2)+' ¥ · ≈'+nf(c.r/2)+' RON</dd>'+
-      '<dt>Pe noapte (cuplu)</dt><dd>'+ef(Math.round(c.e/x.n*10)/10)+' € · '+nf(c.y/x.n)+' ¥ · ≈'+nf(c.r/x.n)+' RON</dd></dl></div>';
+      '<dt>Pe noapte (cuplu)</dt><dd>'+ef(Math.round(c.e/x.n*10)/10)+' € · '+nf(c.y/x.n)+' ¥ · ≈'+nf(c.r/x.n)+' RON</dd></dl>'+(HEE===x.cc?hoForm(x,k):'<div class="btnrow"><button class="cbtn" data-he="'+x.cc+'">Editează detaliile</button></div>')+'</div>';
   });
-  h+='<div class="card"><span class="kicker">Total hoteluri · '+HT.reduce(function(a,x){return a+x.n;},0)+' nopți</span><div class="tg"><span>Cuplu</span><span>'+ef(he)+' €</span><span>'+nf(hy)+' ¥</span><span>≈'+nf(hr)+' RON</span><span>Pe persoană</span><span>'+ef(he/2)+' €</span><span>'+nf(hy/2)+' ¥</span><span>≈'+nf(hr/2)+' RON</span></div></div></div>';
+  h+='<div class="card"><span class="kicker">Total hoteluri · '+hs0.n+' nopți</span><div class="tg"><span>Cuplu</span><span>'+ef(he)+' €</span><span>'+nf(hy)+' ¥</span><span>≈'+nf(hr)+' RON</span><span>Pe persoană</span><span>'+ef(he/2)+' €</span><span>'+nf(hy/2)+' ¥</span><span>≈'+nf(hr/2)+' RON</span></div></div></div>';
   /* atractii */
   h+='<div id="sec-atr" class="stack" style="gap:10px"><h3 class="sec" style="font-size:20px;margin:14px 0 0">Atracții și transport</h3>';
   h+='<div class="cs"><div class="card"><span class="kicker">Total</span><b>'+nf(ty)+' ¥</b><small>≈ '+nf(tr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Plătit (bilete cumpărate)</span><b>'+nf(py)+' ¥</b><small>≈ '+nf(pr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Rămas de plată</span><b>'+nf(ty-py)+' ¥</b><small>≈ '+nf(tr-pr)+' RON</small></div></div>';
-  h+='<div class="card"><span class="kicker">Curs folosit · aprox. '+YEN_PER_RON+' ¥ = 1 RON</span><div class="total"><span>1.000 ¥ ≈ '+Math.round(1000/YEN_PER_RON)+' RON</span><span>10.000 ¥ ≈ '+Math.round(10000/YEN_PER_RON)+' RON</span></div><span class="note">Când scrii yenii în „Editează”, lei se calculează singuri. Îi poți schimba apoi cu mâna.</span></div>';
+  h+='<div class="card"><span class="kicker">Curs folosit · aprox. '+YEN_PER_RON+' ¥ = 1 RON</span><div class="rates"><span>1.000 ¥ ≈ '+Math.round(1000/YEN_PER_RON)+' RON</span><span>10.000 ¥ ≈ '+Math.round(10000/YEN_PER_RON)+' RON</span></div><span class="note">Când scrii yenii în „Editează”, lei se calculează singuri. Îi poți schimba apoi cu mâna.</span></div>';
   ["Tokyo","Kyoto","Osaka","Nara","Altele"].forEach(function(city){
     var rows=cAll().filter(function(x){return x.c===city;});
     if(!rows.length)return;
@@ -853,13 +889,15 @@ function viewCosts(){
 }
 function viewHotels(){
   var h='<div class="stack"><div><h2 class="sec">Hoteluri</h2><p class="lead">Cazările, orele de check-in și check-out și drumul spre gară pentru trenurile voastre.</p></div>';
-  HT.forEach(function(x){
+  HT.forEach(function(x0,k){
+    var c=hx(k),x=Object.assign({},x0,{n:c.n,ci:c.ci,co:c.co,price:hoPrice(c.e,c.y,c.r),pp:hoPrice(c.e/2,c.y/2,c.r/2)});
     h+='<div class="card '+x.cc+'"><span class="kicker">'+x.city+' · '+x.n+' nopți</span><h3>'+esc(x.name)+'</h3><span class="note">'+esc(x.room)+'</span>'+
       '<dl class="kv"><dt>Check-in</dt><dd>'+x.ci+'</dd><dt>Check-out</dt><dd>'+x.co+'</dd><dt>Preț cuplu</dt><dd>'+x.price+'</dd><dt>Pe persoană</dt><dd>'+x.pp+'</dd><dt>Data plății</dt><dd>'+x.paid+'</dd><dt>Adresă</dt><dd>'+esc(x.addr)+'</dd></dl>'+
       '<div class="btnrow"><a class="linkbtn" href="'+x.book+'" target="_blank" rel="noopener">Booking</a><a class="linkbtn" href="'+mapUrl(x.map)+'" target="_blank" rel="noopener">Hartă</a></div>'+
       '<h4 class="sub-h">'+esc(x.rt)+'</h4><ul class="plain">'+x.steps.map(function(t){return '<li>'+esc(t)+'</li>';}).join("")+'</ul></div>';
   });
-  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>2 persoane</span><span>1.781 €</span><span>330.560 ¥</span><span>≈9.722 RON</span></div><div class="total"><span>1 persoană</span><span>890,5 €</span><span>165.280 ¥</span><span>≈4.861 RON</span></div></div>';
+  var T=hoSum();
+  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>2 persoane</span><span>'+ef(T.e)+' €</span><span>'+nf(T.y)+' ¥</span><span>≈'+nf(T.r)+' RON</span></div><div class="total"><span>1 persoană</span><span>'+ef(T.e/2)+' €</span><span>'+nf(T.y/2)+' ¥</span><span>≈'+nf(T.r/2)+' RON</span></div></div>';
   h+=xcHtml("hoteluri")+'</div>';
   return h;
 }
@@ -1037,7 +1075,7 @@ var PEND={};
 var TNK="japonia2026-tn", XCK="japonia2026-xc", TN={}, XC={}, TE=null, XE=null, XDEL=null;
 try{TN=JSON.parse(localStorage.getItem(TNK)||"{}")||{};}catch(e){TN={};}
 try{XC=JSON.parse(localStorage.getItem(XCK)||"{}")||{};}catch(e){XC={};}
-function xSave(){try{localStorage.setItem(TNK,JSON.stringify(TN));localStorage.setItem(XCK,JSON.stringify(XC));localStorage.setItem(BTK,JSON.stringify(BT));}catch(e){}}
+function xSave(){try{localStorage.setItem(TNK,JSON.stringify(TN));localStorage.setItem(XCK,JSON.stringify(XC));localStorage.setItem(BTK,JSON.stringify(BT));localStorage.setItem(HOK,JSON.stringify(HO));}catch(e){}}
 var BTK="japonia2026-bt", BT={}, BE=null, BDEL=null;
 try{BT=JSON.parse(localStorage.getItem(BTK)||"{}")||{};}catch(e){BT={};}
 var BTN={tokyo:"Tokyo",kyoto:"Kyoto",osaka:"Osaka",booked:"Deja rezervate sau luate"};
@@ -1168,6 +1206,7 @@ function toggle(kind,id){
 }
 document.addEventListener("input",function(e){
   var t=e.target;
+  if(t&&t.id==="ho-y"){var hr2=document.getElementById("ho-r");if(hr2)hr2.value=t.value===""?"":Math.round(+t.value/YEN_PER_RON);}
   if(t&&t.id==="n-y"){var rn=document.getElementById("n-r");if(rn)rn.value=t.value===""?"":Math.round(+t.value/YEN_PER_RON);}
   if(t&&t.id&&t.id.indexOf("y-")===0){
     var r=document.getElementById("r-"+t.id.slice(2));
@@ -1181,8 +1220,8 @@ document.addEventListener("click",function(e){
   if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}thOpen=false;applyTheme();renderThemes();return;}
   var sc=e.target.closest&&e.target.closest("[data-scroll]");
   if(sc){var el=document.getElementById(sc.getAttribute("data-scroll"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
-  var xa=e.target.closest&&e.target.closest("[data-te],[data-tc],[data-ts],[data-xadd],[data-xe],[data-xc],[data-xs],[data-xx],[data-badd],[data-be],[data-bc],[data-bx],[data-bs]");
-  if(xa){if(xa.hasAttribute("data-badd")||xa.hasAttribute("data-be")||xa.hasAttribute("data-bc")||xa.hasAttribute("data-bx")||xa.hasAttribute("data-bs"))bAct(xa);else xAct(xa);return;}
+  var xa=e.target.closest&&e.target.closest("[data-te],[data-tc],[data-ts],[data-xadd],[data-xe],[data-xc],[data-xs],[data-xx],[data-badd],[data-be],[data-bc],[data-bx],[data-bs],[data-he],[data-hc],[data-hr],[data-hs]");
+  if(xa){if(xa.hasAttribute("data-badd")||xa.hasAttribute("data-be")||xa.hasAttribute("data-bc")||xa.hasAttribute("data-bx")||xa.hasAttribute("data-bs"))bAct(xa);else if(xa.hasAttribute("data-he")||xa.hasAttribute("data-hc")||xa.hasAttribute("data-hr")||xa.hasAttribute("data-hs"))hoAct(xa);else xAct(xa);return;}
   var fa=e.target.closest&&e.target.closest("[data-fe],[data-fadd],[data-fs],[data-fc],[data-fx]");
   if(fa){flAct(fa);return;}
   var ce=e.target.closest&&e.target.closest("[data-ce]");
@@ -1299,6 +1338,9 @@ function sbApply(rows){
     }else if(kind==="tn"){
       if(v.del){if(TN[id]){delete TN[id];ch=true;}}
       else{var tn={};TNF.forEach(function(f){tn[f]=sbStr(v[f],f==="nt"?400:100);});if(tnKey(TN[id])!==tnKey(tn)){TN[id]=tn;ch=true;}}
+    }else if(kind==="ho"){
+      if(v.del){if(HO[id]){delete HO[id];ch=true;}}
+      else if(/^(tokyo|kyoto|osaka)$/.test(id)){var ho={n:Math.max(1,Math.round(sbNum(v.n)||1)),ci:sbStr(v.ci,60),co:sbStr(v.co,60),e:sbNum(v.e)||0,y:sbNum(v.y)||0,r:sbNum(v.r)||0};if(hoKey(HO[id])!==hoKey(ho)){HO[id]=ho;ch=true;}}
     }else if(kind==="bt"){
       if(v.del){if(!(BT[id]&&BT[id].del)){BT[id]={del:1};ch=true;}}
       else{var bt={id:id,l:BTN[v.l]?v.l:"tokyo",n:sbStr(v.n,80),w:sbStr(v.w,60),p:sbStr(v.p,80),nt:sbStr(v.nt,400)};if(bt.n&&!(BT[id]&&!BT[id].del&&btKey(BT[id])===btKey(bt))){BT[id]=bt;ch=true;}}
@@ -1321,6 +1363,7 @@ function sbSeed(rem){
   for(var id in CV){var k2="cost:"+id;if(!rem[k2]&&!sbQ.hasOwnProperty(k2))sbQ[k2]=CV[id];}
   EXTRA.forEach(function(z){var k3="extra:"+z.id;if(!rem[k3]&&!sbQ.hasOwnProperty(k3))sbQ[k3]=z;});
   for(var tid in TN){var k5="tn:"+tid;if(!rem[k5]&&!sbQ.hasOwnProperty(k5))sbQ[k5]=TN[tid];}
+  for(var hid in HO){var k8="ho:"+hid;if(!rem[k8]&&!sbQ.hasOwnProperty(k8))sbQ[k8]=HO[hid];}
   for(var bid in BT){var k7="bt:"+bid;if(!rem[k7]&&!sbQ.hasOwnProperty(k7))sbQ[k7]=BT[bid];}
   for(var xid in XC){var k6="xc:"+xid;if(!rem[k6]&&!sbQ.hasOwnProperty(k6))sbQ[k6]=XC[xid];}
   for(var fid in FLO){var k4="flight:"+fid;if(!rem[k4]&&!sbQ.hasOwnProperty(k4))sbQ[k4]=FLO[fid];}
@@ -1331,7 +1374,7 @@ function sbEditing(){
   var a=document.activeElement, tg=a&&a.tagName;
   if(tg==="INPUT"||tg==="TEXTAREA"||tg==="SELECT")return true;
   for(var k in CE)return true;
-  if(FE!=null||TE!=null||XE!=null||BE!=null)return true;
+  if(FE!=null||TE!=null||XE!=null||BE!=null||HEE!=null)return true;
   return false;
 }
 function sbPersist(){
