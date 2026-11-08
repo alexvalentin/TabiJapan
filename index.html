@@ -606,8 +606,10 @@ var PREP=[
 ];
 function prepHtml(){
   var done=PREP.filter(function(x){return S.bought[x.id];}).length;
+  var rowsP=PREP.filter(function(x){return !settled(x.id);});
+  if(!rowsP.length)return "";
   var h='<div><div class="group-h" style="--cc:var(--ok)">De pregătit înainte de plecare</div><div class="card" style="padding:4px 14px;margin-top:8px">';
-  PREP.forEach(function(x){
+  rowsP.forEach(function(x){
     var got=!!S.bought[x.id];
     h+='<div class="trow'+(got?' done':'')+'" style="--cc:var(--ok)"><button class="chk" data-k="bought" data-id="'+x.id+'" aria-pressed="'+got+'" aria-label="Făcut: '+esc(x.n)+'"><span>'+TICK+'</span></button>'+
       '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(got?'Făcut':(x.w||'De făcut'))+'</span><span class="name">'+esc(x.n)+'</span>'+(x.p?'<span class="price">'+esc(x.p)+'</span>':'')+(x.note?'<span class="note">'+esc(x.note)+'</span>':'')+'</div></div>';
@@ -622,6 +624,7 @@ function viewTickets(){
   order.forEach(function(c){
     var rows=all.filter(function(s){return s.day.cc===c&&!(c==="tokyo"&&s.day.d===30);});
     if(c==="osaka")rows=rows.concat(all.filter(function(s){return s.day.d===30;}));
+    rows=rows.filter(function(s){return !settled(s.id);});
     if(!rows.length)return;
     h+='<div class="'+c+'"><div class="group-h">'+names[c]+'</div><div class="card" style="padding:4px 14px;margin-top:8px">';
     rows.forEach(function(s){
@@ -633,9 +636,16 @@ function viewTickets(){
     h+='</div></div>';shown=true;
   });
   h+=prepHtml();
-  var booked=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="booked")booked.push(s);});});
+  var booked=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="booked")booked.push({s:s});});});
+  var moved=[];
+  all.forEach(function(s){if(settled(s.id))moved.push({s:s,id:s.id,lbl:"Bilet luat"});});
+  PREP.forEach(function(x){if(settled(x.id))moved.push({p:x,id:x.id});});
   h+='<div><div class="group-h" style="--cc:var(--ok)">Deja rezervate sau luate</div><div class="card" style="padding:4px 14px;margin-top:8px">';
-  booked.forEach(function(s){h+='<div class="trow"><span></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span><span><span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span></span></div></div>';});
+  booked.forEach(function(o){var s=o.s;h+='<div class="trow"><span></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span><span><span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span></span></div></div>';});
+  moved.forEach(function(o){
+    var s=o.s,x=o.p,nm=s?s.n:x.n,wh=s?(s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+s.t:'')):(x.w||'De pregătit');
+    h+='<div class="trow" style="--cc:var(--ok)"><button class="chk" data-k="bought" data-id="'+o.id+'" aria-pressed="true" aria-label="Anulează: '+esc(nm)+'"><span>'+TICK+'</span></button><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+esc(wh)+'</span><span class="name">'+esc(nm)+'</span><span><span class="pill booked">'+TICK+(s?'Bilet luat':'Făcut')+'</span></span></div></div>';
+  });
   h+='</div></div></div>';
   return h;
 }
@@ -995,9 +1005,15 @@ function remoteWrite(kind,id,on){
     if(mode==="live"){mode="off";renderSync();toast("Nu poți scrie live. Se salvează doar pe acest telefon.");}
   });
 }
+var PEND={};
+function settled(id){return !!S.bought[id]&&!PEND[id];}
 function toggle(kind,id){
   var set=S[kind], on=!set[id];
   if(on)set[id]=1;else delete set[id];
+  if(kind==="bought"){
+    if(PEND[id]){clearTimeout(PEND[id]);delete PEND[id];}
+    if(on)PEND[id]=setTimeout(function(){delete PEND[id];if(/^#bilete/.test(location.hash))render(true);},60000);
+  }
   lsSave();render(true);
   remoteWrite(kind,id,on);
   sbPush(kind+":"+id,{on:on?1:0});
