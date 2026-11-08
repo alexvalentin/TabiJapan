@@ -1081,9 +1081,11 @@ var PEND={};
 var STK="japonia2026-st", ST={};
 try{ST=JSON.parse(localStorage.getItem(STK)||"{}")||{};}catch(e){ST={};}
 var STL={v:"Vizitat",n:"Nevizitat",c:"Anulat"};
+var STO=null;
 function stHtml(id){
   var cur=ST[id]||"";
-  return '<div class="st3" role="group" aria-label="Stare">'+["v","n","c"].map(function(k){return '<button class="st3b '+k+(cur===k?' on':'')+'" data-st="'+k+'" data-sid="'+id+'" aria-pressed="'+(cur===k)+'">'+STL[k]+'</button>';}).join("")+'</div>';
+  if(STO===id)return '<div class="st3" role="group" aria-label="Stare">'+["v","n","c"].map(function(k){return '<button class="st3b '+k+' on" data-st="'+k+'" data-sid="'+id+'">'+STL[k]+'</button>';}).join("")+'</div>';
+  return '<div class="st3"><button class="st3b '+(cur||'z')+(cur?' on':'')+'" data-sopen="'+id+'">'+(cur?STL[cur]:'Alege starea')+' ▾</button></div>';
 }
 var TNK="japonia2026-tn", XCK="japonia2026-xc", TN={}, XC={}, TE=null, XE=null, XDEL=null;
 try{TN=JSON.parse(localStorage.getItem(TNK)||"{}")||{};}catch(e){TN={};}
@@ -1234,7 +1236,9 @@ document.addEventListener("click",function(e){
   var sc=e.target.closest&&e.target.closest("[data-scroll]");
   if(sc){var el=document.getElementById(sc.getAttribute("data-scroll"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
   var sb=e.target.closest&&e.target.closest("[data-st]");
-  if(sb){var sid=sb.getAttribute("data-sid"),sk=sb.getAttribute("data-st");if(ST[sid]===sk)delete ST[sid];else ST[sid]=sk;xSave();sbPush("st:"+sid,{v:ST[sid]||""});render(true);return;}
+  var so=e.target.closest&&e.target.closest("[data-sopen]");
+  if(so){STO=so.getAttribute("data-sopen");render(true);return;}
+  if(sb){var sid=sb.getAttribute("data-sid"),sk=sb.getAttribute("data-st");ST[sid]=sk;STO=null;xSave();sbPush("st:"+sid,{v:ST[sid]||""});render(true);return;}
   var xa=e.target.closest&&e.target.closest("[data-te],[data-tc],[data-ts],[data-xadd],[data-xe],[data-xc],[data-xs],[data-xx],[data-badd],[data-be],[data-bc],[data-bx],[data-bs],[data-he],[data-hc],[data-hr],[data-hs]");
   if(xa){if(xa.hasAttribute("data-badd")||xa.hasAttribute("data-be")||xa.hasAttribute("data-bc")||xa.hasAttribute("data-bx")||xa.hasAttribute("data-bs"))bAct(xa);else if(xa.hasAttribute("data-he")||xa.hasAttribute("data-hc")||xa.hasAttribute("data-hr")||xa.hasAttribute("data-hs"))hoAct(xa);else xAct(xa);return;}
   var fa=e.target.closest&&e.target.closest("[data-fe],[data-fadd],[data-fs],[data-fc],[data-fx]");
