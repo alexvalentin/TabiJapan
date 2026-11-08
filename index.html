@@ -619,14 +619,16 @@ function prepHtml(){
   return h+'</div><p class="lead" style="margin-top:8px">'+done+' din '+PREP.length+' făcute.</p></div>';
 }
 function viewTickets(){
-  var all=buyList(), left=all.filter(function(s){return !S.bought[s.id];}).length;
-  var h='<div class="stack"><div><h2 class="sec">Bilete</h2><p class="lead">'+(left?left+' de luat din '+all.length+'. Bifează când ai biletul.':'Toate biletele sunt luate.')+'</p></div>';
+  var all=buyList(), cust=btItems(), allL=all.concat(cust.filter(function(s){return s.l!=="booked";})), left=allL.filter(function(s){return !S.bought[s.id];}).length;
+  var h='<div class="stack"><div><h2 class="sec">Bilete</h2><p class="lead">'+(left?left+' de luat din '+allL.length+'. Bifează când ai biletul.':'Toate biletele sunt luate.')+'</p></div>';
+  h+=(BE?btForm(BE==='new'?null:BT[BE]):'<button class="cbtn" data-badd="1" style="align-self:flex-start">+ Adaugă bilet nou</button>');
   var order=["tokyo","kyoto","osaka"], names={tokyo:"Tokyo",kyoto:"Kyoto",osaka:"Osaka"};
   var shown=false;
   order.forEach(function(c){
     var rows=all.filter(function(s){return s.day.cc===c&&!(c==="tokyo"&&s.day.d===30);});
     if(c==="osaka")rows=rows.concat(all.filter(function(s){return s.day.d===30;}));
     if(c==="tokyo")rows=rows.concat(XT);
+    rows=rows.concat(cust.filter(function(s){return s.l===c;}));
     rows=rows.filter(function(s){return !settled(s.id);});
     if(!rows.length)return;
     h+='<div class="'+c+'"><div class="group-h">'+names[c]+'</div><div class="card" style="padding:4px 14px;margin-top:8px">';
@@ -634,7 +636,7 @@ function viewTickets(){
       var got=!!S.bought[s.id];
       h+='<div class="trow '+c+(got?' done':'')+'"><button class="chk" data-k="bought" data-id="'+s.id+'" aria-pressed="'+got+'" aria-label="Bilet luat: '+esc(s.n)+'"><span>'+TICK+'</span></button>'+
         '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(s.w?(got?'Făcut':s.w):s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):''))+'</span><span class="name">'+esc(s.n)+'</span>'+
-        (s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s.note?'<span class="note">'+esc(s.note)+'</span>':'')+linksHtml(s,s.day.mapCity||s.day.city,!!s.w)+'</div></div>';
+        (s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s.note?'<span class="note">'+esc(s.note)+'</span>':'')+linksHtml(s,s.day.mapCity||s.day.city,!!(s.w&&s.q))+(s.custom?'<div class="btnrow"><button class="cbtn" data-be="'+s.id+'">Editează</button></div>':'')+'</div></div>';
     });
     h+='</div></div>';shown=true;
   });
@@ -642,12 +644,18 @@ function viewTickets(){
   var booked=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="booked")booked.push({s:s});});});
   var moved=[];
   all.concat(XT).forEach(function(s){if(settled(s.id))moved.push({s:s,id:s.id});});
+  cust.forEach(function(s){if(s.l==="booked")moved.push({s:s,id:s.id,nochk:1});else if(settled(s.id))moved.push({s:s,id:s.id});});
   PREP.forEach(function(x){if(settled(x.id))moved.push({p:x,id:x.id});});
   h+='<div><div class="group-h" style="--cc:var(--ok)">Deja rezervate sau luate</div><div class="card" style="padding:4px 14px;margin-top:8px">';
   booked.forEach(function(o){var s=o.s;h+='<div class="trow"><span></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span><span><span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span></span></div></div>';});
+  var CN={tokyo:"Tokyo",kyoto:"Kyoto",osaka:"Osaka",booked:""};
   moved.forEach(function(o){
-    var s=o.s,x=o.p,nm=s?s.n:x.n,wh=s?(s.w?'Tokyo':(s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+s.t:''))):(x.w||'De pregătit');
-    h+='<div class="trow" style="--cc:var(--ok)"><button class="chk" data-k="bought" data-id="'+o.id+'" aria-pressed="true" aria-label="Anulează: '+esc(nm)+'"><span>'+TICK+'</span></button><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+esc(wh)+'</span><span class="name">'+esc(nm)+'</span><span><span class="pill booked">'+TICK+(s&&!s.w?'Bilet luat':'Făcut')+'</span></span></div></div>';
+    var s=o.s,x=o.p,nm=s?s.n:x.n,wh,lab;
+    if(s&&s.custom){wh=(s.w!=="De luat"?s.w:(CN[s.l]||"Rezervat"));lab=s.l==="booked"?"Rezervat":"Bilet luat";}
+    else if(s){wh=s.w?'Tokyo':(s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+s.t:''));lab=s.w?'Făcut':'Bilet luat';}
+    else{wh=x.w||'De pregătit';lab='Făcut';}
+    h+='<div class="trow" style="--cc:var(--ok)">'+(o.nochk?'<span></span>':'<button class="chk" data-k="bought" data-id="'+o.id+'" aria-pressed="true" aria-label="Anulează: '+esc(nm)+'"><span>'+TICK+'</span></button>')+
+      '<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+esc(wh)+'</span><span class="name">'+esc(nm)+'</span>'+(s&&s.custom&&s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s&&s.custom&&s.note?'<span class="note">'+esc(s.note)+'</span>':'')+'<span><span class="pill booked">'+TICK+lab+'</span></span>'+(s&&s.custom?'<div class="btnrow"><button class="cbtn" data-be="'+o.id+'">Editează</button></div>':'')+'</div></div>';
   });
   h+='</div></div>'+xcHtml("bilete")+'</div>';
   return h;
@@ -1022,7 +1030,49 @@ var PEND={};
 var TNK="japonia2026-tn", XCK="japonia2026-xc", TN={}, XC={}, TE=null, XE=null, XDEL=null;
 try{TN=JSON.parse(localStorage.getItem(TNK)||"{}")||{};}catch(e){TN={};}
 try{XC=JSON.parse(localStorage.getItem(XCK)||"{}")||{};}catch(e){XC={};}
-function xSave(){try{localStorage.setItem(TNK,JSON.stringify(TN));localStorage.setItem(XCK,JSON.stringify(XC));}catch(e){}}
+function xSave(){try{localStorage.setItem(TNK,JSON.stringify(TN));localStorage.setItem(XCK,JSON.stringify(XC));localStorage.setItem(BTK,JSON.stringify(BT));}catch(e){}}
+var BTK="japonia2026-bt", BT={}, BE=null, BDEL=null;
+try{BT=JSON.parse(localStorage.getItem(BTK)||"{}")||{};}catch(e){BT={};}
+var BTN={tokyo:"Tokyo",kyoto:"Kyoto",osaka:"Osaka",booked:"Deja rezervate sau luate"};
+function btKey(o){return o?[o.l,o.n,o.w,o.p,o.nt].join("|"):"";}
+function btItems(){
+  var r=[];
+  for(var id in BT){var o=BT[id];if(!o||o.del||!BTN[o.l])continue;
+    r.push({id:id,n:o.n,p:o.p,note:o.nt,w:o.w||"De luat",custom:1,l:o.l,day:{cc:o.l,city:BTN[o.l],d:0,wd:""}});}
+  r.sort(function(a,b){return a.id<b.id?-1:1;});
+  return r;
+}
+function btForm(o){
+  var isNew=!o,id=o?o.id:"new",g=function(k,d){return esc(o&&o[k]!=null?o[k]:d);};
+  var opts=["tokyo","kyoto","osaka","booked"].map(function(k){return '<option value="'+k+'"'+((o?o.l:"tokyo")===k?' selected':'')+'>'+BTN[k]+'</option>';}).join("");
+  return '<div class="card fedit"><span class="kicker">'+(isNew?'Bilet nou':'Editează biletul')+'</span><div class="addf">'+
+    '<label class="full">Ce bilet / rezervare<input type="text" id="be-n" value="'+g("n","")+'" autocomplete="off" placeholder="ex. Teamlab Planets"></label>'+
+    '<label class="full">În ce listă<select id="be-l">'+opts+'</select></label>'+
+    '<label>Ziua / ora<input type="text" id="be-w" value="'+g("w","")+'" autocomplete="off" placeholder="ex. Joi 19 nov, 18:00"></label>'+
+    '<label>Preț<input type="text" id="be-p" value="'+g("p","")+'" autocomplete="off" placeholder="ex. 3.800 ¥ · ≈112 RON"></label>'+
+    '<label class="full">Note<textarea id="be-nt">'+g("nt","")+'</textarea></label></div>'+
+    '<div class="acts" style="gap:8px;flex-wrap:wrap">'+(isNew?'':'<button class="cbtn" data-bx="'+id+'">'+(BDEL===id?'Sigur? Șterge biletul':'Șterge')+'</button>')+'<button class="cbtn" data-bc="1">Anulează</button><button class="cbtn pri" data-bs="1">Salvează</button></div></div>';
+}
+function bAct(el){
+  var g=function(i){var e=document.getElementById(i);return e?e.value.trim():"";};
+  if(el.hasAttribute("data-badd")){BE="new";BDEL=null;render(true);return;}
+  if(el.hasAttribute("data-be")){BE=el.getAttribute("data-be");BDEL=null;render(true);return;}
+  if(el.hasAttribute("data-bc")){BE=null;BDEL=null;render(true);return;}
+  if(el.hasAttribute("data-bx")){
+    var xid=el.getAttribute("data-bx");
+    if(BDEL!==xid){BDEL=xid;render(true);return;}
+    BT[xid]={del:1};delete S.bought[xid];lsSave();xSave();sbPush("bt:"+xid,{del:1});sbPush("bought:"+xid,{on:0});
+    if(PEND[xid]){clearTimeout(PEND[xid]);delete PEND[xid];}
+    BE=null;BDEL=null;render(true);toast("Șters");return;
+  }
+  if(el.hasAttribute("data-bs")){
+    var n=g("be-n");if(!n){toast("Scrie numele biletului");return;}
+    var id=BE==="new"?"b"+Date.now().toString(36):BE;
+    var o={id:id,l:g("be-l"),n:n.slice(0,80),w:g("be-w").slice(0,60),p:g("be-p").slice(0,80),nt:g("be-nt").slice(0,400)};
+    if(!BTN[o.l])o.l="tokyo";
+    BT[id]=o;xSave();sbPush("bt:"+id,o);BE=null;BDEL=null;render(true);toast("Salvat în "+BTN[o.l]);return;
+  }
+}
 var TNF=["d","tr","fr","to","lo","nt"];
 function tnKey(o){return o?TNF.map(function(k){return o[k]||"";}).join("|"):"";}
 function xcKey(o){return o?[o.tab,o.t,o.b].join("|"):"";}
@@ -1103,7 +1153,7 @@ function toggle(kind,id){
   if(on)set[id]=1;else delete set[id];
   if(kind==="bought"){
     if(PEND[id]){clearTimeout(PEND[id]);delete PEND[id];}
-    if(on)PEND[id]=setTimeout(function(){delete PEND[id];if(/^#bilete/.test(location.hash)&&XE==null)render(true);},60000);
+    if(on)PEND[id]=setTimeout(function(){delete PEND[id];if(/^#bilete/.test(location.hash)&&XE==null&&BE==null)render(true);},60000);
   }
   lsSave();render(true);
   remoteWrite(kind,id,on);
@@ -1124,8 +1174,8 @@ document.addEventListener("click",function(e){
   if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}thOpen=false;applyTheme();renderThemes();return;}
   var sc=e.target.closest&&e.target.closest("[data-scroll]");
   if(sc){var el=document.getElementById(sc.getAttribute("data-scroll"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
-  var xa=e.target.closest&&e.target.closest("[data-te],[data-tc],[data-ts],[data-xadd],[data-xe],[data-xc],[data-xs],[data-xx]");
-  if(xa){xAct(xa);return;}
+  var xa=e.target.closest&&e.target.closest("[data-te],[data-tc],[data-ts],[data-xadd],[data-xe],[data-xc],[data-xs],[data-xx],[data-badd],[data-be],[data-bc],[data-bx],[data-bs]");
+  if(xa){if(xa.hasAttribute("data-badd")||xa.hasAttribute("data-be")||xa.hasAttribute("data-bc")||xa.hasAttribute("data-bx")||xa.hasAttribute("data-bs"))bAct(xa);else xAct(xa);return;}
   var fa=e.target.closest&&e.target.closest("[data-fe],[data-fadd],[data-fs],[data-fc],[data-fx]");
   if(fa){flAct(fa);return;}
   var ce=e.target.closest&&e.target.closest("[data-ce]");
@@ -1242,6 +1292,9 @@ function sbApply(rows){
     }else if(kind==="tn"){
       if(v.del){if(TN[id]){delete TN[id];ch=true;}}
       else{var tn={};TNF.forEach(function(f){tn[f]=sbStr(v[f],f==="nt"?400:100);});if(tnKey(TN[id])!==tnKey(tn)){TN[id]=tn;ch=true;}}
+    }else if(kind==="bt"){
+      if(v.del){if(!(BT[id]&&BT[id].del)){BT[id]={del:1};ch=true;}}
+      else{var bt={id:id,l:BTN[v.l]?v.l:"tokyo",n:sbStr(v.n,80),w:sbStr(v.w,60),p:sbStr(v.p,80),nt:sbStr(v.nt,400)};if(bt.n&&!(BT[id]&&!BT[id].del&&btKey(BT[id])===btKey(bt))){BT[id]=bt;ch=true;}}
     }else if(kind==="xc"){
       if(v.del){if(!(XC[id]&&XC[id].del)){XC[id]={del:1};ch=true;}}
       else{var xc={id:id,tab:/^(transport|hoteluri|bilete)$/.test(v.tab)?v.tab:"transport",t:sbStr(v.t,80),b:sbStr(v.b,1500)};if(!(XC[id]&&!XC[id].del&&xcKey(XC[id])===xcKey(xc))){XC[id]=xc;ch=true;}}
@@ -1261,6 +1314,7 @@ function sbSeed(rem){
   for(var id in CV){var k2="cost:"+id;if(!rem[k2]&&!sbQ.hasOwnProperty(k2))sbQ[k2]=CV[id];}
   EXTRA.forEach(function(z){var k3="extra:"+z.id;if(!rem[k3]&&!sbQ.hasOwnProperty(k3))sbQ[k3]=z;});
   for(var tid in TN){var k5="tn:"+tid;if(!rem[k5]&&!sbQ.hasOwnProperty(k5))sbQ[k5]=TN[tid];}
+  for(var bid in BT){var k7="bt:"+bid;if(!rem[k7]&&!sbQ.hasOwnProperty(k7))sbQ[k7]=BT[bid];}
   for(var xid in XC){var k6="xc:"+xid;if(!rem[k6]&&!sbQ.hasOwnProperty(k6))sbQ[k6]=XC[xid];}
   for(var fid in FLO){var k4="flight:"+fid;if(!rem[k4]&&!sbQ.hasOwnProperty(k4))sbQ[k4]=FLO[fid];}
   sbSaveQ();
@@ -1270,7 +1324,7 @@ function sbEditing(){
   var a=document.activeElement, tg=a&&a.tagName;
   if(tg==="INPUT"||tg==="TEXTAREA"||tg==="SELECT")return true;
   for(var k in CE)return true;
-  if(FE!=null||TE!=null||XE!=null)return true;
+  if(FE!=null||TE!=null||XE!=null||BE!=null)return true;
   return false;
 }
 function sbPersist(){
