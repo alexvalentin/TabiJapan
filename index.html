@@ -227,9 +227,14 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .total span{white-space:nowrap}
 @media(max-width:420px){.total{grid-template-columns:72px repeat(3,auto);justify-content:space-between;font-size:11px;gap:4px 6px}}
 .tl{display:flex;flex-direction:column;margin-top:8px}
-.tl>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.tl>div{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.tl .tlh{border-top:1px solid var(--line);padding:6px 0;font-size:12px}
+.tl .tlh i{font-style:normal;font-family:var(--f-mono);color:var(--muted);text-align:right;min-width:92px}
+.tl b{text-align:right;min-width:92px}
+.tl b.pp2{color:var(--muted)}
+.pp{display:block;margin-top:4px;font-family:var(--f-mono);font-size:15px;color:var(--muted)}
 .tl span{color:var(--muted)}
-.tl b{font-family:var(--f-mono);font-weight:500;font-size:15px;font-variant-numeric:tabular-nums}
+.tl b{font-family:var(--f-mono);font-weight:500;font-size:14px;font-variant-numeric:tabular-nums}
 .total span:not(:first-child){text-align:right}
 .copy{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;margin-left:6px}
 ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
@@ -800,7 +805,9 @@ function viewCosts(){
   var fr=0,fpaid=0;flAll().map(flCost).forEach(function(x){var v=cget(x);fr+=v.r||0;if(v.b)fpaid+=v.r||0;});
   var he=0,hy=0,hr=0;HC.forEach(function(c){he+=c.e;hy+=c.y;hr+=c.r;});
   var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Bilete de avion, hoteluri, atracții și transport. La sume apasă „Editează”, apoi „Salvează”.</p></div>';
-  h+='<div class="card"><span class="kicker">Total general · lei</span><b style="font-family:var(--f-mono);font-size:22px;font-weight:500">≈ '+nf(fr+hr+tr)+' RON</b><div class="tl"><div><span>Avion</span><b>'+nf(fr)+' RON</b></div><div><span>Hoteluri</span><b>'+nf(hr)+' RON</b></div><div><span>Atracții și transport</span><b>'+nf(tr)+' RON</b></div></div></div>';
+  var gt=fr+hr+tr;
+  h+='<div class="card"><span class="kicker">Total general · lei</span><b style="font-family:var(--f-mono);font-size:22px;font-weight:500">≈ '+nf(gt)+' RON</b><span class="pp">≈ '+nf(gt/2)+' RON / persoană</span><div class="tl"><div class="tlh"><span></span><i>2 persoane</i><i>1 persoană</i></div>'+
+    [["Avion",fr],["Hoteluri",hr],["Atracții și transport",tr]].map(function(r){return '<div><span>'+r[0]+'</span><b>'+nf(r[1])+' RON</b><b class="pp2">'+nf(r[1]/2)+' RON</b></div>';}).join("")+'</div></div>';
   h+='<div class="btnrow"><button class="cbtn" data-scroll="sec-avion">Bilete avion</button><button class="cbtn" data-scroll="sec-hot">Hoteluri</button><button class="cbtn" data-scroll="sec-atr">Atracții</button></div>';
   /* avion */
   h+='<div id="sec-avion" class="stack" style="gap:8px"><h3 class="sec" style="font-size:20px;margin:8px 0 0">Bilete avion <span class="note" style="font-weight:400">'+(fr?nf(fr)+' RON total':'prețuri de completat')+'</span></h3>';
