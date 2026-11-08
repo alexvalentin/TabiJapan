@@ -223,8 +223,9 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .wxh.now b,.wxh.now span{color:#fff}
 .wxh .hi{color:var(--warn);font-weight:600}
 .sub-h{font-family:var(--f-head);font-size:17px;font-weight:700;margin:8px 0 0}
-.total{display:grid;grid-template-columns:max-content repeat(3,minmax(0,1fr));gap:4px 8px;align-items:baseline;font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums;padding:3px 0}
+.total{display:grid;grid-template-columns:96px repeat(3,minmax(0,1fr));max-width:520px;gap:4px 8px;align-items:baseline;font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums;padding:3px 0}
 .total span{white-space:nowrap}
+@media(max-width:420px){.total{grid-template-columns:72px repeat(3,auto);justify-content:space-between;font-size:11px;gap:4px 6px}}
 .tl{display:flex;flex-direction:column;margin-top:8px}
 .tl>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
 .tl span{color:var(--muted)}
@@ -846,7 +847,7 @@ function viewHotels(){
       '<div class="btnrow"><a class="linkbtn" href="'+x.book+'" target="_blank" rel="noopener">Booking</a><a class="linkbtn" href="'+mapUrl(x.map)+'" target="_blank" rel="noopener">Hartă</a></div>'+
       '<h4 class="sub-h">'+esc(x.rt)+'</h4><ul class="plain">'+x.steps.map(function(t){return '<li>'+esc(t)+'</li>';}).join("")+'</ul></div>';
   });
-  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>Cuplu</span><span>1.781 €</span><span>330.560 ¥</span><span>≈9.722 RON</span></div><div class="total"><span>Pe persoană</span><span>890,5 €</span><span>165.280 ¥</span><span>≈4.861 RON</span></div></div>';
+  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>2 persoane</span><span>1.781 €</span><span>330.560 ¥</span><span>≈9.722 RON</span></div><div class="total"><span>1 persoană</span><span>890,5 €</span><span>165.280 ¥</span><span>≈4.861 RON</span></div></div>';
   h+=xcHtml("hoteluri")+'</div>';
   return h;
 }
