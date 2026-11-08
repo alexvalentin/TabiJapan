@@ -667,7 +667,7 @@ function viewTickets(){
     if(s&&s.custom){wh=(s.w!=="De luat"?s.w:(CN[s.l]||"Rezervat"));lab=s.l==="booked"?"Rezervat":"Bilet luat";}
     else if(s){wh=s.w?'Tokyo':(s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+s.t:''));lab=s.w?'Făcut':'Bilet luat';}
     else{wh=x.w||'De pregătit';lab='Făcut';}
-    h+='<div class="trow" style="--cc:var(--ok)">'+(o.nochk?'<span></span>':'<button class="chk" data-k="bought" data-id="'+o.id+'" aria-pressed="true" aria-label="Anulează: '+esc(nm)+'"><span>'+TICK+'</span></button>')+
+    h+='<div class="trow" style="--cc:var(--ok)">'+'<span></span>'+
       '<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+esc(wh)+'</span><span class="name">'+esc(nm)+'</span>'+(s&&s.custom&&s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s&&s.custom&&s.note?'<span class="note">'+esc(s.note)+'</span>':'')+'<span><span class="pill booked">'+TICK+lab+'</span></span>'+(s&&s.custom?'<div class="btnrow"><button class="cbtn" data-be="'+o.id+'">Editează</button></div>':'')+'</div></div>';
   });
   h+='</div></div>'+xcHtml("bilete")+'</div>';
