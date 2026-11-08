@@ -947,7 +947,7 @@ function renderNav(){
   document.getElementById("nav").innerHTML=TABS.map(function(t){
     var href=t.id==="zile"?(selDay===null?"#zile":"#zi-"+selDay):("#"+t.id);
     return '<a href="'+href+'"'+(tab===t.id?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+t.i+'</svg>'+t.l+
-      (t.id==="bilete"&&left?'<span class="badge">'+left+'</span>':'')+'</a>';
+      '</a>';
   }).join("");
 }
 function renderStats(){
