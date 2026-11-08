@@ -806,7 +806,7 @@ function viewCosts(){
   var he=0,hy=0,hr=0;HC.forEach(function(c){he+=c.e;hy+=c.y;hr+=c.r;});
   var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Bilete de avion, hoteluri, atracții și transport. La sume apasă „Editează”, apoi „Salvează”.</p></div>';
   var gt=fr+hr+tr;
-  h+='<div class="card"><span class="kicker">Total general · lei</span><b style="font-family:var(--f-mono);font-size:22px;font-weight:500">≈ '+nf(gt)+' RON</b><span class="pp">≈ '+nf(gt/2)+' RON / persoană</span><div class="tl"><div class="tlh"><span></span><i>2 persoane</i><i>1 persoană</i></div>'+
+  h+='<div class="card"><span class="kicker">Total general · lei</span><b style="font-family:var(--f-mono);font-size:22px;font-weight:500">≈ '+nf(gt)+' RON</b><span class="pp">≈ '+nf(gt/2)+' RON / persoană</span><div class="tl"><div class="tlh"><span>Cheltuiala</span><i>2 persoane</i><i>1 persoană</i></div>'+
     [["Avion",fr],["Hoteluri",hr],["Atracții și transport",tr]].map(function(r){return '<div><span>'+r[0]+'</span><b>'+nf(r[1])+' RON</b><b class="pp2">'+nf(r[1]/2)+' RON</b></div>';}).join("")+'</div></div>';
   h+='<div class="btnrow"><button class="cbtn" data-scroll="sec-avion">Bilete avion</button><button class="cbtn" data-scroll="sec-hot">Hoteluri</button><button class="cbtn" data-scroll="sec-atr">Atracții</button></div>';
   /* avion */
