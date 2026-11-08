@@ -80,7 +80,7 @@ h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;mar
 @keyframes ping{0%{transform:scale(1);opacity:.65}100%{transform:scale(3.2);opacity:0}}
 .sync.warn{color:var(--warn)} .sync.warn i{background:#f2b705}
 @media (prefers-reduced-motion:reduce){.sync.live i::after{animation:none;opacity:0}}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stats{display:grid;grid-template-columns:1fr;gap:10px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .stat b{font-family:var(--f-head);font-size:22px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
 .stat span{font-size:12px;color:var(--muted)}
@@ -136,7 +136,7 @@ h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;mar
 ul.stops{list-style:none;margin:0;padding:0 14px;display:flex;flex-direction:column;gap:0;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
 ul.stops:empty{display:none}
 ul.stops .stop:last-child{border-bottom:0}
-.stop{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 6px;padding:12px 0;border-bottom:1px solid var(--line)}
+.stop{display:grid;grid-template-columns:minmax(0,1fr);gap:4px 6px;padding:12px 0;border-bottom:1px solid var(--line)}
 .stop:last-child{border-bottom:0}
 .chk{width:44px;height:44px;display:grid;place-items:center;background:none;border:0;padding:0;margin:-6px 0 0 -8px}
 .chk span{width:26px;height:26px;border-radius:8px;border:2px solid var(--muted);display:grid;place-items:center;transition:background .15s,border-color .15s}
@@ -303,7 +303,6 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
       <div class="top-r"><span class="sync warn" id="sync" role="status"><i></i><span id="synct">Local</span></span><div class="themes" id="themes"></div></div>
     </div>
     <div class="stats">
-      <div class="stat"><b id="st1">0/0</b><span>atracții bifate</span><div class="bar"><div id="bar1"></div></div></div>
       <div class="stat"><b id="st2">0</b><span id="st2l">bilete de luat</span><div class="bar"><div id="bar2"></div></div></div>
     </div>
   </header>
@@ -340,9 +339,6 @@ var D=[
 {d:15,wd:"Duminică",cc:"tokyo",city:"Tokyo",code:"T",title:"Ajungem în Narita",note:"Ora aterizării nu e în program. Când o știi, alegem trenul potrivit.",stops:[
  {n:"Aterizare la Narita",note:"Control de pașapoarte și vamă. Dacă completezi Visit Japan Web înainte, treci mai repede."},
  {n:"Narita → Asakusa, varianta recomandată",s:"door",lbl:"Plătști la gară",p:"1.372 ¥ · ≈40 RON",x:1,note:"Keisei Narita Sky Access, apoi tren direct pe Asakusa Line. Circa 1–1,5 ore. Alege un tren care merge direct spre Asakusa și confirmă ora pe Ekitan sau Google Maps după aterizare.",links:["narita"]},
- {n:"Cea mai ieftină: Keisei Main Line",s:"door",lbl:"Plătști la gară",p:"1.177 ¥ · ≈35 RON",x:1,note:"Circa 1,5 ore, tot direct pe Asakusa Line."},
- {n:"Cea mai rapidă: Skyliner până la Keisei Ueno",s:"door",lbl:"Bilet rezervat sau la ghișeu",p:"2.745 ¥ · ≈81 RON",x:1,note:"Circa 1 oră în total. La Keisei Ueno schimbi pe Ginza Line spre Asakusa, cu bagajele. Locurile sunt rezervate. Nu e acoperit de Japan Rail Pass."},
- {n:"Cea mai comodă: autobuz limuzină",s:"door",lbl:"Plătști la urcare",p:"3.100 ¥ / persoană · ≈91 RON",x:1,note:"Circa 2 ore, până la Asakusa View Hotel, lângă stația Asakusa. Depinde de trafic."},
  {n:"Check-in la Tosei Hotel Asakusa",q:"Tosei Hotel Asakusa Tokyo",note:"În zonă sunt două hoteluri Tosei, Cocone Asakusa și Cocone Asakusa Kuramae. Verifică în rezervare numele și adresa exactă."}]},
 {d:16,wd:"Luni",cc:"tokyo",city:"Tokyo",code:"T",title:"Shibuya la apus",stops:[
  {n:"Shinjuku City"},{n:"Meiji Park"},{n:"Meiji Jingu"},{n:"Harajuku Street"},{n:"Shibuya Scramble Crossing"},
@@ -483,8 +479,7 @@ function linksHtml(s,city,withMap){
 }
 function stopHtml(s){
   var seen=!!S.seen[s.id], city=s.day.mapCity||s.day.city;
-  return '<li class="stop'+(seen?' done':'')+'">'+
-    '<button class="chk" data-k="seen" data-id="'+s.id+'" aria-pressed="'+seen+'" aria-label="Bifează: '+esc(s.n)+'"><span>'+TICK+'</span></button>'+
+  return '<li class="stop">'+
     '<div class="body">'+
       '<div class="line1">'+(s.t?'<span class="time">'+esc(s.t)+'</span>':'')+'<span class="name">'+esc(s.n)+'</span></div>'+
       ((s.s||s.p)?'<div class="meta">'+pill(s)+(s.p?'<span class="price">'+esc(s.p)+'</span>':'')+'</div>':'')+
@@ -579,8 +574,6 @@ function viewDays(){
   var hk=d.hotel||(d.d>=15&&d.d<=20?"tokyo":null);if(hk){var ht=HOTEL[hk];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
   if(d.stops.length){
     h+='<ul class="stops">'+d.stops.map(stopHtml).join("")+'</ul>';
-    var seenN=d.stops.filter(function(s){return S.seen[s.id];}).length;
-    h+='<p class="foot">'+seenN+' din '+d.stops.length+' bifate în ziua asta</p>';
   }
   h+='</section>';
   return h;
@@ -944,8 +937,6 @@ function renderNav(){
 function renderStats(){
   var tot=0,seen=0;D.forEach(function(d){d.stops.forEach(function(s){tot++;if(S.seen[s.id])seen++;});});
   var b=buyList(), left=b.filter(function(s){return !S.bought[s.id];}).length;
-  document.getElementById("st1").textContent=seen+"/"+tot;
-  document.getElementById("bar1").style.width=(tot?seen/tot*100:0)+"%";
   document.getElementById("st2").textContent=left;
   document.getElementById("st2l").textContent=left===1?"bilet de luat":"bilete de luat";
   document.getElementById("bar2").style.width=(b.length?(b.length-left)/b.length*100:0)+"%";
