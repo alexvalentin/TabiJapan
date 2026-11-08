@@ -269,6 +269,9 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
 .fmuted,.fmeta{margin:0;color:var(--muted);font-size:14px}
 .fnote{font-size:14px;color:var(--ink);white-space:pre-wrap}
 .fedit .addf input[type=time]{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);min-width:0;width:100%;box-sizing:border-box}
+.tnbox{border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+.tnbox .kv{margin:6px 0 0}
+.card.fedit{display:flex;flex-direction:column;gap:10px}
 .tsel{display:flex;align-items:center;gap:6px}
 .tsel select{flex:1;min-width:0}
 .tsel b{color:var(--muted)}
@@ -594,6 +597,7 @@ function viewDays(){
   h+='</section>';
   return h;
 }
+var XT=[{id:"t1",n:"Caută McDonald's în Tokyo",q:"McDonald's Tokyo",w:"De făcut",day:{cc:"tokyo",city:"Tokyo",d:0,wd:""}}];
 function buyList(){var r=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="buy")r.push(s);});});return r;}
 var PREP=[
  {id:"p1",n:"10.000 ¥ de persoană",p:"≈294 RON de persoană"},
@@ -624,32 +628,33 @@ function viewTickets(){
   order.forEach(function(c){
     var rows=all.filter(function(s){return s.day.cc===c&&!(c==="tokyo"&&s.day.d===30);});
     if(c==="osaka")rows=rows.concat(all.filter(function(s){return s.day.d===30;}));
+    if(c==="tokyo")rows=rows.concat(XT);
     rows=rows.filter(function(s){return !settled(s.id);});
     if(!rows.length)return;
     h+='<div class="'+c+'"><div class="group-h">'+names[c]+'</div><div class="card" style="padding:4px 14px;margin-top:8px">';
     rows.forEach(function(s){
       var got=!!S.bought[s.id];
       h+='<div class="trow '+c+(got?' done':'')+'"><button class="chk" data-k="bought" data-id="'+s.id+'" aria-pressed="'+got+'" aria-label="Bilet luat: '+esc(s.n)+'"><span>'+TICK+'</span></button>'+
-        '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span>'+
-        (s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s.note?'<span class="note">'+esc(s.note)+'</span>':'')+linksHtml(s,s.day.mapCity||s.day.city,false)+'</div></div>';
+        '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(s.w?(got?'Făcut':s.w):s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):''))+'</span><span class="name">'+esc(s.n)+'</span>'+
+        (s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s.note?'<span class="note">'+esc(s.note)+'</span>':'')+linksHtml(s,s.day.mapCity||s.day.city,!!s.w)+'</div></div>';
     });
     h+='</div></div>';shown=true;
   });
   h+=prepHtml();
   var booked=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="booked")booked.push({s:s});});});
   var moved=[];
-  all.forEach(function(s){if(settled(s.id))moved.push({s:s,id:s.id,lbl:"Bilet luat"});});
+  all.concat(XT).forEach(function(s){if(settled(s.id))moved.push({s:s,id:s.id});});
   PREP.forEach(function(x){if(settled(x.id))moved.push({p:x,id:x.id});});
   h+='<div><div class="group-h" style="--cc:var(--ok)">Deja rezervate sau luate</div><div class="card" style="padding:4px 14px;margin-top:8px">';
   booked.forEach(function(o){var s=o.s;h+='<div class="trow"><span></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span><span><span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span></span></div></div>';});
   moved.forEach(function(o){
-    var s=o.s,x=o.p,nm=s?s.n:x.n,wh=s?(s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+s.t:'')):(x.w||'De pregătit');
-    h+='<div class="trow" style="--cc:var(--ok)"><button class="chk" data-k="bought" data-id="'+o.id+'" aria-pressed="true" aria-label="Anulează: '+esc(nm)+'"><span>'+TICK+'</span></button><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+esc(wh)+'</span><span class="name">'+esc(nm)+'</span><span><span class="pill booked">'+TICK+(s?'Bilet luat':'Făcut')+'</span></span></div></div>';
+    var s=o.s,x=o.p,nm=s?s.n:x.n,wh=s?(s.w?'Tokyo':(s.day.wd+' '+s.day.d+' nov'+(s.t?' · '+s.t:''))):(x.w||'De pregătit');
+    h+='<div class="trow" style="--cc:var(--ok)"><button class="chk" data-k="bought" data-id="'+o.id+'" aria-pressed="true" aria-label="Anulează: '+esc(nm)+'"><span>'+TICK+'</span></button><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+esc(wh)+'</span><span class="name">'+esc(nm)+'</span><span><span class="pill booked">'+TICK+(s&&!s.w?'Bilet luat':'Făcut')+'</span></span></div></div>';
   });
-  h+='</div></div></div>';
+  h+='</div></div>'+xcHtml("bilete")+'</div>';
   return h;
 }
-function viewTransport(){
+function viewTransport0(){
   return '<div class="stack"><div><h2 class="sec">Transport</h2><p class="lead">Trenurile dintre orașe și drumurile mai lungi din plan.</p></div>'+
   '<div class="card tokyo"><span class="kicker">Sâmbătă 21 nov · Tokyo → Kyoto</span><h3>Shinkansen, în jur de 10:00</h3>'+
     '<p>Rezervare pentru 2 pasageri prin SmartEX. De la cazare până la Tokyo Station e o stație de metrou.</p>'+
@@ -663,7 +668,19 @@ function viewTransport(){
     '<div class="btnrow"><a class="linkbtn" href="https://smart-ex.jp/en/" target="_blank" rel="noopener">SmartEX</a></div></div>'+
   '<div class="card tokyo"><span class="kicker">Miercuri 18 nov · Tokyo</span><h3>Drumul la DisneySea</h3><p>Hotel, Ueno, Tokyo Station, Maihama. Aproximativ 45–55 de minute într-o direcție.</p></div>'+
   '<div class="card osaka"><span class="kicker">Joi 26 nov · Osaka</span><h3>Drumul la Universal Studios</h3><p>Pe jos până la Osaka-Namba, Hanshin Namba Line până la Nishikujo, apoi JR Yumesaki Line până la Universal City. Retur pe aceeași rută.</p></div>'+
-  '<div class="card"><span class="kicker">Cazări</span><dl class="kv"><dt>Kyoto</dt><dd>The Royal Park Canvas – Kyoto Nijo</dd><dt>Osaka</dt><dd>Toho Hotel Namba Motomachi</dd></dl></div></div>';
+  '<div class="card"><span class="kicker">Cazări</span><dl class="kv"><dt>Tokyo</dt><dd>Tosei Hotel Asakusa</dd><dt>Kyoto</dt><dd>The Royal Park Canvas – Kyoto Nijo</dd><dt>Osaka</dt><dd>Toho Hotel Namba Motomachi</dd></dl></div></div>';
+}
+function viewTransport(){
+  var old=viewTransport0(), parts=old.split('<div class="card'), out=parts[0], i;
+  for(i=1;i<parts.length;i++){
+    var c=parts[i], last=i===parts.length-1, tail="";
+    if(last){tail='</div>';c=c.slice(0,c.length-6);}
+    c=c.slice(0,c.length-6);
+    var add=i<=5?tnHtml("tr"+i):"";
+    out+='<div class="card'+c+add+'</div>'+tail;
+  }
+  out=out.slice(0,out.length-6);
+  return out+xcHtml("transport")+'</div>';
 }
 var HT=[
 {cc:"tokyo",city:"Tokyo",name:"Tosei Hotel Asakusa",room:"Cameră twin",book:"https://www.booking.com/hotel/jp/toseihoterukokoneqian-cao.ro.html",addr:"Asakusa 3-26-10, Tokyo, Japonia",map:"Tosei Hotel Asakusa 3-26-10 Asakusa Tokyo",
@@ -829,7 +846,8 @@ function viewHotels(){
       '<div class="btnrow"><a class="linkbtn" href="'+x.book+'" target="_blank" rel="noopener">Booking</a><a class="linkbtn" href="'+mapUrl(x.map)+'" target="_blank" rel="noopener">Hartă</a></div>'+
       '<h4 class="sub-h">'+esc(x.rt)+'</h4><ul class="plain">'+x.steps.map(function(t){return '<li>'+esc(t)+'</li>';}).join("")+'</ul></div>';
   });
-  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>Cuplu</span><span>1.781 €</span><span>330.560 ¥</span><span>≈9.722 RON</span></div><div class="total"><span>Pe persoană</span><span>890,5 €</span><span>165.280 ¥</span><span>≈4.861 RON</span></div></div></div>';
+  h+='<div class="card"><span class="kicker">Total cazări</span><div class="total"><span>Cuplu</span><span>1.781 €</span><span>330.560 ¥</span><span>≈9.722 RON</span></div><div class="total"><span>Pe persoană</span><span>890,5 €</span><span>165.280 ¥</span><span>≈4.861 RON</span></div></div>';
+  h+=xcHtml("hoteluri")+'</div>';
   return h;
 }
 var WXC={tokyo:{n:"Tokyo",la:35.6762,lo:139.6503},kyoto:{n:"Kyoto",la:35.0116,lo:135.7681},osaka:{n:"Osaka",la:34.6937,lo:135.5023},nara:{n:"Nara",la:34.6851,lo:135.8048}};
@@ -1006,13 +1024,91 @@ function remoteWrite(kind,id,on){
   });
 }
 var PEND={};
+var TNK="japonia2026-tn", XCK="japonia2026-xc", TN={}, XC={}, TE=null, XE=null, XDEL=null;
+try{TN=JSON.parse(localStorage.getItem(TNK)||"{}")||{};}catch(e){TN={};}
+try{XC=JSON.parse(localStorage.getItem(XCK)||"{}")||{};}catch(e){XC={};}
+function xSave(){try{localStorage.setItem(TNK,JSON.stringify(TN));localStorage.setItem(XCK,JSON.stringify(XC));}catch(e){}}
+var TNF=["d","tr","fr","to","lo","nt"];
+function tnKey(o){return o?TNF.map(function(k){return o[k]||"";}).join("|"):"";}
+function xcKey(o){return o?[o.tab,o.t,o.b].join("|"):"";}
+function xcList(tab){var r=[];for(var id in XC){var o=XC[id];if(o&&!o.del&&o.tab===tab)r.push(o);}r.sort(function(a,b){return a.id<b.id?-1:1;});return r;}
+function tnHtml(id){
+  var o=TN[id];
+  if(TE===id){
+    var g=function(k){return esc((o&&o[k])||"");};
+    return '<div class="fedit"><span class="kicker">Detaliile mele</span><div class="addf">'+
+      '<label>Ziua<input type="text" id="te-d" value="'+g("d")+'" autocomplete="off" placeholder="ex. sâmbătă 21 nov"></label>'+
+      '<label>Tren<input type="text" id="te-tr" value="'+g("tr")+'" autocomplete="off" placeholder="ex. Nozomi 15"></label>'+
+      '<label>De la ora (0–24)'+tsel("te-fr",(o&&o.fr)||"")+'</label>'+
+      '<label>Până la ora (0–24)'+tsel("te-to",(o&&o.to)||"")+'</label>'+
+      '<label class="full">Locuri / vagon<input type="text" id="te-lo" value="'+g("lo")+'" autocomplete="off" placeholder="ex. vagon 7, locurile 12A și 12B"></label>'+
+      '<label class="full">Note<textarea id="te-nt">'+g("nt")+'</textarea></label></div>'+
+      '<div class="acts" style="gap:8px;flex-wrap:wrap"><button class="cbtn" data-tc="1">Anulează</button><button class="cbtn pri" data-ts="'+id+'">Salvează</button></div></div>';
+  }
+  var h='';
+  if(o){
+    var kv='';
+    if(o.d)kv+='<dt>Ziua</dt><dd>'+esc(o.d)+'</dd>';
+    if(o.tr)kv+='<dt>Tren</dt><dd>'+esc(o.tr)+'</dd>';
+    if(o.fr||o.to)kv+='<dt>Ora</dt><dd>'+esc(o.fr||"—")+' → '+esc(o.to||"—")+'</dd>';
+    if(o.lo)kv+='<dt>Locuri</dt><dd>'+esc(o.lo)+'</dd>';
+    if(o.nt)kv+='<dt>Note</dt><dd style="white-space:pre-wrap">'+esc(o.nt)+'</dd>';
+    if(kv)h+='<div class="tnbox"><span class="kicker">Detaliile mele</span><dl class="kv">'+kv+'</dl></div>';
+  }
+  return h+'<div class="btnrow"><button class="cbtn" data-te="'+id+'">'+(o?'Editează detaliile':'+ Detaliile mele')+'</button></div>';
+}
+function xcForm(o,tab){
+  var isNew=!o, id=o?o.id:"new";
+  var h='<div class="card fedit"><span class="kicker">'+(isNew?'Card nou':'Editează cardul')+'</span><div class="addf">'+
+    '<label class="full">Titlu<input type="text" id="xe-t" value="'+esc(o?o.t:"")+'" autocomplete="off" placeholder="ex. Telecabina Kyoto"></label>'+
+    '<label class="full">Detalii<textarea id="xe-b" rows="5">'+esc(o?o.b:"")+'</textarea></label></div>'+
+    '<div class="acts" style="gap:8px;flex-wrap:wrap">'+(isNew?'':'<button class="cbtn" data-xx="'+id+'">'+(XDEL===id?'Sigur? Șterge cardul':'Șterge')+'</button>')+'<button class="cbtn" data-xc="1">Anulează</button><button class="cbtn pri" data-xs="'+tab+'">Salvează</button></div></div>';
+  return h;
+}
+function xcHtml(tab){
+  var h='';
+  xcList(tab).forEach(function(o){
+    if(XE===o.id){h+=xcForm(o,tab);return;}
+    h+='<div class="card"><span class="kicker">Detalii adăugate de mine</span>'+(o.t?'<h3>'+esc(o.t)+'</h3>':'')+(o.b?'<p style="white-space:pre-wrap">'+esc(o.b)+'</p>':'')+'<div class="btnrow"><button class="cbtn" data-xe="'+o.id+'">Editează</button></div></div>';
+  });
+  if(XE==="new:"+tab)h+=xcForm(null,tab);
+  else h+='<button class="cbtn" data-xadd="'+tab+'" style="align-self:flex-start">+ Adaugă card cu detalii</button>';
+  return h;
+}
+function xAct(el){
+  var g=function(i){var e=document.getElementById(i);return e?e.value.trim():"";};
+  if(el.hasAttribute("data-te")){TE=el.getAttribute("data-te");XE=null;render(true);return;}
+  if(el.hasAttribute("data-tc")){TE=null;render(true);return;}
+  if(el.hasAttribute("data-ts")){
+    var id=el.getAttribute("data-ts");
+    var o={d:g("te-d").slice(0,60),tr:g("te-tr").slice(0,60),fr:tget("te-fr"),to:tget("te-to"),lo:g("te-lo").slice(0,100),nt:g("te-nt").slice(0,400)};
+    if(!tnKey(o).replace(/\|/g,"")){delete TN[id];xSave();sbPush("tn:"+id,{del:1});}
+    else{TN[id]=o;xSave();sbPush("tn:"+id,o);}
+    TE=null;render(true);toast("Salvat");return;
+  }
+  if(el.hasAttribute("data-xadd")){XE="new:"+el.getAttribute("data-xadd");TE=null;XDEL=null;render(true);return;}
+  if(el.hasAttribute("data-xe")){XE=el.getAttribute("data-xe");TE=null;XDEL=null;render(true);return;}
+  if(el.hasAttribute("data-xc")){XE=null;XDEL=null;render(true);return;}
+  if(el.hasAttribute("data-xx")){
+    var xid=el.getAttribute("data-xx");
+    if(XDEL!==xid){XDEL=xid;render(true);return;}
+    XC[xid]={del:1};xSave();sbPush("xc:"+xid,{del:1});XE=null;XDEL=null;render(true);toast("Șters");return;
+  }
+  if(el.hasAttribute("data-xs")){
+    var tab=el.getAttribute("data-xs"), t=g("xe-t"), b=g("xe-b");
+    if(!t&&!b){toast("Scrie un titlu sau detalii");return;}
+    var cid=XE&&XE.indexOf("new:")===0?"x"+Date.now().toString(36):XE;
+    var c={id:cid,tab:tab,t:t.slice(0,80),b:b.slice(0,1500)};
+    XC[cid]=c;xSave();sbPush("xc:"+cid,c);XE=null;XDEL=null;render(true);toast("Salvat");return;
+  }
+}
 function settled(id){return !!S.bought[id]&&!PEND[id];}
 function toggle(kind,id){
   var set=S[kind], on=!set[id];
   if(on)set[id]=1;else delete set[id];
   if(kind==="bought"){
     if(PEND[id]){clearTimeout(PEND[id]);delete PEND[id];}
-    if(on)PEND[id]=setTimeout(function(){delete PEND[id];if(/^#bilete/.test(location.hash))render(true);},60000);
+    if(on)PEND[id]=setTimeout(function(){delete PEND[id];if(/^#bilete/.test(location.hash)&&XE==null)render(true);},60000);
   }
   lsSave();render(true);
   remoteWrite(kind,id,on);
@@ -1033,6 +1129,8 @@ document.addEventListener("click",function(e){
   if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}thOpen=false;applyTheme();renderThemes();return;}
   var sc=e.target.closest&&e.target.closest("[data-scroll]");
   if(sc){var el=document.getElementById(sc.getAttribute("data-scroll"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  var xa=e.target.closest&&e.target.closest("[data-te],[data-tc],[data-ts],[data-xadd],[data-xe],[data-xc],[data-xs],[data-xx]");
+  if(xa){xAct(xa);return;}
   var fa=e.target.closest&&e.target.closest("[data-fe],[data-fadd],[data-fs],[data-fc],[data-fx]");
   if(fa){flAct(fa);return;}
   var ce=e.target.closest&&e.target.closest("[data-ce]");
@@ -1146,6 +1244,12 @@ function sbApply(rows){
     }else if(kind==="flight"){
       if(v.del){if(!(FLO[id]&&FLO[id].del)){FLO[id]={del:1};ch=true;}}
       else{var fo=sbFl(v);if(fo&&!(FLO[id]&&!FLO[id].del&&flKey(FLO[id])===flKey(fo))){FLO[id]=fo;ch=true;}}
+    }else if(kind==="tn"){
+      if(v.del){if(TN[id]){delete TN[id];ch=true;}}
+      else{var tn={};TNF.forEach(function(f){tn[f]=sbStr(v[f],f==="nt"?400:100);});if(tnKey(TN[id])!==tnKey(tn)){TN[id]=tn;ch=true;}}
+    }else if(kind==="xc"){
+      if(v.del){if(!(XC[id]&&XC[id].del)){XC[id]={del:1};ch=true;}}
+      else{var xc={id:id,tab:/^(transport|hoteluri|bilete)$/.test(v.tab)?v.tab:"transport",t:sbStr(v.t,80),b:sbStr(v.b,1500)};if(!(XC[id]&&!XC[id].del&&xcKey(XC[id])===xcKey(xc))){XC[id]=xc;ch=true;}}
     }else if(kind==="extra"){
       var pos=-1;EXTRA.forEach(function(z,j){if(z.id===id)pos=j;});
       if(v.del){if(pos>=0){EXTRA.splice(pos,1);delete CV[id];delete CE[id];ch=true;}}
@@ -1161,6 +1265,8 @@ function sbSeed(rem){
   ["seen","bought"].forEach(function(kind){for(var id in S[kind]){var k=kind+":"+id;if(!rem[k]&&!sbQ.hasOwnProperty(k))sbQ[k]={on:1};}});
   for(var id in CV){var k2="cost:"+id;if(!rem[k2]&&!sbQ.hasOwnProperty(k2))sbQ[k2]=CV[id];}
   EXTRA.forEach(function(z){var k3="extra:"+z.id;if(!rem[k3]&&!sbQ.hasOwnProperty(k3))sbQ[k3]=z;});
+  for(var tid in TN){var k5="tn:"+tid;if(!rem[k5]&&!sbQ.hasOwnProperty(k5))sbQ[k5]=TN[tid];}
+  for(var xid in XC){var k6="xc:"+xid;if(!rem[k6]&&!sbQ.hasOwnProperty(k6))sbQ[k6]=XC[xid];}
   for(var fid in FLO){var k4="flight:"+fid;if(!rem[k4]&&!sbQ.hasOwnProperty(k4))sbQ[k4]=FLO[fid];}
   sbSaveQ();
   try{localStorage.setItem(SBI,sbCode);}catch(e){}
@@ -1169,13 +1275,13 @@ function sbEditing(){
   var a=document.activeElement, tg=a&&a.tagName;
   if(tg==="INPUT"||tg==="TEXTAREA"||tg==="SELECT")return true;
   for(var k in CE)return true;
-  if(FE!=null)return true;
+  if(FE!=null||TE!=null||XE!=null)return true;
   return false;
 }
 function sbPersist(){
   try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}
   try{localStorage.setItem(CK,JSON.stringify(CV));}catch(e){}
-  cxSave();flSave();
+  cxSave();flSave();xSave();
 }
 async function sbSync(){
   if(!sbOn())return;
