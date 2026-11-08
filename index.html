@@ -223,7 +223,9 @@ h2.sec{font-family:var(--f-head);font-size:24px;margin:0;font-weight:700}
 .wxh.now b,.wxh.now span{color:#fff}
 .wxh .hi{color:var(--warn);font-weight:600}
 .sub-h{font-family:var(--f-head);font-size:17px;font-weight:700;margin:8px 0 0}
-.total{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--f-mono);font-size:13px}
+.total{display:grid;grid-template-columns:max-content repeat(3,minmax(0,1fr));gap:4px 8px;align-items:baseline;font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums;padding:3px 0}
+.total span{white-space:nowrap}
+.total span:not(:first-child){text-align:right}
 .copy{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;margin-left:6px}
 ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 .linkbtn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}
@@ -250,6 +252,20 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
 .obc .cbtn{width:100%;padding:12px}
 .obc .obskip{font:inherit;font-size:14px;background:none;border:0;color:var(--muted);text-decoration:underline;padding:6px;cursor:pointer}
 .obc .oberr{color:var(--warn);font-size:14px;min-height:18px}
+
+.fl{display:flex;flex-direction:column;gap:10px;margin:2px 0 14px}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.fhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fro{font-weight:700;font-size:18px;min-width:0}
+.ftimes{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.ftimes small{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ftimes b{font-family:var(--f-mono);font-weight:500;font-size:26px;font-variant-numeric:tabular-nums}
+.ftimes sup{font-size:12px;margin-left:3px;color:var(--warn)}
+.ftimes .farr{color:var(--muted);font-size:20px}
+.fmuted,.fmeta{margin:0;color:var(--muted);font-size:14px}
+.fnote{font-size:14px;color:var(--ink);white-space:pre-wrap}
+.fedit .addf input[type=time]{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);min-width:0;width:100%;box-sizing:border-box}
+.fedit .acts{display:flex;justify-content:flex-end}
 </style>
 
 <div id="splash" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -316,8 +332,7 @@ var L={
   ekitan:{l:"Orar Haruka",u:"https://ekitan.com/en/article/haruka-jikoku-ryoukin"}
 };
 var D=[
-{d:14,wd:"Sâmbătă",cc:"tokyo",city:"Zbor spre Tokyo",code:"T",title:"Zbor București → Doha",note:"Detaliile zborului (locuri, Doha → Narita) se adaugă mai târziu.",stops:[
- {n:"Zbor Qatar Airways, București → Doha",t:"16:20",x:1}]},
+{d:14,wd:"Sâmbătă",cc:"tokyo",city:"Zbor spre Tokyo",code:"T",title:"Zboruri spre Japonia",stops:[]},
 {d:15,wd:"Duminică",cc:"tokyo",city:"Tokyo",code:"T",title:"Ajungem în Narita",note:"Ora aterizării nu e în program. Când o știi, alegem trenul potrivit.",stops:[
  {n:"Aterizare la Narita",note:"Control de pașapoarte și vamă. Dacă completezi Visit Japan Web înainte, treci mai repede."},
  {n:"Narita → Asakusa, varianta recomandată",s:"door",lbl:"Plătști la gară",p:"1.372 ¥ · ≈40 RON",x:1,note:"Keisei Narita Sky Access, apoi tren direct pe Asakusa Line. Circa 1–1,5 ore. Alege un tren care merge direct spre Asakusa și confirmă ora pe Ekitan sau Google Maps după aterizare.",links:["narita"]},
@@ -394,7 +409,7 @@ var D=[
  {n:"Shinsekai și Tsutenkaku Tower",s:"door",p:"Turnul 1.000–1.200 ¥ · ≈29–35 RON"}]},
 {d:30,wd:"Luni",cc:"tokyo",city:"Tokyo",code:"T",title:"Înapoi la Tokyo",stops:[
  {n:"Shinkansen Nozomi Shin-Osaka → Tokyo",s:"booked",lbl:"Bilet cumpărat",x:1,note:"Plecare din Shin-Osaka, nu din Osaka Station. Circa 2 h 30. Loc pe partea A pentru priveliștea spre Muntele Fuji.",links:["smartex"]}]},
-{d:31,wd:"Marți",cc:"tokyo",city:"Zbor spre București",code:"T",title:"Zbor Narita → București",note:"Detaliile zborului de întoarcere (oră, escală) se adaugă mai târziu.",stops:[{n:"Zbor Narita → București",x:1}]}
+{d:31,wd:"Marți",cc:"tokyo",city:"Zbor spre București",code:"T",title:"Zboruri înapoi acasă",stops:[]}
 ];
 D.forEach(function(day){day.stops.forEach(function(s,i){s.id="d"+day.d+"-"+(i+1);s.day=day;});});
 
@@ -473,6 +488,71 @@ function stopHtml(s){
       linksHtml(s,city,true)+
     '</div></li>';
 }
+function flDayLab(n){var dd=dayBy(n);return dd.wd+" "+dlab(n)+(n>30?" dec":" nov");}
+function flCard(f){
+  var none=!f.dep&&!f.arr;
+  var h='<div class="fcard"><div class="fhead"><span class="fro">'+esc(f.f)+' → '+esc(f.t)+'</span><button class="cbtn" data-fe="'+f.id+'">Editează</button></div>';
+  if(none)h+='<p class="fmuted">Ora zborului nu e completată. Apasă Editează.</p>';
+  else h+='<div class="ftimes"><div><small>Plecare</small><b>'+(f.dep?esc(f.dep):"—")+'</b></div><span class="farr" aria-hidden="true">→</span><div><small>Sosire</small><b>'+(f.arr?esc(f.arr):"—")+(f.ao?'<sup>+'+f.ao+'</sup>':'')+'</b></div></div>';
+  var m=[];if(f.al)m.push(esc(f.al));if(f.no)m.push(esc(f.no));
+  if(m.length)h+='<div class="fmeta">'+m.join(" · ")+'</div>';
+  if(f.ao)h+='<div class="fmeta">Aterizezi a doua zi după plecare.</div>';
+  if(f.note)h+='<div class="fnote">'+esc(f.note)+'</div>';
+  return h+'</div>';
+}
+function flForm(f,dn){
+  var dr=FDRAFT||{}, g=function(k,def){return dr[k]!=null?dr[k]:(f&&f[k]!=null?f[k]:def);};
+  var isNew=!f, id=f?f.id:"new";
+  var opts=[14,15,30,31].map(function(n){return '<option value="'+n+'"'+(+g("d",dn||FDAY||14)===n?' selected':'')+'>'+flDayLab(n)+'</option>';}).join("");
+  var h='<div class="fcard fedit"><span class="kicker">'+(isNew?'Zbor nou':'Editează zborul')+'</span><div class="addf">'+
+    '<label>De la<input type="text" id="fe-f" value="'+esc(g("f",""))+'" autocomplete="off" placeholder="ex. Doha"></label>'+
+    '<label>La<input type="text" id="fe-t" value="'+esc(g("t",""))+'" autocomplete="off" placeholder="ex. Narita"></label>'+
+    '<label>Ora plecare<input type="time" id="fe-dep" value="'+esc(g("dep",""))+'"></label>'+
+    '<label>Ora sosire<input type="time" id="fe-arr" value="'+esc(g("arr",""))+'"></label>'+
+    '<label>Ziua plecării<select id="fe-d">'+opts+'</select></label>'+
+    '<label>Aterizezi<select id="fe-ao"><option value="0"'+(+g("ao",0)?'':' selected')+'>în aceeași zi</option><option value="1"'+(+g("ao",0)?' selected':'')+'>a doua zi (+1)</option></select></label>'+
+    '<label>Companie<input type="text" id="fe-al" value="'+esc(g("al",""))+'" autocomplete="off" placeholder="ex. Qatar Airways"></label>'+
+    '<label>Număr zbor<input type="text" id="fe-no" value="'+esc(g("no",""))+'" autocomplete="off" autocapitalize="characters" placeholder="ex. QR 806"></label>'+
+    '<label class="full">Note (locuri, terminal, rezervare)<textarea id="fe-note">'+esc(g("note",""))+'</textarea></label></div>'+
+    '<div class="acts" style="gap:8px;flex-wrap:wrap">'+(isNew?'':'<button class="cbtn" data-fx="'+id+'">'+(FDEL===id?'Sigur? Șterge zborul':'Șterge')+'</button>')+'<button class="cbtn" data-fc="1">Anulează</button><button class="cbtn pri" data-fs="1">Salvează</button></div></div>';
+  return h;
+}
+function flightsHtml(dn){
+  var list=flAll().filter(function(f){return f.d===dn;});
+  var addable=dn===14||dn===15||dn===31;
+  if(!list.length&&!addable&&!(FE==="new"&&FDAY===dn))return "";
+  var h='<div class="fl"><span class="kicker">Zboruri</span>';
+  list.forEach(function(f){h+=(FE===f.id)?flForm(f):flCard(f);});
+  if(FE==="new"&&FDAY===dn)h+=flForm(null,dn);
+  else if(addable)h+='<button class="cbtn" data-fadd="'+dn+'">+ Adaugă zbor</button>';
+  return h+'</div>';
+}
+function flCapture(){
+  if(!document.getElementById("fe-f"))return;
+  var g=function(i){var e=document.getElementById(i);return e?e.value:"";};
+  FDRAFT={f:g("fe-f"),t:g("fe-t"),dep:g("fe-dep"),arr:g("fe-arr"),d:g("fe-d"),ao:g("fe-ao"),al:g("fe-al"),no:g("fe-no"),note:g("fe-note")};
+}
+function flSaveForm(){
+  var g=function(i){var e=document.getElementById(i);return e?e.value.trim():"";};
+  var f=g("fe-f"), t=g("fe-t"), dep=g("fe-dep"), arr=g("fe-arr");
+  if(!f||!t){toast("Completează De la și La");return;}
+  var id=FE==="new"?"fx"+Date.now().toString(36):FE;
+  var o={id:id,d:(+g("fe-d")||14),f:f.slice(0,40),t:t.slice(0,40),al:g("fe-al").slice(0,40),no:g("fe-no").slice(0,20),dep:/^\d{2}:\d{2}$/.test(dep)?dep:"",arr:/^\d{2}:\d{2}$/.test(arr)?arr:"",ao:g("fe-ao")==="1"?1:0,note:g("fe-note").slice(0,300)};
+  var moved=o.d!==selDay;
+  FLO[id]=o;flSave();sbPush("flight:"+id,o);FE=null;FDRAFT=null;FDEL=null;
+  render(true);toast(moved?"Salvat. Zborul e în ziua "+flDayLab(o.d):"Salvat");
+}
+function flAct(el){
+  if(el.hasAttribute("data-fadd")){flCapture();FE="new";FDAY=+el.getAttribute("data-fadd");FDRAFT=null;FDEL=null;render(true);return;}
+  if(el.hasAttribute("data-fe")){flCapture();FE=el.getAttribute("data-fe");FDRAFT=null;FDEL=null;render(true);return;}
+  if(el.hasAttribute("data-fc")){FE=null;FDRAFT=null;FDEL=null;render(true);return;}
+  if(el.hasAttribute("data-fx")){
+    var id=el.getAttribute("data-fx");
+    if(FDEL!==id){flCapture();FDEL=id;render(true);return;}
+    FLO[id]={del:1};flSave();sbPush("flight:"+id,{del:1});FE=null;FDEL=null;FDRAFT=null;render(true);toast("Șters");return;
+  }
+  if(el.hasAttribute("data-fs")){flSaveForm();return;}
+}
 function viewDays(){
   var td=today();
   var GR=[{k:"tokyo",t:"Zbor București – Narita",from:14,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo și Zbor Narita – București",from:30,to:31,r:"30 nov – 1 dec"}];
@@ -487,12 +567,18 @@ function viewDays(){
   h+='<div class="strip" id="days">'+chips+'</div>';
   if(!d){h+='<p class="note" style="padding:6px 0 0">Alege o zi din listă ca să vezi programul ei. Se deschide singură în ziua respectivă.</p>';return h;}
   h+='<section id="daysec" class="'+d.cc+'"><div class="dayhead"><span class="city">'+d.city+' · '+d.code+dlab(d.d)+'</span><h2>'+esc(d.title)+'</h2><span class="date">'+d.wd+', '+dlab(d.d)+(d.d>30?' decembrie':' noiembrie')+' 2026</span></div>';
-  if(d.note)h+='<div class="notice">'+esc(d.note)+'</div>';
+  var nt=d.note;
+  if(d.d===15){var la=flAll().filter(function(f){return /narita/i.test(f.t)&&f.arr&&(f.d+(f.ao||0))===15;})[0];if(la)nt="Aterizezi la Narita la "+la.arr+". Alege trenul potrivit după ora asta.";}
+  if(nt)h+='<div class="notice">'+esc(nt)+'</div>';
+  h+=flightsHtml(d.d);
   h+='<div id="wx">'+wxHtml(d)+'</div>';
   var hk=d.hotel||(d.d>=15&&d.d<=20?"tokyo":null);if(hk){var ht=HOTEL[hk];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
-  h+='<ul class="stops">'+d.stops.map(stopHtml).join("")+'</ul>';
-  var seenN=d.stops.filter(function(s){return S.seen[s.id];}).length;
-  h+='<p class="foot">'+seenN+' din '+d.stops.length+' bifate în ziua asta</p></section>';
+  if(d.stops.length){
+    h+='<ul class="stops">'+d.stops.map(stopHtml).join("")+'</ul>';
+    var seenN=d.stops.filter(function(s){return S.seen[s.id];}).length;
+    h+='<p class="foot">'+seenN+' din '+d.stops.length+' bifate în ziua asta</p>';
+  }
+  h+='</section>';
   return h;
 }
 function buyList(){var r=[];D.forEach(function(d){d.stops.forEach(function(s){if(s.s==="buy")r.push(s);});});return r;}
@@ -612,11 +698,26 @@ var CXK="japonia2026-cost-extra", EXTRA=[];
 try{EXTRA=JSON.parse(localStorage.getItem(CXK)||"[]")||[];}catch(e){EXTRA=[];}
 function cxSave(){try{localStorage.setItem(CXK,JSON.stringify(EXTRA));}catch(e){}}
 function cAll(){return COSTS.concat(EXTRA);}
-var FL=[
-{id:"f1",fl:1,a:"Zbor București → Doha",d:14,det:"Qatar Airways, plecare la 16:20.",y:null,r:null,b:0},
-{id:"f2",fl:1,a:"Zbor Doha → Narita",d:15,det:"Detaliile (ora, escala, locurile) se adaugă mai târziu.",y:null,r:null,b:0},
-{id:"f3",fl:1,a:"Zbor Narita → București",d:31,det:"Ora zborului se adaugă mai târziu.",y:null,r:null,b:0}
+var FB=[
+{id:"f1",d:14,f:"București",t:"Doha",al:"Qatar Airways",no:"",dep:"16:20",arr:"",ao:0,note:""},
+{id:"f2",d:15,f:"Doha",t:"Narita",al:"",no:"",dep:"",arr:"",ao:0,note:""},
+{id:"f3",d:31,f:"Narita",t:"Doha",al:"",no:"",dep:"",arr:"",ao:0,note:""},
+{id:"f4",d:31,f:"Doha",t:"București",al:"",no:"",dep:"",arr:"",ao:0,note:""}
 ];
+var FLK="japonia2026-fl", FLO={}, FE=null, FDAY=14, FDEL=null, FDRAFT=null;
+try{FLO=JSON.parse(localStorage.getItem(FLK)||"{}")||{};}catch(e){FLO={};}
+function flSave(){try{localStorage.setItem(FLK,JSON.stringify(FLO));}catch(e){}}
+function flAll(){
+  var r=[],seen={};
+  FB.forEach(function(b){seen[b.id]=1;var o=FLO[b.id];if(o&&o.del)return;r.push(o||b);});
+  Object.keys(FLO).forEach(function(id){var o=FLO[id];if(!seen[id]&&o&&!o.del)r.push(o);});
+  r.forEach(function(x,i){x._i=i;});
+  r.sort(function(a,b){return a.d-b.d||((a.dep||"99:99")<(b.dep||"99:99")?-1:(a.dep||"99:99")>(b.dep||"99:99")?1:0)||a._i-b._i;});
+  return r;
+}
+function flKey(o){return [o.d,o.f,o.t,o.al,o.no,o.dep,o.arr,o.ao,o.note].join("|");}
+function flDet(f){var a=[];if(f.al)a.push(f.al);if(f.no)a.push(f.no);if(f.dep||f.arr)a.push((f.dep||"—")+" → "+(f.arr||"—")+(f.ao?" (+"+f.ao+" zi)":""));return a.join(" · ");}
+function flCost(f){return {id:f.id,fl:1,a:"Zbor "+f.f+" → "+f.t,d:f.d,det:flDet(f),y:null,r:null,b:0};}
 var HC=[{e:729,y:135319,r:3980},{e:678,y:125800,r:3700},{e:374,y:69441,r:2042}];
 function ef(n){return n%1?n.toFixed(1).replace(".",","):nf(n);}
 var YEN_PER_RON=34;
@@ -650,14 +751,14 @@ function costRow(x){
 function viewCosts(){
   var ty=0,tr=0,py=0,pr=0;
   cAll().forEach(function(x){var v=cget(x);ty+=v.y||0;tr+=v.r||0;if(v.b){py+=v.y||0;pr+=v.r||0;}});
-  var fr=0,fpaid=0;FL.forEach(function(x){var v=cget(x);fr+=v.r||0;if(v.b)fpaid+=v.r||0;});
+  var fr=0,fpaid=0;flAll().map(flCost).forEach(function(x){var v=cget(x);fr+=v.r||0;if(v.b)fpaid+=v.r||0;});
   var he=0,hy=0,hr=0;HC.forEach(function(c){he+=c.e;hy+=c.y;hr+=c.r;});
   var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Bilete de avion, hoteluri, atracții și transport. La sume apasă „Editează”, apoi „Salvează”.</p></div>';
   h+='<div class="card"><span class="kicker">Total general · lei</span><b style="font-family:var(--f-mono);font-size:22px;font-weight:500">≈ '+nf(fr+hr+tr)+' RON</b><div class="total"><span>Avion '+nf(fr)+'</span><span>Hoteluri '+nf(hr)+'</span><span>Atracții și transport '+nf(tr)+'</span></div></div>';
   h+='<div class="btnrow"><button class="cbtn" data-scroll="sec-avion">Bilete avion</button><button class="cbtn" data-scroll="sec-hot">Hoteluri</button><button class="cbtn" data-scroll="sec-atr">Atracții</button></div>';
   /* avion */
   h+='<div id="sec-avion" class="stack" style="gap:8px"><h3 class="sec" style="font-size:20px;margin:8px 0 0">Bilete avion <span class="note" style="font-weight:400">'+(fr?nf(fr)+' RON total':'prețuri de completat')+'</span></h3>';
-  FL.forEach(function(x){h+=costRow(x);});
+  flAll().map(flCost).forEach(function(x){h+=costRow(x);});
   h+='</div>';
   /* hoteluri */
   h+='<div id="sec-hot" class="stack" style="gap:8px"><h3 class="sec" style="font-size:20px;margin:14px 0 0">Cheltuieli Hoteluri <span class="note" style="font-weight:400">≈ '+nf(hr)+' RON</span></h3>';
@@ -701,7 +802,7 @@ function viewHotels(){
   var h='<div class="stack"><div><h2 class="sec">Hoteluri</h2><p class="lead">Cazările, orele de check-in și check-out și drumul spre gară pentru trenurile voastre.</p></div>';
   HT.forEach(function(x){
     h+='<div class="card '+x.cc+'"><span class="kicker">'+x.city+' · '+x.n+' nopți</span><h3>'+esc(x.name)+'</h3><span class="note">'+esc(x.room)+'</span>'+
-      '<dl class="kv"><dt>Check-in</dt><dd>'+x.ci+'</dd><dt>Check-out</dt><dd>'+x.co+'</dd><dt>Preț cuplu</dt><dd>'+x.price+'</dd><dt>Pe persoană</dt><dd>'+x.pp+'</dd><dt>Data plată</dt><dd>'+x.pay+'</dd><dt>Data plății</dt><dd>'+x.paid+'</dd><dt>Adresă</dt><dd>'+esc(x.addr)+'</dd></dl>'+
+      '<dl class="kv"><dt>Check-in</dt><dd>'+x.ci+'</dd><dt>Check-out</dt><dd>'+x.co+'</dd><dt>Preț cuplu</dt><dd>'+x.price+'</dd><dt>Pe persoană</dt><dd>'+x.pp+'</dd><dt>Data plății</dt><dd>'+x.paid+'</dd><dt>Adresă</dt><dd>'+esc(x.addr)+'</dd></dl>'+
       '<div class="btnrow"><a class="linkbtn" href="'+x.book+'" target="_blank" rel="noopener">Booking</a><a class="linkbtn" href="'+mapUrl(x.map)+'" target="_blank" rel="noopener">Hartă</a></div>'+
       '<h4 class="sub-h">'+esc(x.rt)+'</h4><ul class="plain">'+x.steps.map(function(t){return '<li>'+esc(t)+'</li>';}).join("")+'</ul></div>';
   });
@@ -857,6 +958,7 @@ function renderSync(){
 }
 function render(keepScroll){
   var main=document.getElementById("main");
+  flCapture();
   var html=tab==="bilete"?viewTickets():tab==="transport"?viewTransport():tab==="hoteluri"?viewHotels():tab==="cheltuieli"?viewCosts():tab==="info"?viewInfo():viewDays();
   var prevDays=document.getElementById("days"), sl=prevDays?prevDays.scrollLeft:0;
   main.innerHTML=html;
@@ -904,6 +1006,8 @@ document.addEventListener("click",function(e){
   if(th){theme=th.getAttribute("data-theme-set");try{localStorage.setItem(THK,theme);}catch(x){}thOpen=false;applyTheme();renderThemes();return;}
   var sc=e.target.closest&&e.target.closest("[data-scroll]");
   if(sc){var el=document.getElementById(sc.getAttribute("data-scroll"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  var fa=e.target.closest&&e.target.closest("[data-fe],[data-fadd],[data-fs],[data-fc],[data-fx]");
+  if(fa){flAct(fa);return;}
   var ce=e.target.closest&&e.target.closest("[data-ce]");
   if(ce){CE[ce.getAttribute("data-ce")]=true;render(true);var f=document.getElementById("y-"+ce.getAttribute("data-ce"))||document.getElementById("r-"+ce.getAttribute("data-ce"));if(f)f.focus();return;}
   var ca=e.target.closest&&e.target.closest("[data-cadd]");
@@ -987,6 +1091,12 @@ function sbKick(ms){
 }
 function sbId(x){return typeof x==="string"&&/^[A-Za-z0-9_-]{1,40}$/.test(x);}
 function sbStr(x,n){return typeof x==="string"?x.slice(0,n):"";}
+function sbTime(x){return typeof x==="string"&&/^\d{2}:\d{2}$/.test(x)?x:"";}
+function sbFl(r){
+  if(!r||typeof r!=="object"||!sbId(r.id))return null;
+  var d=+r.d;if(!(d>=14&&d<=31))return null;
+  return {id:r.id,d:d,f:sbStr(r.f,40),t:sbStr(r.t,40),al:sbStr(r.al,40),no:sbStr(r.no,20),dep:sbTime(r.dep),arr:sbTime(r.arr),ao:r.ao?1:0,note:sbStr(r.note,300)};
+}
 function sbNum(x){return typeof x==="number"&&isFinite(x)&&x>=0?x:null;}
 function sbClean(r){
   if(!r||typeof r!=="object"||!sbId(r.id))return null;
@@ -1006,6 +1116,9 @@ function sbApply(rows){
     }else if(kind==="cost"){
       var n={y:sbNum(v.y),r:sbNum(v.r),b:v.b?1:0}, o=CV[id];
       if(!o||o.y!==n.y||o.r!==n.r||o.b!==n.b){CV[id]=n;ch=true;}
+    }else if(kind==="flight"){
+      if(v.del){if(!(FLO[id]&&FLO[id].del)){FLO[id]={del:1};ch=true;}}
+      else{var fo=sbFl(v);if(fo&&!(FLO[id]&&!FLO[id].del&&flKey(FLO[id])===flKey(fo))){FLO[id]=fo;ch=true;}}
     }else if(kind==="extra"){
       var pos=-1;EXTRA.forEach(function(z,j){if(z.id===id)pos=j;});
       if(v.del){if(pos>=0){EXTRA.splice(pos,1);delete CV[id];delete CE[id];ch=true;}}
@@ -1021,6 +1134,7 @@ function sbSeed(rem){
   ["seen","bought"].forEach(function(kind){for(var id in S[kind]){var k=kind+":"+id;if(!rem[k]&&!sbQ.hasOwnProperty(k))sbQ[k]={on:1};}});
   for(var id in CV){var k2="cost:"+id;if(!rem[k2]&&!sbQ.hasOwnProperty(k2))sbQ[k2]=CV[id];}
   EXTRA.forEach(function(z){var k3="extra:"+z.id;if(!rem[k3]&&!sbQ.hasOwnProperty(k3))sbQ[k3]=z;});
+  for(var fid in FLO){var k4="flight:"+fid;if(!rem[k4]&&!sbQ.hasOwnProperty(k4))sbQ[k4]=FLO[fid];}
   sbSaveQ();
   try{localStorage.setItem(SBI,sbCode);}catch(e){}
 }
@@ -1028,12 +1142,13 @@ function sbEditing(){
   var a=document.activeElement, tg=a&&a.tagName;
   if(tg==="INPUT"||tg==="TEXTAREA"||tg==="SELECT")return true;
   for(var k in CE)return true;
+  if(FE!=null)return true;
   return false;
 }
 function sbPersist(){
   try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}
   try{localStorage.setItem(CK,JSON.stringify(CV));}catch(e){}
-  cxSave();
+  cxSave();flSave();
 }
 async function sbSync(){
   if(!sbOn())return;
