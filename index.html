@@ -136,15 +136,16 @@ h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;mar
 ul.stops{list-style:none;margin:0;padding:0 14px;display:flex;flex-direction:column;gap:0;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
 ul.stops:empty{display:none}
 ul.stops .stop:last-child{border-bottom:0}
-.stop{display:grid;grid-template-columns:minmax(0,1fr);gap:4px 6px;padding:12px 0;border-bottom:1px solid var(--line)}
+.stop{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
 .stop:last-child{border-bottom:0}
 .chk{width:44px;height:44px;display:grid;place-items:center;background:none;border:0;padding:0;margin:-6px 0 0 -8px}
 .chk span{width:26px;height:26px;border-radius:8px;border:2px solid var(--muted);display:grid;place-items:center;transition:background .15s,border-color .15s}
 .chk svg{width:16px;height:16px;opacity:0;stroke:var(--on-city)}
 .chk[aria-pressed="true"] span{background:var(--cc);border-color:var(--cc)}
 .chk[aria-pressed="true"] svg{opacity:1}
-.st3{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.st3b{font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface2);color:var(--muted);cursor:pointer}
+.st3{display:flex;gap:6px;flex-direction:column;align-items:flex-end;margin-top:2px}
+.st3.open{gap:6px}
+.st3b{font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;white-space:nowrap;border:1.5px solid var(--line);background:var(--surface2);color:var(--muted);cursor:pointer}
 .st3b.v.on{background:#2f9e5f;border-color:#2f9e5f;color:#fff}
 .st3b.n.on{background:#f2c230;border-color:#f2c230;color:#3d2e00}
 .st3b.c.on{background:#d24b3e;border-color:#d24b3e;color:#fff}
@@ -501,8 +502,8 @@ function stopHtml(s){
       '<div class="line1">'+(s.t?'<span class="time">'+esc(s.t)+'</span>':'')+'<span class="name">'+esc(s.n)+'</span></div>'+
       ((s.s||s.p)?'<div class="meta">'+pill(s)+(s.p?'<span class="price">'+esc(s.p)+'</span>':'')+'</div>':'')+
       (s.note?'<div class="note">'+esc(s.note)+'</div>':'')+
-      linksHtml(s,city,true)+stHtml(s.id)+
-    '</div></li>';
+      linksHtml(s,city,true)+
+    '</div>'+stHtml(s.id)+'</li>';
 }
 function flDayLab(n){var dd=dayBy(n);return dd.wd+" "+dlab(n)+(n>30?" dec":" nov");}
 function flCard(f){
@@ -1084,7 +1085,7 @@ var STL={v:"Vizitat",n:"Nevizitat",c:"Anulat"};
 var STO=null;
 function stHtml(id){
   var cur=ST[id]||"";
-  if(STO===id)return '<div class="st3" role="group" aria-label="Stare">'+["v","n","c"].map(function(k){return '<button class="st3b '+k+' on" data-st="'+k+'" data-sid="'+id+'">'+STL[k]+'</button>';}).join("")+'</div>';
+  if(STO===id)return '<div class="st3 open" role="group" aria-label="Stare">'+["v","n","c"].map(function(k){return '<button class="st3b '+k+' on" data-st="'+k+'" data-sid="'+id+'">'+STL[k]+'</button>';}).join("")+'<button class="st3b z" data-st="" data-sid="'+id+'">Alege starea</button></div>';
   return '<div class="st3"><button class="st3b '+(cur||'z')+(cur?' on':'')+'" data-sopen="'+id+'">'+(cur?STL[cur]:'Alege starea')+' ▾</button></div>';
 }
 var TNK="japonia2026-tn", XCK="japonia2026-xc", TN={}, XC={}, TE=null, XE=null, XDEL=null;
@@ -1238,7 +1239,7 @@ document.addEventListener("click",function(e){
   var sb=e.target.closest&&e.target.closest("[data-st]");
   var so=e.target.closest&&e.target.closest("[data-sopen]");
   if(so){STO=so.getAttribute("data-sopen");render(true);return;}
-  if(sb){var sid=sb.getAttribute("data-sid"),sk=sb.getAttribute("data-st");ST[sid]=sk;STO=null;xSave();sbPush("st:"+sid,{v:ST[sid]||""});render(true);return;}
+  if(sb){var sid=sb.getAttribute("data-sid"),sk=sb.getAttribute("data-st");if(sk)ST[sid]=sk;else delete ST[sid];STO=null;xSave();sbPush("st:"+sid,{v:ST[sid]||""});render(true);return;}
   var xa=e.target.closest&&e.target.closest("[data-te],[data-tc],[data-ts],[data-xadd],[data-xe],[data-xc],[data-xs],[data-xx],[data-badd],[data-be],[data-bc],[data-bx],[data-bs],[data-he],[data-hc],[data-hr],[data-hs]");
   if(xa){if(xa.hasAttribute("data-badd")||xa.hasAttribute("data-be")||xa.hasAttribute("data-bc")||xa.hasAttribute("data-bx")||xa.hasAttribute("data-bs"))bAct(xa);else if(xa.hasAttribute("data-he")||xa.hasAttribute("data-hc")||xa.hasAttribute("data-hr")||xa.hasAttribute("data-hs"))hoAct(xa);else xAct(xa);return;}
   var fa=e.target.closest&&e.target.closest("[data-fe],[data-fadd],[data-fs],[data-fc],[data-fx]");
