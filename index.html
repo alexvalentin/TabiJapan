@@ -269,6 +269,9 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
 .fmuted,.fmeta{margin:0;color:var(--muted);font-size:14px}
 .fnote{font-size:14px;color:var(--ink);white-space:pre-wrap}
 .fedit .addf input[type=time]{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--ink);min-width:0;width:100%;box-sizing:border-box}
+.tsel{display:flex;align-items:center;gap:6px}
+.tsel select{flex:1;min-width:0}
+.tsel b{color:var(--muted)}
 .fedit .acts{display:flex;justify-content:flex-end}
 </style>
 
@@ -506,8 +509,8 @@ function flForm(f,dn){
   var h='<div class="fcard fedit"><span class="kicker">'+(isNew?'Zbor nou':'Editează zborul')+'</span><div class="addf">'+
     '<label>De la<input type="text" id="fe-f" value="'+esc(g("f",""))+'" autocomplete="off" placeholder="ex. Doha"></label>'+
     '<label>La<input type="text" id="fe-t" value="'+esc(g("t",""))+'" autocomplete="off" placeholder="ex. Narita"></label>'+
-    '<label>Ora plecare<input type="time" id="fe-dep" value="'+esc(g("dep",""))+'"></label>'+
-    '<label>Ora sosire<input type="time" id="fe-arr" value="'+esc(g("arr",""))+'"></label>'+
+    '<label>Ora plecare (0–24)'+tsel("fe-dep",g("dep",""))+'</label>'+
+    '<label>Ora sosire (0–24)'+tsel("fe-arr",g("arr",""))+'</label>'+
     '<label>Ziua plecării<select id="fe-d">'+opts+'</select></label>'+
     '<label>Aterizezi<select id="fe-ao"><option value="0"'+(+g("ao",0)?'':' selected')+'>în aceeași zi</option><option value="1"'+(+g("ao",0)?' selected':'')+'>a doua zi (+1)</option></select></label>'+
     '<label>Companie<input type="text" id="fe-al" value="'+esc(g("al",""))+'" autocomplete="off" placeholder="ex. Qatar Airways"></label>'+
@@ -526,14 +529,27 @@ function flightsHtml(dn){
   else if(addable)h+='<button class="cbtn" data-fadd="'+dn+'">+ Adaugă zbor</button>';
   return h+'</div>';
 }
+function tsel(id,v){
+  var m=/^(\d{2}):(\d{2})$/.exec(v||""),hh=m?m[1]:"",mm=m?m[2]:"",o='<span class="tsel">',i,x;
+  o+='<select id="'+id+'-h" aria-label="Ora"><option value="">--</option>';
+  for(i=0;i<24;i++){x=("0"+i).slice(-2);o+='<option value="'+x+'"'+(x===hh?' selected':'')+'>'+x+'</option>';}
+  o+='</select><b>:</b><select id="'+id+'-m" aria-label="Minute"><option value="">--</option>';
+  for(i=0;i<60;i++){x=("0"+i).slice(-2);o+='<option value="'+x+'"'+(x===mm?' selected':'')+'>'+x+'</option>';}
+  return o+'</select></span>';
+}
+function tget(id){
+  var h=document.getElementById(id+"-h"),m=document.getElementById(id+"-m");
+  if(!h||!h.value)return "";
+  return h.value+":"+((m&&m.value)||"00");
+}
 function flCapture(){
   if(!document.getElementById("fe-f"))return;
   var g=function(i){var e=document.getElementById(i);return e?e.value:"";};
-  FDRAFT={f:g("fe-f"),t:g("fe-t"),dep:g("fe-dep"),arr:g("fe-arr"),d:g("fe-d"),ao:g("fe-ao"),al:g("fe-al"),no:g("fe-no"),note:g("fe-note")};
+  FDRAFT={f:g("fe-f"),t:g("fe-t"),dep:tget("fe-dep"),arr:tget("fe-arr"),d:g("fe-d"),ao:g("fe-ao"),al:g("fe-al"),no:g("fe-no"),note:g("fe-note")};
 }
 function flSaveForm(){
   var g=function(i){var e=document.getElementById(i);return e?e.value.trim():"";};
-  var f=g("fe-f"), t=g("fe-t"), dep=g("fe-dep"), arr=g("fe-arr");
+  var f=g("fe-f"), t=g("fe-t"), dep=tget("fe-dep"), arr=tget("fe-arr");
   if(!f||!t){toast("Completează De la și La");return;}
   var id=FE==="new"?"fx"+Date.now().toString(36):FE;
   var o={id:id,d:(+g("fe-d")||14),f:f.slice(0,40),t:t.slice(0,40),al:g("fe-al").slice(0,40),no:g("fe-no").slice(0,20),dep:/^\d{2}:\d{2}$/.test(dep)?dep:"",arr:/^\d{2}:\d{2}$/.test(arr)?arr:"",ao:g("fe-ao")==="1"?1:0,note:g("fe-note").slice(0,300)};
