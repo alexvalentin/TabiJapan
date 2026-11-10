@@ -316,7 +316,7 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
     <div class="top-row">
       <div>
         <h1>Tabi Japan</h1>
-        <div class="sub" id="sub">14 noiembrie 2026 – 1 decembrie 2026 · Tokyo · Kyoto · Osaka · Nara</div>
+        <div class="sub" id="sub">14 noiembrie – 1 decembrie 2026 · Tokyo · Kyoto · Osaka · Nara</div>
       </div>
       <div class="top-r"><span class="sync warn" id="sync" role="status"><i></i><span id="synct">Local</span></span><div class="themes" id="themes"></div></div>
     </div>
@@ -476,7 +476,7 @@ function renderThemes(){
 applyTheme();
 
 function dlab(n){return n>30?n-30:n;}
-function tripDate(n){return dlab(n)+(n>30?" decembrie ":" noiembrie ")+"2026";}
+function tripDate(n,omitYear){return dlab(n)+(n>30?" decembrie":" noiembrie")+(omitYear?"":" 2026");}
 function fullTripDates(value){return value.replace(/\b(\d{1,2}) (nov|dec)\b/g,function(_,day,month){return tripDate(+day+(month==="dec"?30:0));});}
 function wxDate(n){return n>30?"2026-12-0"+(n-30):"2026-11-"+(n<10?"0":"")+n;}
 function today(){var n=new Date();if(n.getFullYear()!==2026)return null;if(n.getMonth()===10&&n.getDate()>=14&&n.getDate()<=30)return n.getDate();if(n.getMonth()===11&&n.getDate()===1)return 31;return null;}
@@ -511,7 +511,7 @@ function stopHtml(s){
       linksHtml(s,city,true)+
     '</div>'+stHtml(s.id)+'</li>';
 }
-function flDayLab(n){var dd=dayBy(n);return dd.wd+" "+tripDate(n);}
+function flDayLab(n){var dd=dayBy(n);return dd.wd+", "+tripDate(n);}
 var FL_ZONES={ro:{label:"România",offset:120},qa:{label:"Qatar",offset:180},jp:{label:"Japonia",offset:540}};
 function flZone(city){
   if(/doha|\bdoh\b/i.test(city))return "qa";
@@ -626,7 +626,7 @@ function viewDays(){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
         '<span class="band"></span><span class="code">'+x.code+dlab(x.d)+'</span><span class="wd">'+x.wd+'</span><span class="wc"></span></a>';
     }).join("");
-    return '<div class="dgroup '+g.k+'"><div class="dg-h"><b>'+g.t+'</b><span>'+(tripDate(g.from)+(g.from===g.to?'':' – '+tripDate(g.to)))+'</span></div><div class="days">'+items+'</div></div>';
+    return '<div class="dgroup '+g.k+'"><div class="dg-h"><b>'+g.t+'</b><span>'+(g.from===g.to?tripDate(g.from):tripDate(g.from,true)+' – '+tripDate(g.to))+'</span></div><div class="days">'+items+'</div></div>';
   }).join("");
   var d=selDay===null?null:dayBy(selDay), h="";
   h+='<div class="strip" id="days">'+chips+'</div>';
@@ -651,7 +651,7 @@ var PREP=[
  {id:"p2",n:"Cântar de bagaje, chestii pentru haine"},
  {id:"p3",n:"Visit Japan Web, cu datele personale"},
  {id:"p4",n:"Rezerve pentru aparatul foto"},
- {id:"p5",n:"eSIM pentru telefon",w:"Vineri 13 noiembrie 2026",note:"De cumpărat și instalat pe 13 noiembrie 2026, pe Wi-Fi. Câte unul de persoană, de exemplu Nomad 20 GB / 30 zile. Lasă linia oprită până la Narita, apoi pornește-o și pune datele mobile pe ea."},
+ {id:"p5",n:"eSIM pentru telefon",w:"Vineri, 13 noiembrie 2026",note:"De cumpărat și instalat pe 13 noiembrie 2026, pe Wi-Fi. Câte unul de persoană, de exemplu Nomad 20 GB / 30 zile. Lasă linia oprită până la Narita, apoi pornește-o și pune datele mobile pe ea."},
  {id:"p6",n:"Baterie portabilă de luat"},
  {id:"p7",n:"Asigurare de călătorie"}
 ];
@@ -683,7 +683,7 @@ function viewTickets(){
     rows.forEach(function(s){
       var got=!!S.bought[s.id];
       h+='<div class="trow '+c+(got?' done':'')+'"><button class="chk" data-k="bought" data-id="'+s.id+'" aria-pressed="'+got+'" aria-label="Bilet luat: '+esc(s.n)+'"><span>'+TICK+'</span></button>'+
-        '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(s.w?(got?'Făcut':s.w):s.day.wd+' '+tripDate(s.day.d)+(s.t?' · '+esc(s.t):''))+'</span><span class="name">'+esc(s.n)+'</span>'+
+        '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(s.w?(got?'Făcut':s.w):s.day.wd+', '+tripDate(s.day.d)+(s.t?' · '+esc(s.t):''))+'</span><span class="name">'+esc(s.n)+'</span>'+
         (s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s.note?'<span class="note">'+esc(s.note)+'</span>':'')+linksHtml(s,s.day.mapCity||s.day.city,!!(s.w&&s.q))+(s.custom?'<div class="btnrow"><button class="cbtn" data-be="'+s.id+'">Editează</button></div>':'')+'</div></div>';
     });
     h+='</div></div>';shown=true;
@@ -695,12 +695,12 @@ function viewTickets(){
   cust.forEach(function(s){if(s.l==="booked")moved.push({s:s,id:s.id,nochk:1});else if(settled(s.id))moved.push({s:s,id:s.id});});
   PREP.forEach(function(x){if(settled(x.id))moved.push({p:x,id:x.id});});
   h+='<div><div class="group-h" style="--cc:var(--ok)">Deja rezervate sau luate</div><div class="card" style="padding:4px 14px;margin-top:8px">';
-  booked.forEach(function(o){var s=o.s;h+='<div class="trow"><span></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+s.day.wd+' '+tripDate(s.day.d)+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span><span><span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span></span></div></div>';});
+  booked.forEach(function(o){var s=o.s;h+='<div class="trow"><span></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+s.day.wd+', '+tripDate(s.day.d)+(s.t?' · '+esc(s.t):'')+'</span><span class="name">'+esc(s.n)+'</span><span><span class="pill booked">'+TICK+esc(s.lbl||"Rezervat")+'</span></span></div></div>';});
   var CN={tokyo:"Tokyo",kyoto:"Kyoto",osaka:"Osaka",booked:""};
   moved.forEach(function(o){
     var s=o.s,x=o.p,nm=s?s.n:x.n,wh,lab;
     if(s&&s.custom){wh=(s.w!=="De luat"?s.w:(CN[s.l]||"Rezervat"));lab=s.l==="booked"?"Rezervat":"Bilet luat";}
-    else if(s){wh=s.w?'Tokyo':(s.day.wd+' '+tripDate(s.day.d)+(s.t?' · '+s.t:''));lab=s.w?'Făcut':'Bilet luat';}
+    else if(s){wh=s.w?'Tokyo':(s.day.wd+', '+tripDate(s.day.d)+(s.t?' · '+s.t:''));lab=s.w?'Făcut':'Bilet luat';}
     else{wh=x.w||'De pregătit';lab='Făcut';}
     h+='<div class="trow" style="--cc:var(--ok)">'+'<span></span>'+
       '<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="when">'+esc(wh)+'</span><span class="name">'+esc(nm)+'</span>'+(s&&s.custom&&s.p?'<span class="price">'+esc(s.p)+'</span>':'')+(s&&s.custom&&s.note?'<span class="note">'+esc(s.note)+'</span>':'')+'<span><span class="pill booked">'+TICK+lab+'</span></span>'+(s&&s.custom?'<div class="btnrow"><button class="cbtn" data-be="'+o.id+'">Editează</button></div>':'')+'</div></div>';
@@ -710,16 +710,16 @@ function viewTickets(){
 }
 function viewTransport0(){
   return '<div class="stack"><div><h2 class="sec">Transport</h2><p class="lead">Trenurile dintre orașe și drumurile mai lungi din plan.</p></div>'+
-  '<div class="card tokyo"><span class="kicker">Sâmbătă 21 noiembrie 2026 · Tokyo → Kyoto</span><h3>Shinkansen, în jur de 10:00</h3>'+
+  '<div class="card tokyo"><span class="kicker">Sâmbătă, 21 noiembrie 2026 · Tokyo → Kyoto</span><h3>Shinkansen, în jur de 10:00</h3>'+
     '<p>Rezervare pentru 2 pasageri prin SmartEX. De la cazare până la Tokyo Station e o stație de metrou.</p>'+
     '<dl class="kv"><dt>ID SmartEX</dt><dd><span class="mono" id="sx">0347941143</span><button class="copy" data-copy="0347941143">Copiază</button></dd></dl>'+
     '<div class="btnrow"><a class="linkbtn" href="https://smart-ex.jp/en/" target="_blank" rel="noopener">SmartEX</a></div></div>'+
-  '<div class="card kyoto"><span class="kicker">Miercuri 25 noiembrie 2026 · Kyoto → Osaka</span></div>'+
-  '<div class="card osaka"><span class="kicker">Luni 30 noiembrie 2026 · Osaka → Tokyo</span><h3>Nozomi din Shin-Osaka</h3>'+
+  '<div class="card kyoto"><span class="kicker">Miercuri, 25 noiembrie 2026 · Kyoto → Osaka</span></div>'+
+  '<div class="card osaka"><span class="kicker">Luni, 30 noiembrie 2026 · Osaka → Tokyo</span><h3>Nozomi din Shin-Osaka</h3>'+
     '<p>Pleci din Shin-Osaka, nu din Osaka Station. Drumul durează circa 2 h 30. Ia loc pe partea A pentru Muntele Fuji. Bagajul tău (79 × 46,5 × 27,5 cm, în total 153 cm) e sub limita de 160 cm.</p>'+
     '<div class="btnrow"><a class="linkbtn" href="https://smart-ex.jp/en/" target="_blank" rel="noopener">SmartEX</a></div></div>'+
-  '<div class="card tokyo"><span class="kicker">Miercuri 18 noiembrie 2026 · Tokyo</span><h3>Drumul la DisneySea</h3><p>Hotel, Ueno, Tokyo Station, Maihama. Aproximativ 45–55 de minute într-o direcție.</p></div>'+
-  '<div class="card osaka"><span class="kicker">Joi 26 noiembrie 2026 · Osaka</span><h3>Drumul la Universal Studios</h3><p>Pe jos până la Osaka-Namba, Hanshin Namba Line până la Nishikujo, apoi JR Yumesaki Line până la Universal City. Retur pe aceeași rută.</p></div>'+
+  '<div class="card tokyo"><span class="kicker">Miercuri, 18 noiembrie 2026 · Tokyo</span><h3>Drumul la DisneySea</h3><p>Hotel, Ueno, Tokyo Station, Maihama. Aproximativ 45–55 de minute într-o direcție.</p></div>'+
+  '<div class="card osaka"><span class="kicker">Joi, 26 noiembrie 2026 · Osaka</span><h3>Drumul la Universal Studios</h3><p>Pe jos până la Osaka-Namba, Hanshin Namba Line până la Nishikujo, apoi JR Yumesaki Line până la Universal City. Retur pe aceeași rută.</p></div>'+
   '<div class="card"><span class="kicker">Cazări</span><dl class="kv"><dt>Tokyo</dt><dd>Tosei Hotel Asakusa</dd><dt>Kyoto</dt><dd>The Royal Park Canvas – Kyoto Nijo</dd><dt>Osaka</dt><dd>Toho Hotel Namba Motomachi</dd></dl></div></div>';
 }
 function viewTransport(){
@@ -737,15 +737,15 @@ function viewTransport(){
 var HT=[
 {cc:"tokyo",city:"Tokyo",name:"Tosei Hotel Asakusa",room:"Cameră twin",book:"https://www.booking.com/hotel/jp/toseihoterukokoneqian-cao.ro.html",addr:"Asakusa 3-26-10, Tokyo, Japonia",map:"Tosei Hotel Asakusa 3-26-10 Asakusa Tokyo",
  ci:"15 noiembrie 2026, de la 15:00",co:"21 noiembrie 2026, până la 10:00",n:6,price:"729 € · 135.319 ¥ · ≈3.980 RON",pp:"364,5 € · 67.660 ¥ · ≈1.990 RON",pay:"13 noiembrie 2026",paid:"11 noiembrie 2026",
- rt:"Hotel → Tokyo Station, sâmbătă 21 noiembrie 2026 (Shinkansen spre Kyoto)",
+ rt:"Hotel → Tokyo Station, sâmbătă, 21 noiembrie 2026 (Shinkansen spre Kyoto)",
  steps:["Metrou Ginza Line din stația Asakusa până la Nihombashi, circa 18 min, 210 ¥ (≈6 RON). De acolo, circa 5 min pe jos până la Tokyo Station, ieșirea Yaesu.","Alternativ: Ginza Line până la Ueno, apoi JR Yamanote până la Tokyo Station. Circa 20 min, 340 ¥ (≈10 RON).","Check-out e la 10:00. Dacă Shinkansenul pleacă în jur de 10:00, iese din hotel pe la 9:00, ca să ai timp pentru bagaje și peron.","Cât de departe e hotelul de stația Asakusa se vede pe hartă, la adresa de mai sus."]},
 {cc:"kyoto",city:"Kyoto",name:"The Royal Park Canvas – Kyoto Nijo",room:"Cameră twin standard",book:"https://www.booking.com/hotel/jp/za-roiyarupaku-kiyanbasu-jing-du-er-tiao.ro.html",addr:"Nakagyo, Nishinokyo Shokushi-cho 22-7, Kyoto, Japonia",map:"The Royal Park Canvas Kyoto Nijo",
  ci:"21 noiembrie 2026, de la 15:00",co:"25 noiembrie 2026, până la 11:00",n:4,price:"678 € · 125.800 ¥ · ≈3.700 RON",pp:"339 € · 62.900 ¥ · ≈1.850 RON",pay:"17 noiembrie 2026",paid:"15 noiembrie 2026",
- rt:"Hotel → Kyoto Station, miercuri 25 noiembrie 2026 (tren spre Osaka)",
+ rt:"Hotel → Kyoto Station, miercuri, 25 noiembrie 2026 (tren spre Osaka)",
  steps:["Cea mai apropiată stație e Nijo, pe linia JR Sanin, la circa 2 minute pe jos de hotel.","De la Nijo iei trenul JR până la Kyoto Station. Durata și peronul se văd pe Google Maps sau Ekitan în dimineața plecării.","Check-out e la 11:00. Alege un tren cu cel puțin 30 de minute rezervă față de plecarea din hotel.","Pe 21 noiembrie 2026, la sosire, faci același drum invers, de la Kyoto Station la Nijo."]},
 {cc:"osaka",city:"Osaka",name:"Toho Hotel Namba Motomachi",room:"Cameră twin standard, pentru nefumători",book:"https://www.booking.com/hotel/jp/dong-fang-hoterunanbayuan-ting.ro.html",addr:"Naniwa-ku, Motomachi 2-5-6, Osaka, Japonia",map:"Toho Hotel Namba Motomachi Osaka",
  ci:"25 noiembrie 2026, de la 15:00",co:"30 noiembrie 2026, până la 11:00",n:5,price:"374 € · 69.441 ¥ · ≈2.042 RON",pp:"187 € · 34.721 ¥ · ≈1.021 RON",pay:"23 noiembrie 2026",paid:"la cazare, 25 noiembrie 2026",
- rt:"Hotel → Shin-Osaka, luni 30 noiembrie 2026 (Nozomi spre Tokyo)",
+ rt:"Hotel → Shin-Osaka, luni, 30 noiembrie 2026 (Nozomi spre Tokyo)",
  steps:["Stații lângă hotel: JR Namba circa 7 min pe jos, Namba (Nankai) circa 8 min, Osaka-Namba circa 11 min. Timpii diferă între surse, verifică pe hartă.","De la Namba, metroul Midosuji Line merge direct spre Shin-Osaka, circa 15–20 min. Confirmă pe Google Maps în ziua plecării.","Check-out e la 11:00. Nozomi pleacă din Shin-Osaka, nu din Osaka Station."]}
 ];
 var COSTS=[
@@ -1066,7 +1066,7 @@ function viewInfo(){
   '<div class="card"><h3>Bagaj în Shinkansen</h3><p>Regula de 160 cm (suma celor trei dimensiuni) se aplică doar pe liniile Tokaido, Sanyo și Kyushu. Bagajul tău are 153 cm, deci intră.</p></div>'+
   '<div class="card"><h3>Idei în plus</h3><ul class="plain">'+
     '<li>DAWN avatar robot café, Tokyo: intrare 2.200 ¥ (≈65 RON), Diner 5.500 ¥ (≈162 RON). Pentru Diner e obligatorie rezervarea.</li>'+
-    '<li>Seara, cu bilet separat: Kiyomizu-dera (21 noiembrie 2026 – 30 noiembrie 2026), To-ji, Chion-in, Kodaiji.</li>'+
+    '<li>Seara, cu bilet separat: Kiyomizu-dera (21 noiembrie – 30 noiembrie 2026), To-ji, Chion-in, Kodaiji.</li>'+
     '<li>Osaka Amazing Pass costă 3.500 ¥ (≈103 RON) pe o zi și nu se justifică pentru planul vostru.</li></ul></div>'+
   viewSync()+
   '<div class="card"><h3>Cum merge aplicația</h3><p>Tema se alege separat pe fiecare telefon. Bifele „văzut” și „bilet cumpărat”, sumele din Cheltuieli și rândurile adăugate de voi se sincronizează între telefoane, dacă folosiți același cod de grup. Fără internet, schimbările se păstrează pe telefon și se trimit când revine semnalul.</p></div></div>';
@@ -1094,7 +1094,7 @@ function renderStats(){
   var n=new Date(), start=new Date(2026,10,14), diff=Math.ceil((start-n)/864e5), t=today(), sub;
   if(t)sub="Ziua "+(t-13)+" din 17 · "+dayBy(t).city;
   else if(diff>0)sub="Mai sunt "+diff+(diff===1?" zi":" zile")+" până pe 14 noiembrie 2026";
-  else sub="14 noiembrie 2026 – 1 decembrie 2026";
+  else sub="14 noiembrie – 1 decembrie 2026";
   document.getElementById("sub").textContent=sub;
 }
 function renderSync(){
@@ -1161,7 +1161,7 @@ function btForm(o){
   return '<div class="card fedit"><span class="kicker">'+(isNew?'Bilet nou':'Editează biletul')+'</span><div class="addf">'+
     '<label class="full">Ce bilet / rezervare<input type="text" id="be-n" value="'+g("n","")+'" autocomplete="off" placeholder="ex. Teamlab Planets"></label>'+
     '<label class="full">În ce listă<select id="be-l">'+opts+'</select></label>'+
-    '<label>Ziua / ora<input type="text" id="be-w" value="'+g("w","")+'" autocomplete="off" placeholder="ex. Joi 19 noiembrie 2026, 18:00"></label>'+
+    '<label>Ziua / ora<input type="text" id="be-w" value="'+g("w","")+'" autocomplete="off" placeholder="ex. Joi, 19 noiembrie 2026, 18:00"></label>'+
     '<label>Preț<input type="text" id="be-p" value="'+g("p","")+'" autocomplete="off" placeholder="ex. 3.800 ¥ · ≈112 RON"></label>'+
     '<label class="full">Note<textarea id="be-nt">'+g("nt","")+'</textarea></label></div>'+
     '<div class="acts" style="gap:8px;flex-wrap:wrap">'+(isNew?'':'<button class="cbtn" data-bx="'+id+'">'+(BDEL===id?'Sigur? Șterge biletul':'Șterge')+'</button>')+'<button class="cbtn" data-bc="1">Anulează</button><button class="cbtn pri" data-bs="1">Salvează</button></div></div>';
@@ -1195,7 +1195,7 @@ function tnHtml(id){
   if(TE===id){
     var g=function(k){return esc((o&&o[k])||"");};
     return '<div class="fedit"><span class="kicker">Detaliile mele</span><div class="addf">'+
-      '<label>Ziua<input type="text" id="te-d" value="'+g("d")+'" autocomplete="off" placeholder="ex. sâmbătă 21 noiembrie 2026"></label>'+
+      '<label>Ziua<input type="text" id="te-d" value="'+g("d")+'" autocomplete="off" placeholder="ex. sâmbătă, 21 noiembrie 2026"></label>'+
       '<label>Tren<input type="text" id="te-tr" value="'+g("tr")+'" autocomplete="off" placeholder="ex. Nozomi 15"></label>'+
       '<label>De la ora (0–24)'+tsel("te-fr",(o&&o.fr)||"")+'</label>'+
       '<label>Până la ora (0–24)'+tsel("te-to",(o&&o.to)||"")+'</label>'+
