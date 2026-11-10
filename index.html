@@ -639,7 +639,6 @@ var PREP=[
  {id:"p7",n:"Asigurare de călătorie"}
 ];
 function prepHtml(){
-  var done=PREP.filter(function(x){return S.bought[x.id];}).length;
   var rowsP=PREP.filter(function(x){return !settled(x.id);});
   if(!rowsP.length)return "";
   var h='<div><div class="group-h" style="--cc:var(--ok)">De pregătit înainte de plecare</div><div class="card" style="padding:4px 14px;margin-top:8px">';
@@ -648,7 +647,7 @@ function prepHtml(){
     h+='<div class="trow'+(got?' done':'')+'" style="--cc:var(--ok)"><button class="chk" data-k="bought" data-id="'+x.id+'" aria-pressed="'+got+'" aria-label="Făcut: '+esc(x.n)+'"><span>'+TICK+'</span></button>'+
       '<div class="body" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="when">'+(got?'Făcut':(x.w||'De făcut'))+'</span><span class="name">'+esc(x.n)+'</span>'+(x.p?'<span class="price">'+esc(x.p)+'</span>':'')+(x.note?'<span class="note">'+esc(x.note)+'</span>':'')+'</div></div>';
   });
-  return h+'</div><p class="lead" style="margin-top:8px">'+done+' din '+PREP.length+' făcute.</p></div>';
+  return h+'</div></div>';
 }
 function viewTickets(){
   var all=buyList(), cust=btItems();
