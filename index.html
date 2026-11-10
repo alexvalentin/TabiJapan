@@ -110,6 +110,8 @@ h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;mar
 /* Ecran de pornire: cerul si dealurile din spatele steagului */
 #splash{position:fixed;inset:0;z-index:200;background:var(--bg) var(--sky) top / 100% 420px no-repeat;display:grid;place-items:center;animation:splashOut .5s ease 2.6s forwards;cursor:pointer}
 #splash::before,.ob::before{position:absolute}
+#splash::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.5;background:linear-gradient(#7ab9e6 50%,#4f9d5c 50%)}
+#splash::before{display:none}
 #splash svg{position:absolute;inset:0;width:100%;height:100%}
 #splash b{position:absolute;left:0;right:0;bottom:calc(9% + env(safe-area-inset-bottom,0px));text-align:center;font-family:var(--f-head);font-size:34px;font-weight:700;color:var(--ink)}
 @keyframes splashOut{to{opacity:0;visibility:hidden}}
@@ -306,6 +308,24 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
 </style>
 
 <div id="splash" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+<defs>
+<linearGradient id="spsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ab9e6"/><stop offset=".6" stop-color="#bfe3f2"/><stop offset="1" stop-color="#e6f3dc"/></linearGradient>
+<radialGradient id="spglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff7d6" stop-opacity=".9"/><stop offset="1" stop-color="#fff7d6" stop-opacity="0"/></radialGradient>
+</defs>
+<g opacity=".5">
+
+<rect width="512" height="512" fill="url(#spsky)"/>
+<circle cx="256" cy="230" r="190" fill="url(#spglow)"/>
+<g fill="#fff" opacity=".96">
+<circle cx="395" cy="105" r="28"/><circle cx="428" cy="118" r="22"/><circle cx="362" cy="120" r="20"/><rect x="345" y="112" width="104" height="26" rx="13"/>
+<circle cx="105" cy="82" r="20"/><circle cx="132" cy="90" r="15"/><rect x="80" y="86" width="72" height="18" rx="9"/>
+<circle cx="440" cy="250" r="14"/><rect x="408" y="248" width="66" height="14" rx="7"/>
+</g>
+<path d="M0 372 C90 316 190 322 290 358 C370 386 440 352 512 330 V512 H0Z" fill="#8cc787"/>
+<path d="M0 438 C120 386 250 392 360 430 C420 450 470 440 512 420 V512 H0Z" fill="#4f9d5c"/>
+<g stroke="#3e8450" stroke-width="5" stroke-linecap="round" fill="none"><path d="M70 470 l-6 -16 M80 472 l2 -18 M92 470 l8 -14"/><path d="M400 480 l-6 -16 M411 482 l2 -18 M423 480 l8 -14"/></g>
+
+</g>
 <ellipse cx="256" cy="392" rx="150" ry="14" fill="#2f6f45" opacity=".18"/>
 <path d="M96 168 C172 136 252 204 416 162 L416 346 C252 388 172 322 96 354Z" fill="#fffaf0" stroke="#e4d9c2" stroke-width="4" stroke-linejoin="round"/>
 <circle cx="256" cy="258" r="62" fill="#cb2a30"/>
