@@ -63,6 +63,15 @@ body{
 }
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--band)}
 .wrap{max-width:720px;margin:0 auto}
+body{isolation:isolate}
+body::after{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:url("japan-hero-1440.webp") center center / cover no-repeat;
+  opacity:.15;
+}
+@media(max-width:640px){
+  body::after{background-image:url("japan-hero-960.webp");background-position:42% center;opacity:.10}
+}
 .trip-hero{display:block;width:100%;height:auto;border-radius:16px;margin:0 0 14px}
 a{color:inherit}
 button{font:inherit;color:inherit;cursor:pointer}
