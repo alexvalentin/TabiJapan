@@ -143,6 +143,7 @@ h1{font-family:var(--f-head);font-weight:700;font-size:30px;line-height:1.05;mar
 .dayhead .date{color:var(--muted);font-size:14px}
 .notice{background:var(--info-bg);color:var(--info);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
 .hotel{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.itinerary-heading{margin:0 0 12px;font-size:16px;font-weight:700;color:var(--ink)}
 .hotel small{display:block;color:var(--muted);font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 .hotel div{min-width:0}
 ul.stops{list-style:none;margin:0;padding:0 14px;display:flex;flex-direction:column;gap:0;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
@@ -398,8 +399,7 @@ var D=[
  {n:"Bagaje și check-in la hotel",x:1},
   {n:"Ia biletul Haruka Kyoto → Osaka, pentru 25 noiembrie 2026, ora 10:30",s:"door",lbl:"Card fizic sau cash",x:1,note:"De la ghișeul JR din Kyoto Station, în prima zi în Kyoto. Cardul virtual Revolut nu merge la ridicarea biletelor JR West. Cere loc într-un vagon cu spațiu pentru bagaje.",links:["ekitan"]},
  {n:"Nijo Castle",s:"door",p:"1.300 ¥ · ≈38 RON"},{n:"Kyoto Gyoen National Garden"},
- {n:"În trecere: Manga Museum, Museum of Kyoto, Samurai Ninja Museum",x:1},
- {n:"Pontocho",note:"Cină și plimbare."},{n:"Înapoi pe jos prin Nijo Castle, apoi la hotel",x:1}]},
+ {id:"d21-7",n:"Pontocho",note:"Cină și plimbare."},{id:"d21-8",n:"Înapoi pe jos prin Nijo Castle, apoi la hotel",x:1}]},
 {d:22,wd:"Duminică",cc:"kyoto",city:"Kyoto",code:"K",title:"Templele din est",hotel:"kyoto",stops:[
  {n:"Fushimi Inari Taisha"},
  {n:"To-ji",note:"Iluminatul de seară costă 1.000 ¥ (≈29 RON), bilet separat."},
@@ -658,6 +658,7 @@ function viewDays(){
   h+=flightsHtml(d.d);
   h+='<div id="wx">'+wxHtml(d)+'</div>';
   var hk=d.hotel||(d.d>=15&&d.d<=20?"tokyo":null);if(hk){var ht=HOTEL[hk];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
+  h+='<h3 class="card itinerary-heading">Itinerariu '+esc(d.city)+' '+d.code+dlab(d.d)+', '+d.wd+', '+tripDate(d.d)+'</h3>';
   if(d.stops.length){
     h+='<ul class="stops">'+d.stops.map(stopHtml).join("")+'</ul>';
   }
