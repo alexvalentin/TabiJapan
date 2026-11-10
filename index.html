@@ -649,8 +649,8 @@ function prepHtml(){
   return h+'</div><p class="lead" style="margin-top:8px">'+done+' din '+PREP.length+' făcute.</p></div>';
 }
 function viewTickets(){
-  var all=buyList(), cust=btItems(), allL=all.concat(cust.filter(function(s){return s.l!=="booked";})), left=allL.filter(function(s){return !S.bought[s.id];}).length;
-  var h='<div class="stack"><div><h2 class="sec">Bilete</h2><p class="lead">'+(left?left+' de luat din '+allL.length+'. Bifează când ai biletul.':'Toate biletele sunt luate.')+'</p></div>';
+  var all=buyList(), cust=btItems();
+  var h='<div class="stack"><div><h2 class="sec">Bilete</h2></div>';
   h+=(BE?btForm(BE==='new'?null:BT[BE]):'<button class="cbtn" data-badd="1" style="align-self:flex-start">+ Adaugă bilet nou</button>');
   var order=["tokyo","kyoto","osaka"], names={tokyo:"Tokyo",kyoto:"Kyoto",osaka:"Osaka"};
   var shown=false;
