@@ -664,10 +664,12 @@ function viewDays(){
   var nt=d.note;
   if(d.d===15){var la=flAll().filter(function(f){return /narita/i.test(f.t)&&f.arr&&(f.d+(f.ao||0))===15;})[0];if(la)nt="Aterizezi la Narita la "+la.arr+". Alege trenul potrivit după ora asta.";}
   if(nt)h+='<div class="notice">'+esc(nt)+'</div>';
+  var flightDay=d.d===14||d.d===31;
+  if(flightDay)h+='<h3 class="card itinerary-heading">Itinerariu '+esc(d.city)+' '+d.code+dlab(d.d)+', '+d.wd+', '+tripDate(d.d)+'</h3>';
   h+=flightsHtml(d.d);
   h+='<div id="wx">'+wxHtml(d)+'</div>';
   var hk=d.hotel||(d.d>=15&&d.d<=20?"tokyo":null);if(hk){var ht=HOTEL[hk];h+='<div class="hotel"><div><small>Cazare</small>'+esc(ht.n)+'</div><a class="linkbtn" href="'+mapUrl(ht.q)+'" target="_blank" rel="noopener">Hartă</a></div>';}
-  h+='<h3 class="card itinerary-heading">Itinerariu '+esc(d.city)+' '+d.code+dlab(d.d)+', '+d.wd+', '+tripDate(d.d)+'</h3>';
+  if(!flightDay)h+='<h3 class="card itinerary-heading">Itinerariu '+esc(d.city)+' '+d.code+dlab(d.d)+', '+d.wd+', '+tripDate(d.d)+'</h3>';
   if(d.stops.length){
     h+='<ul class="stops">'+d.stops.map(stopHtml).join("")+'</ul>';
   }
