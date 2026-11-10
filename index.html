@@ -585,6 +585,7 @@ function flSaveForm(){
   var id=FE==="new"?"fx"+Date.now().toString(36):FE;
   var o={id:id,d:(+g("fe-d")||14),f:f.slice(0,40),t:t.slice(0,40),al:g("fe-al").slice(0,40),no:g("fe-no").slice(0,20),dep:/^\d{2}:\d{2}$/.test(dep)?dep:"",arr:/^\d{2}:\d{2}$/.test(arr)?arr:"",ao:g("fe-ao")==="1"?1:0,note:g("fe-note").slice(0,300)};
   var moved=o.d!==selDay;
+  retireLegacyFlight(id);
   FLO[id]=o;flSave();sbPush("flight:"+id,o);FE=null;FDRAFT=null;FDEL=null;
   render(true);toast(moved?"Salvat. Zborul e în ziua "+flDayLab(o.d):"Salvat");
 }
@@ -595,6 +596,7 @@ function flAct(el){
   if(el.hasAttribute("data-fx")){
     var id=el.getAttribute("data-fx");
     if(FDEL!==id){flCapture();FDEL=id;render(true);return;}
+    retireLegacyFlight(id);
     FLO[id]={del:1};flSave();sbPush("flight:"+id,{del:1});FE=null;FDEL=null;FDRAFT=null;render(true);toast("Șters");return;
   }
   if(el.hasAttribute("data-fs")){flSaveForm();return;}
@@ -783,9 +785,30 @@ var FB=[
 var FLK="japonia2026-fl", FLO={}, FE=null, FDAY=14, FDEL=null, FDRAFT=null;
 try{FLO=JSON.parse(localStorage.getItem(FLK)||"{}")||{};}catch(e){FLO={};}
 function flSave(){try{localStorage.setItem(FLK,JSON.stringify(FLO));}catch(e){}}
+function isLegacyNaritaFlight(f){
+  return f&&f.id==="f2"&&f.d===15&&!f.dep&&!f.arr;
+}
+function isOutboundNaritaFlight(f){
+  return f&&!f.del&&f.d===14&&f.f.trim().toLowerCase()==="doha"&&f.t.trim().toLowerCase()==="narita";
+}
+function retireLegacyFlight(id){
+  if(!isOutboundNaritaFlight(FLO[id])||!isLegacyNaritaFlight(FLO.f2||FB[1]))return;
+  FLO.f2={del:1};
+  sbPush("flight:f2",FLO.f2);
+}
 function flAll(){
   var r=[],seen={};
-  FB.forEach(function(b){seen[b.id]=1;var o=FLO[b.id];if(o&&o.del)return;r.push(o||b);});
+  var hasOutboundNarita=Object.keys(FLO).some(function(id){return isOutboundNaritaFlight(FLO[id]);});
+  FB.forEach(function(b){
+    seen[b.id]=1;
+    var f=FLO[b.id]||b;
+    if(f.del)return;
+    if(isLegacyNaritaFlight(f)){
+      if(hasOutboundNarita)return;
+      f=Object.assign({},f,{d:14});
+    }
+    r.push(f);
+  });
   Object.keys(FLO).forEach(function(id){var o=FLO[id];if(!seen[id]&&o&&!o.del)r.push(o);});
   r.forEach(function(x,i){x._i=i;});
   r.sort(function(a,b){return a.d-b.d||((a.dep||"99:99")<(b.dep||"99:99")?-1:(a.dep||"99:99")>(b.dep||"99:99")?1:0)||a._i-b._i;});
@@ -861,7 +884,8 @@ function costRow(x){
 function viewCosts(){
   var ty=0,tr=0,py=0,pr=0;
   cAll().forEach(function(x){var v=cget(x);ty+=v.y||0;tr+=v.r||0;if(v.b){py+=v.y||0;pr+=v.r||0;}});
-  var fr=0,fpaid=0;flAll().map(flCost).forEach(function(x){var v=cget(x);fr+=v.r||0;if(v.b)fpaid+=v.r||0;});
+  var flightCosts=flAll().map(flCost);
+  var fr=0,fpaid=0;flightCosts.forEach(function(x){var v=cget(x);fr+=v.r||0;if(v.b)fpaid+=v.r||0;});
   var hs0=hoSum(),he=hs0.e,hy=hs0.y,hr=hs0.r;
   var h='<div class="stack"><div><h2 class="sec">Cheltuieli</h2><p class="lead">Bilete de avion, hoteluri, atracții și transport. La sume apasă „Editează”, apoi „Salvează”.</p></div>';
   var gt=fr+hr+tr;
@@ -870,7 +894,7 @@ function viewCosts(){
   h+='<div class="btnrow"><button class="cbtn" data-scroll="sec-avion">Bilete avion</button><button class="cbtn" data-scroll="sec-hot">Hoteluri</button><button class="cbtn" data-scroll="sec-atr">Atracții</button></div>';
   /* avion */
   h+='<div id="sec-avion" class="stack" style="gap:8px"><h3 class="sec" style="font-size:20px;margin:8px 0 0">Bilete avion <span class="note" style="font-weight:400">'+(fr?nf(fr)+' RON total':'prețuri de completat')+'</span></h3>';
-  flAll().map(flCost).forEach(function(x){h+=costRow(x);});
+  flightCosts.forEach(function(x){h+=costRow(x);});
   h+='</div>';
   /* hoteluri */
   h+='<div id="sec-hot" class="stack" style="gap:8px"><h3 class="sec" style="font-size:20px;margin:14px 0 0">Cheltuieli Hoteluri <span class="note" style="font-weight:400">≈ '+nf(hr)+' RON</span></h3>';
