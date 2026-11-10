@@ -545,9 +545,6 @@ function flDuration(f){
   if(elapsed<=0)return "";
   return Math.floor(elapsed/60)+" h "+elapsed%60+" min";
 }
-function flDisplayDay(f){
-  return f.d===15&&flZone(f.f)==="qa"&&flZone(f.t)==="jp"?14:f.d;
-}
 function flCard(f){
   var none=!f.dep&&!f.arr;
   var h='<div class="fcard"><div class="fhead"><span class="fro">'+esc(f.f)+' → '+esc(f.t)+'</span><button class="cbtn" data-fe="'+f.id+'">Editează</button></div>';
@@ -557,7 +554,6 @@ function flCard(f){
   if(m.length)h+='<div class="fmeta">'+m.join(" · ")+'</div>';
   var duration=flDuration(f);
   if(duration)h+='<div class="fmeta fduration">Durată zbor: '+duration+'</div>';
-  if(flDisplayDay(f)!==f.d)h+='<div class="fmeta">Plecare pe '+dlab(f.d)+' noiembrie, ora locală.</div>';
   if(f.ao)h+='<div class="fmeta">Aterizezi a doua zi după plecare.</div>';
   if(f.note)h+='<div class="fnote">'+esc(f.note)+'</div>';
   return h+'</div>';
@@ -582,7 +578,7 @@ function flForm(f,dn){
   return h;
 }
 function flightsHtml(dn){
-  var list=flAll().filter(function(f){return flDisplayDay(f)===dn;});
+  var list=flAll().filter(function(f){return f.d===dn;});
   var addable=dn===14||dn===15||dn===31;
   if(!list.length&&!addable&&!(FE==="new"&&FDAY===dn))return "";
   var h='<div class="fl"><span class="kicker">Zboruri</span>';
@@ -617,10 +613,10 @@ function flSaveForm(){
   var o={id:id,d:(+g("fe-d")||14),f:f.slice(0,40),t:t.slice(0,40),al:g("fe-al").slice(0,40),no:g("fe-no").slice(0,20),dep:/^\d{2}:\d{2}$/.test(dep)?dep:"",arr:/^\d{2}:\d{2}$/.test(arr)?arr:"",ao:g("fe-ao")==="1"?1:0,note:g("fe-note").slice(0,300)};
   o.fromZone=g("fe-from-zone");
   o.toZone=g("fe-to-zone");
-  var displayDay=flDisplayDay(o), moved=displayDay!==selDay;
+  var moved=o.d!==selDay;
   retireLegacyFlight(id);
   FLO[id]=o;flSave();sbPush("flight:"+id,o);FE=null;FDRAFT=null;FDEL=null;
-  render(true);toast(moved?"Salvat. Zborul e în ziua "+flDayLab(displayDay):"Salvat");
+  render(true);toast(moved?"Salvat. Zborul e în ziua "+flDayLab(o.d):"Salvat");
 }
 function flAct(el){
   if(el.hasAttribute("data-fadd")){flCapture();FE="new";FDAY=+el.getAttribute("data-fadd");FDRAFT=null;FDEL=null;render(true);return;}
@@ -821,7 +817,7 @@ function isLegacyNaritaFlight(f){
   return f&&f.id==="f2"&&f.d===15&&!f.dep&&!f.arr;
 }
 function isOutboundNaritaFlight(f){
-  return f&&!f.del&&flDisplayDay(f)===14&&flZone(f.f)==="qa"&&flZone(f.t)==="jp";
+  return f&&!f.del&&(f.d===14||f.d===15)&&flZone(f.f)==="qa"&&flZone(f.t)==="jp";
 }
 function retireLegacyFlight(id){
   if(id==="f2"||!isOutboundNaritaFlight(FLO[id])||!isLegacyNaritaFlight(FLO.f2||FB[1]))return;
@@ -835,10 +831,7 @@ function flAll(){
     seen[b.id]=1;
     var f=FLO[b.id]||b;
     if(f.del)return;
-    if(isLegacyNaritaFlight(f)){
-      if(hasOutboundNarita)return;
-      f=Object.assign({},f,{d:14});
-    }
+    if(isLegacyNaritaFlight(f)&&hasOutboundNarita)return;
     r.push(f);
   });
   Object.keys(FLO).forEach(function(id){var o=FLO[id];if(!seen[id]&&o&&!o.del)r.push(o);});
@@ -848,7 +841,7 @@ function flAll(){
 }
 function flKey(o){return [o.d,o.f,o.t,o.al,o.no,o.dep,o.arr,o.ao,o.note,o.fromZone||"",o.toZone||""].join("|");}
 function flDet(f){var a=[];if(f.al)a.push(f.al);if(f.no)a.push(f.no);if(f.dep||f.arr)a.push((f.dep||"—")+" → "+(f.arr||"—")+(f.ao?" (+"+f.ao+" zi)":""));return a.join(" · ");}
-function flCost(f){return {id:f.id,fl:1,a:"Zbor "+f.f+" → "+f.t,d:flDisplayDay(f),det:flDet(f)+(flDuration(f)?" · Durată zbor: "+flDuration(f):""),y:null,r:null,b:0};}
+function flCost(f){return {id:f.id,fl:1,a:"Zbor "+f.f+" → "+f.t,d:f.d,det:flDet(f)+(flDuration(f)?" · Durată zbor: "+flDuration(f):""),y:null,r:null,b:0};}
 var HC=[{e:729,y:135319,r:3980},{e:678,y:125800,r:3700},{e:374,y:69441,r:2042}];
 var HOK="japonia2026-ho", HO={}, HEE=null;
 try{HO=JSON.parse(localStorage.getItem(HOK)||"{}")||{};}catch(e){HO={};}
