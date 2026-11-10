@@ -431,6 +431,7 @@ var D=[
 {d:29,wd:"Duminică",cc:"osaka",city:"Osaka",code:"O",title:"Acvariu și Shinsekai",hotel:"osaka",stops:[
  {n:"Osaka Aquarium Kaiyukan",s:"buy",p:"2.400–3.500 ¥ · ≈71–103 RON",note:"Bilete electronice online."},
  {n:"Tempozan Ferris Wheel",s:"door",p:"700–800 ¥ · ≈21–24 RON"},
+ {id:"d29-pokemon-cafe",n:"Pokémon Cafe Osaka",t:"14:05",s:"booked",lbl:"Rezervat",q:"Pokémon Cafe Osaka Daimaru Shinsaibashi",note:"Rezervare la 14:05, ora locală. Daimaru Shinsaibashi, clădirea principală, etajul 9."},
  {n:"Shitennoji",s:"door",p:"500 ¥ + 300 ¥ · ≈24 RON"},
  {n:"Abeno Harukas",s:"door",p:"Observator ≈2.200 ¥ · ≈65 RON"},
  {n:"Shinsekai și Tsutenkaku Tower",s:"door",p:"Turnul 1.000–1.200 ¥ · ≈29–35 RON"}]},
@@ -438,7 +439,13 @@ var D=[
  {n:"Shinkansen Nozomi Shin-Osaka → Tokyo",s:"booked",lbl:"Bilet cumpărat",x:1,note:"Plecare din Shin-Osaka, nu din Osaka Station. Circa 2 h 30. Loc pe partea A pentru priveliștea spre Muntele Fuji.",links:["smartex"]}]},
 {d:31,wd:"Marți",cc:"tokyo",city:"Zbor spre București",code:"T",title:"Zboruri înapoi acasă",stops:[]}
 ];
-D.forEach(function(day){day.stops.forEach(function(s,i){s.id="d"+day.d+"-"+(i+1);s.day=day;});});
+D.forEach(function(day){
+  var stopNumber=0;
+  day.stops.forEach(function(s){
+    if(!s.id)s.id="d"+day.d+"-"+(++stopNumber);
+    s.day=day;
+  });
+});
 
 var TABS=[
  {id:"zile",l:"Zile",i:'<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'},
