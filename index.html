@@ -976,7 +976,7 @@ function viewCosts(){
   h+='<div class="cs"><div class="card"><span class="kicker">Total</span><b>'+nf(ty)+' ¥</b><small>≈ '+nf(tr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Plătit (bilete cumpărate)</span><b>'+nf(py)+' ¥</b><small>≈ '+nf(pr)+' RON</small></div>'+
      '<div class="card"><span class="kicker">Rămas de plată</span><b>'+nf(ty-py)+' ¥</b><small>≈ '+nf(tr-pr)+' RON</small></div></div>';
-  h+='<div class="card"><span class="kicker">Curs folosit · aprox. '+YEN_PER_RON+' ¥ = 1 RON</span><div class="rates"><span>1.000 ¥ ≈ '+Math.round(1000/YEN_PER_RON)+' RON</span><span>10.000 ¥ ≈ '+Math.round(10000/YEN_PER_RON)+' RON</span></div><span class="note">Când scrii yenii în „Editează”, lei se calculează singuri. Îi poți schimba apoi cu mâna.</span></div>';
+  h+='<div class="card"><span class="kicker">Curs folosit · aprox. '+YEN_PER_RON+' ¥ = 1 RON</span><div class="rates"><span>1.000 ¥ ≈ '+Math.round(1000/YEN_PER_RON)+' RON</span><span>10.000 ¥ ≈ '+Math.round(10000/YEN_PER_RON)+' RON</span></div><span class="note">Când introduci o sumă în yeni sau în lei, aplicația completează automat cealaltă monedă.</span></div>';
   ["Tokyo","Kyoto","Osaka","Nara","Altele"].forEach(function(city){
     var rows=cAll().filter(function(x){return x.c===city;});
     if(!rows.length)return;
@@ -1326,13 +1326,15 @@ function toggle(kind,id){
   sbPush(kind+":"+id,{on:on?1:0});
 }
 document.addEventListener("input",function(e){
-  var t=e.target;
-  if(t&&t.id==="ho-y"){var hr2=document.getElementById("ho-r");if(hr2)hr2.value=t.value===""?"":Math.round(+t.value/YEN_PER_RON);}
-  if(t&&t.id==="n-y"){var rn=document.getElementById("n-r");if(rn)rn.value=t.value===""?"":Math.round(+t.value/YEN_PER_RON);}
-  if(t&&t.id&&t.id.indexOf("y-")===0){
-    var r=document.getElementById("r-"+t.id.slice(2));
-    if(r)r.value=t.value===""?"":Math.round(+t.value/YEN_PER_RON);
-  }
+  var source=e.target, match=/^(?:(ho|n)-([yr])|([yr])-(.+))$/.exec(source.id||"");
+  if(!match)return;
+  var currency=match[2]||match[3];
+  var targetCurrency=currency==="y"?"r":"y";
+  var targetId=match[1]?match[1]+"-"+targetCurrency:targetCurrency+"-"+match[4];
+  var target=document.getElementById(targetId);
+  if(!target)return;
+  var rate=currency==="y"?1/YEN_PER_RON:YEN_PER_RON;
+  target.value=source.value===""?"":Math.round(Number(source.value)*rate);
 });
 document.addEventListener("click",function(e){
   var th=e.target.closest&&e.target.closest("[data-theme-set]");
