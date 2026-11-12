@@ -901,6 +901,29 @@ var CK="japonia2026-cost", CV={}, CE={};
 try{CV=JSON.parse(localStorage.getItem(CK)||"{}")||{};}catch(e){CV={};}
 function cget(x){var o=CV[x.id];return o?{y:o.y,r:o.r,b:o.b}:{y:x.y,r:x.r,b:x.b};}
 function nf(n){return n==null?"—":String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,".");}
+function costBasis(id){
+  return '<label>Prețul introdus este pentru<select id="qty-'+id+'" data-cost-basis="'+id+'"><option value="2">2 persoane</option><option value="1">1 persoană</option></select></label>';
+}
+function costTotal(value,quantity){
+  return value===""?null:Math.max(0,+value)*2/quantity;
+}
+var costNumber=new Intl.NumberFormat("ro-RO",{maximumFractionDigits:2});
+function costAmounts(v,quantity){
+  var amounts=[];
+  if(v.y!=null)amounts.push(costNumber.format(v.y*quantity/2)+" ¥");
+  if(v.r!=null)amounts.push(costNumber.format(v.r*quantity/2)+" RON");
+  return amounts.join(" · ")||"—";
+}
+document.addEventListener("change",function(e){
+  var basis=e.target.getAttribute("data-cost-basis");
+  if(!basis)return;
+  var ids=basis==="new"?["n-y","n-r"]:["y-"+basis,"r-"+basis];
+  var factor=e.target.value==="1"?0.5:2;
+  ids.forEach(function(id){
+    var field=document.getElementById(id);
+    if(field&&field.value!=="")field.value=+(Number(field.value)*factor).toPrecision(15);
+  });
+});
 function costRow(x){
   var v=cget(x), ed=!!CE[x.id], h='';
   h+='<div class="crow" id="'+x.id+'"><div class="top"><h3>'+esc(x.a)+'</h3>'+(v.b&&!ed?'<span class="got">'+(x.fl?'Bilet cumpărat':'Bilet cumpărat')+'</span>':'')+'</div>';
@@ -913,14 +936,12 @@ function costRow(x){
     if(mt)h+='<div class="cmeta">'+mt+'</div>';
   }
   if(ed){
-    h+='<div class="edit">'+(x.fl?'':'<label>Preț (¥)<input type="number" inputmode="numeric" min="0" id="y-'+x.id+'" value="'+(v.y==null?'':v.y)+'"></label>')+
-       '<label>'+(x.fl?'Preț total, 2 persoane (RON)':'Preț (RON)')+'<input type="number" inputmode="numeric" min="0" id="r-'+x.id+'" value="'+(v.r==null?'':v.r)+'"></label>'+
+    h+='<div class="edit">'+costBasis(x.id)+(x.fl?'':'<label>Preț (¥)<input type="number" inputmode="decimal" step="any" min="0" id="y-'+x.id+'" value="'+(v.y==null?'':v.y)+'"></label>')+
+       '<label>'+'Preț (RON)'+'<input type="number" inputmode="decimal" step="any" min="0" id="r-'+x.id+'" value="'+(v.r==null?'':v.r)+'"></label>'+
        '<label class="cchk"><input type="checkbox" id="b-'+x.id+'"'+(v.b?' checked':'')+'> Bilet cumpărat</label></div>'+
        '<div class="acts" style="gap:8px">'+(x.custom?'<button class="cbtn" data-cx="'+x.id+'">Șterge</button>':'')+'<button class="cbtn pri" data-cs="'+x.id+'">Salvează</button></div>';
-  }else if(x.fl){
-    h+='<div class="top"><span class="am">'+(v.r==null?'—':nf(v.r)+' RON <span>· '+nf(v.r/2)+' RON / persoană</span>')+'</span><button class="cbtn" data-ce="'+x.id+'">Editează</button></div>';
   }else{
-    h+='<div class="top"><span class="am">'+nf(v.y)+' ¥ <span>· ≈ '+nf(v.r)+' RON</span></span><button class="cbtn" data-ce="'+x.id+'">Editează</button></div>';
+    h+='<div class="top"><div class="am"><div>'+costAmounts(v,1)+' <span>/ persoană</span></div><div>'+costAmounts(v,2)+' <span>/ 2 persoane</span></div></div><button class="cbtn" data-ce="'+x.id+'">Editează</button></div>';
   }
   return h+'</div>';
 }
@@ -968,8 +989,8 @@ function viewCosts(){
     '<label class="full">Atracție sau cheltuială<input type="text" id="n-a" placeholder="ex. Cafenea cu pisici"></label>'+
     '<label>Oraș<select id="n-c"><option>Tokyo</option><option>Kyoto</option><option>Osaka</option><option>Nara</option><option>Altele</option></select></label>'+
     '<label>Ziua<select id="n-d"><option value="">Fără zi</option>'+D.filter(function(z){return z.d!==6;}).map(function(z){return '<option value="'+z.d+'">'+z.code+dlab(z.d)+' · '+z.wd+'</option>';}).join("")+'</select></label>'+
-    '<label>Preț (¥)<input type="number" inputmode="numeric" min="0" id="n-y"></label>'+
-    '<label>Preț (RON)<input type="number" inputmode="numeric" min="0" id="n-r"></label>'+
+    costBasis("new")+'<label>Preț (¥)<input type="number" inputmode="decimal" step="any" min="0" id="n-y"></label>'+
+    '<label>Preț (RON)<input type="number" inputmode="decimal" step="any" min="0" id="n-r"></label>'+
     '<label class="full">De unde se cumpără<input type="text" id="n-s" placeholder="ex. online, la intrare"></label>'+
     '<label class="full">Detalii<textarea id="n-t" placeholder="ore, rezervare, observații"></textarea></label>'+
     '<label class="cchk full"><input type="checkbox" id="n-b"> Bilet cumpărat</label></div>'+
@@ -1335,7 +1356,8 @@ document.addEventListener("click",function(e){
     var nm=document.getElementById("n-a").value.trim();
     if(!nm){toast("Scrie numele atracției");return;}
     var ny=document.getElementById("n-y").value, nr=document.getElementById("n-r").value, nd=document.getElementById("n-d").value;
-    EXTRA.push({id:"x"+Date.now(),custom:1,c:document.getElementById("n-c").value,a:nm,y:ny===""?null:Math.max(0,+ny),r:nr===""?null:Math.max(0,+nr),b:document.getElementById("n-b").checked?1:0,d:nd?+nd:null,s:document.getElementById("n-s").value.trim(),u:"",det:document.getElementById("n-t").value.trim()});
+    var quantity=+document.getElementById("qty-new").value;
+    EXTRA.push({id:"x"+Date.now(),custom:1,c:document.getElementById("n-c").value,a:nm,y:costTotal(ny,quantity),r:costTotal(nr,quantity),b:document.getElementById("n-b").checked?1:0,d:nd?+nd:null,s:document.getElementById("n-s").value.trim(),u:"",det:document.getElementById("n-t").value.trim()});
     cxSave();sbPush("extra:"+EXTRA[EXTRA.length-1].id,EXTRA[EXTRA.length-1]);render(true);toast("Adăugat");return;
   }
   var cx=e.target.closest&&e.target.closest("[data-cx]");
@@ -1343,7 +1365,8 @@ document.addEventListener("click",function(e){
   var cs=e.target.closest&&e.target.closest("[data-cs]");
   if(cs){
     var id=cs.getAttribute("data-cs"), ye=document.getElementById("y-"+id), gy=ye?ye.value:"", gr=document.getElementById("r-"+id).value;
-    CV[id]={y:gy===""?null:Math.max(0,+gy),r:gr===""?null:Math.max(0,+gr),b:document.getElementById("b-"+id).checked?1:0};
+    var quantity=+document.getElementById("qty-"+id).value;
+    CV[id]={y:costTotal(gy,quantity),r:costTotal(gr,quantity),b:document.getElementById("b-"+id).checked?1:0};
     try{localStorage.setItem(CK,JSON.stringify(CV));}catch(x){}
     sbPush("cost:"+id,CV[id]);delete CE[id];render(true);toast("Salvat");return;
   }
