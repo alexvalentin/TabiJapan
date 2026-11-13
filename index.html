@@ -385,12 +385,7 @@ var D=[
  {n:"Aterizare la Narita",note:"Control de pașapoarte și vamă. Dacă completezi Visit Japan Web înainte, treci mai repede."},
  {n:"Narita → Asakusa, varianta recomandată",s:"door",lbl:"Plătști la gară",p:"1.372 ¥ · ≈40 RON",x:1,note:"Keisei Narita Sky Access, apoi tren direct pe Asakusa Line. Circa 1–1,5 ore. Alege un tren care merge direct spre Asakusa și confirmă ora pe Ekitan sau Google Maps după aterizare.",links:["narita"]},
  {n:"Check-in la Tosei Hotel Asakusa",q:"Tosei Hotel Asakusa Tokyo",note:"În zonă sunt două hoteluri Tosei, Cocone Asakusa și Cocone Asakusa Kuramae. Verifică în rezervare numele și adresa exactă."}]},
-{d:16,wd:"Luni",cc:"tokyo",city:"Tokyo",code:"T",title:"Shibuya la apus",stops:[
- {n:"Shinjuku City"},{n:"Meiji Park"},{n:"Meiji Jingu"},{n:"Harajuku Street"},{n:"Shibuya Scramble Crossing"},
- {n:"Shibuya Sky",t:"15:20–15:40",s:"booked",lbl:"Rezervat",p:"3.400 ¥ după 15:00 · ≈100 RON",note:"Apusul e în jur de 16:30."},
- {n:"Yoyogi Park, lumini de seară",t:"18:00",s:"booked",lbl:"Bilet cumpărat",q:"Yoyogi Park",note:"Deschis 17:30–22:00, ultima intrare la 21:00, traseu de 1,8 km. Bilet cumpărat pe Asoview, pentru 16 noiembrie 2026, ora 18:00. Se arată ca cod QR din browser: asoview.com, My Page, Reservations. Fă o captură de ecran."},
- {n:"Omoide Yokocho"},{n:"Golden Gai"},
- {n:"Tokyo Tower",s:"door",p:"Main Deck 1.500 ¥ ≈44 RON · Top Deck ≈3.300 ¥ ≈97 RON",id:"d20-5",note:"Vizită opțională după sosire, dacă aveți timp."}]},
+{d:16,wd:"Luni",cc:"tokyo",city:"Tokyo",code:"T",title:"Sosire în Japonia",note:"După aterizarea la Narita, transfer spre Asakusa, check-in și cină în apropiere.",stops:[]},
 {d:17,wd:"Marți",cc:"tokyo",city:"Tokyo",code:"T",title:"Ueno, Asakusa, Skytree",stops:[
  {n:"Ueno Park"},{n:"Ameyoko Market"},{n:"Kappabashi"},{n:"Senso-ji"},
  {n:"Tokyo Skytree",s:"buy",p:"1.800–3.600 ¥ în funcție de zi și oră · ≈53–106 RON"}]},
@@ -399,11 +394,17 @@ var D=[
 {d:19,wd:"Joi",cc:"tokyo",city:"Tokyo",code:"T",title:"Palatul Imperial și Akihabara",stops:[
  {n:"Imperial Palace East Gardens",note:"Închis luni și vineri, joi e deschis."},{n:"Imperial Palace"},{n:"Itoya Annex Ginza"},
  {n:"Pokémon Café Tokyo Nihombashi",t:"15:20–16:50",s:"booked",lbl:"Rezervat"},
- {n:"Akihabara"},{n:"Mandarake Complex"}]},
-{d:20,wd:"Vineri",cc:"tokyo",city:"Tokyo",code:"T",title:"Grădini și artă",stops:[
- {n:"Shinjuku Gyoen",s:"door",p:"500 ¥ · ≈15 RON",note:"Închis luni, vineri e deschis."},{n:"Meiji Jingu Gaien"},{n:"Hie Shrine"},
- {n:"The National Art Center",s:"door",p:"Expoziția Louvre 2.400 ¥ la ghișeu · ≈71 RON"},
- {id:"d20-6",n:"Asakusa"}]},
+ {n:"Akihabara"},{n:"Mandarake Complex"},
+ {n:"Tokyo Tower",s:"door",p:"Main Deck 1.500 ¥ ≈44 RON · Top Deck ≈3.300 ¥ ≈97 RON",id:"d20-5"}]},
+{d:20,wd:"Vineri",cc:"tokyo",city:"Tokyo",code:"T",title:"Harajuku, Shibuya și Shinjuku",stops:[
+ {id:"d16-3",n:"Meiji Jingū",note:"Prima oprire, dimineața. Intrarea sudică este lângă gara Harajuku."},
+ {id:"d16-4",n:"Harajuku și Takeshita Street"},
+ {id:"d20-cat-street",n:"Cat Street",note:"Plimbare spre Shibuya după prânz."},
+ {id:"d20-hachiko",n:"Statuia Hachikō"},
+ {id:"d16-5",n:"Shibuya Scramble Crossing"},
+ {id:"d16-7",n:"Yoyogi Forest of Lights, opțional",note:"Mergi doar dacă ai un bilet valabil pentru 20 noiembrie. Altfel, continuă spre Shinjuku."},
+ {id:"d16-8",n:"Omoide Yokocho",note:"Seara, în Shinjuku, dacă alegi varianta fără Yoyogi."},
+ {id:"d16-9",n:"Golden Gai",note:"După Omoide Yokocho."}]},
 {d:21,wd:"Sâmbătă",cc:"kyoto",city:"Kyoto",code:"K",title:"Shinkansen spre Kyoto",hotel:"kyoto",stops:[
  {n:"Shinkansen Tokyo → Kyoto",t:"~10:00",s:"booked",lbl:"Bilet cumpărat",x:1,note:"2 pasageri, rezervare prin SmartEX. De la cazare până la Tokyo Station e o stație de metrou.",links:["smartex"]},
  {n:"Bagaje și check-in la hotel",x:1},
@@ -650,7 +651,7 @@ function flAct(el){
 }
 function viewDays(){
   var td=today();
-  var GR=[{k:"tokyo",t:"Zbor București – Narita",from:15,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo și Zbor Narita – București",from:30,to:31}];
+  var GR=[{k:"tokyo",t:"Zbor București – Narita",from:15,to:16},{k:"tokyo",t:"Tokyo",from:17,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo și Zbor Narita – București",from:30,to:31}];
   var chips=GR.map(function(g){
     var items=D.filter(function(x){return x.d>=g.from&&x.d<=g.to;}).map(function(x){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
@@ -665,7 +666,7 @@ function viewDays(){
   var nt=d.note;
   if(d.d===15){var la=flAll().filter(function(f){return /narita/i.test(f.t)&&f.arr&&(f.d+(f.ao||0))===15;})[0];if(la)nt="Aterizezi la Narita la "+la.arr+". Alege trenul potrivit după ora asta.";}
   if(nt)h+='<div class="notice">'+esc(nt)+'</div>';
-  var flightDay=d.d===14||d.d===31;
+  var flightDay=d.d===15||d.d===16||d.d===31;
   if(flightDay)h+='<h3 class="card itinerary-heading">Itinerariu '+esc(d.city)+' '+d.code+dlab(d.d)+', '+d.wd+', '+tripDate(d.d)+'</h3>';
   h+=flightsHtml(d.d);
   h+='<div id="wx">'+wxHtml(d)+'</div>';
@@ -811,7 +812,7 @@ var COSTS=[
 {id:"c27",c:"Osaka",a:"Tren Osaka → Narita",y:14300,r:445,b:1}
 ];
 var CM={c1:{d:18},c2:{d:16},c3:{d:17,s:"Online pe site-ul Tokyo Skytree sau la ghișeu. Prețul diferă după zi și oră (1.800–3.600 ¥).",u:"https://www.tokyo-skytree.jp/en/"},
-c4:{d:20,s:"La poartă, la intrare."},c5:{d:16,s:"Online sau la ghișeu.",u:"https://ticket.tokyotower.co.jp/en/"},c6:{d:21,u:"https://smart-ex.jp/en/",s:"SmartEX"},
+c4:{d:20,s:"La poartă, la intrare."},c5:{d:19,s:"Online sau la ghișeu.",u:"https://ticket.tokyotower.co.jp/en/"},c6:{d:21,u:"https://smart-ex.jp/en/",s:"SmartEX"},
 c7:{d:22,s:"La intrare."},c8:{d:21,s:"La intrare."},c9:{d:23,s:"La intrare."},c10:{d:24},c11:{d:24},
 c12:{d:27,s:"Online pe WILLER (1.900 ¥), cumpărat cu cel puțin 2 zile înainte, sau la ghișeu (2.000 ¥)."},c13:{d:26},
 c14:{d:27,s:"La intrare."},c15:{s:"Nu e încă pus pe nicio zi în aplicație."},c16:{d:28,s:"De la gară sau automatele de bilete, în ziua călătoriei. Nu am preț în aplicație."},
