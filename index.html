@@ -346,7 +346,7 @@ nav.bottom .badge{position:absolute;top:2px;right:calc(50% - 22px);background:va
     <div class="top-row">
       <div>
         <h1>Tabi Japan</h1>
-        <div class="sub" id="sub">14 noiembrie – 1 decembrie 2026 · Tokyo · Kyoto · Osaka · Nara</div>
+        <div class="sub" id="sub">15 noiembrie – 1 decembrie 2026 · Tokyo · Kyoto · Osaka · Nara</div>
       </div>
       <div class="top-r"><span class="sync warn" id="sync" role="status"><i></i><span id="synct">Local</span></span><div class="themes" id="themes"></div></div>
     </div>
@@ -508,7 +508,7 @@ function dlab(n){return n>30?n-30:n;}
 function tripDate(n,omitYear){return dlab(n)+(n>30?" decembrie":" noiembrie")+(omitYear?"":" 2026");}
 function fullTripDates(value){return value.replace(/\b(\d{1,2}) (nov|dec)\b/g,function(_,day,month){return tripDate(+day+(month==="dec"?30:0));});}
 function wxDate(n){return n>30?"2026-12-0"+(n-30):"2026-11-"+(n<10?"0":"")+n;}
-function today(){var n=new Date();if(n.getFullYear()!==2026)return null;if(n.getMonth()===10&&n.getDate()>=14&&n.getDate()<=30)return n.getDate();if(n.getMonth()===11&&n.getDate()===1)return 31;return null;}
+function today(){var n=new Date();if(n.getFullYear()!==2026)return null;if(n.getMonth()===10&&n.getDate()>=15&&n.getDate()<=30)return n.getDate();if(n.getMonth()===11&&n.getDate()===1)return 31;return null;}
 function dayBy(n){for(var i=0;i<D.length;i++)if(D[i].d===n)return D[i];return D[0];}
 function mapUrl(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
@@ -649,7 +649,7 @@ function flAct(el){
 }
 function viewDays(){
   var td=today();
-  var GR=[{k:"tokyo",t:"Zbor București – Narita",from:14,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo și Zbor Narita – București",from:30,to:31}];
+  var GR=[{k:"tokyo",t:"Zbor București – Narita",from:15,to:15},{k:"tokyo",t:"Tokyo",from:16,to:20},{k:"kyoto",t:"Kyoto",from:21,to:24},{k:"osaka",t:"Osaka",from:25,to:29},{k:"tokyo",t:"Înapoi la Tokyo și Zbor Narita – București",from:30,to:31}];
   var chips=GR.map(function(g){
     var items=D.filter(function(x){return x.d>=g.from&&x.d<=g.to;}).map(function(x){
       return '<a class="chip '+x.cc+(x.d===selDay?' sel':'')+(x.d===td?' today':'')+'" href="#zi-'+x.d+'" data-d="'+x.d+'"'+(x.d===selDay?' aria-current="date"':'')+'>'+
@@ -1129,7 +1129,7 @@ function viewInfo(){
 function parseHash(){
   var h=(location.hash||"").replace("#","");
   var m=/^zi-(\d+)$/.exec(h);
-  if(m){var n=+m[1];if(n>=14&&n<=31){tab="zile";selDay=n;return;}}
+  if(m){var n=+m[1];if(n>=14&&n<=31){tab="zile";selDay=n===14?15:n;return;}}
   if(h==="bilete"||h==="transport"||h==="hoteluri"||h==="cheltuieli"||h==="info"||h==="zile"){tab=h;}
   if(selDay===null)selDay=today();
 }
@@ -1144,10 +1144,10 @@ function renderNav(){
 function renderStats(){
   var tot=0,seen=0;D.forEach(function(d){d.stops.forEach(function(s){tot++;if(S.seen[s.id])seen++;});});
   var b=buyList(), left=b.filter(function(s){return !S.bought[s.id];}).length;
-  var n=new Date(), start=new Date(2026,10,14), diff=Math.ceil((start-n)/864e5), t=today(), sub;
+  var n=new Date(), start=new Date(2026,10,15), diff=Math.ceil((start-n)/864e5), t=today(), sub;
   if(t)sub="Ziua "+(t-13)+" din 17 · "+dayBy(t).city;
-  else if(diff>0)sub="Mai sunt "+diff+(diff===1?" zi":" zile")+" până pe 14 noiembrie 2026";
-  else sub="14 noiembrie – 1 decembrie 2026";
+  else if(diff>0)sub="Mai sunt "+diff+(diff===1?" zi":" zile")+" până pe 15 noiembrie 2026";
+  else sub="15 noiembrie – 1 decembrie 2026";
   document.getElementById("sub").textContent=sub;
 }
 function renderSync(){
