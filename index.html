@@ -596,7 +596,7 @@ function flForm(f,dn){
 }
 function flightsHtml(dn){
   var list=flAll().filter(function(f){return f.d===dn;});
-  var addable=dn===14||dn===15||dn===31;
+  var addable=dn===14||dn===15||dn===16||dn===31;
   if(!list.length&&!addable&&!(FE==="new"&&FDAY===dn))return "";
   var h='<div class="fl"><span class="kicker">Zboruri</span>';
   list.forEach(function(f){h+=(FE===f.id)?flForm(f):flCard(f);});
@@ -835,7 +835,7 @@ function isLegacyNaritaFlight(f){
   return f&&f.id==="f2"&&f.d===15&&!f.dep&&!f.arr;
 }
 function isOutboundNaritaFlight(f){
-  return f&&!f.del&&(f.d===14||f.d===15)&&flZone(f.f)==="qa"&&flZone(f.t)==="jp";
+  return f&&!f.del&&(f.d===14||f.d===15||f.d===16)&&flZone(f.f)==="qa"&&flZone(f.t)==="jp";
 }
 function retireLegacyFlight(id){
   if(id==="f2"||!isOutboundNaritaFlight(FLO[id])||!isLegacyNaritaFlight(FLO.f2||FB[1]))return;
@@ -853,6 +853,10 @@ function flAll(){
     r.push(f);
   });
   Object.keys(FLO).forEach(function(id){var o=FLO[id];if(!seen[id]&&o&&!o.del)r.push(o);});
+  r=r.map(function(f){
+    if(f.d!==16&&isOutboundNaritaFlight(f))return Object.assign({},f,{d:16,no:f.no||"QR 806",al:f.al||"Qatar Airways"});
+    return f;
+  });
   r.forEach(function(x,i){x._i=i;});
   r.sort(function(a,b){return a.d-b.d||((a.dep||"99:99")<(b.dep||"99:99")?-1:(a.dep||"99:99")>(b.dep||"99:99")?1:0)||a._i-b._i;});
   return r;
