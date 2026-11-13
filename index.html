@@ -371,6 +371,7 @@ var HOTEL={
   osaka:{n:"Toho Hotel Namba Motomachi",q:"Toho Hotel Namba Motomachi Osaka"}
 };
 var L={
+  shibuyaSky:{l:"Bilete Shibuya Sky",u:"https://www.shibuya-scramble-square.com/sky/ticket/"},
   yoyogi:{l:"Site Yoyogi",u:"https://yoyogiforestoflights.tokyo/en"},
   ltike:{l:"Bilete Lawson",u:"https://l-tike.com"},
   smartex:{l:"SmartEX",u:"https://smart-ex.jp/en/"},
@@ -398,9 +399,12 @@ var D=[
  {n:"Tokyo Tower",s:"door",p:"Main Deck 1.500 ¥ ≈44 RON · Top Deck ≈3.300 ¥ ≈97 RON",id:"d20-5"}]},
 {d:20,wd:"Vineri",cc:"tokyo",city:"Tokyo",code:"T",title:"Harajuku, Shibuya și Shinjuku",stops:[
  {id:"d16-3",n:"Meiji Jingū",note:"Prima oprire, dimineața. Intrarea sudică este lângă gara Harajuku."},
- {id:"d16-4",n:"Harajuku și Takeshita Street"},
+ {id:"d16-4",n:"Harajuku"},
+ {id:"d20-shibuya-sky",n:"Shibuya Sky",s:"buy",p:"2.700 ¥ / persoană online înainte de 15:00",note:"Caută un interval între 10:00 și 12:00 și ajustează plimbarea după ora biletului.",links:["shibuyaSky"]},
+ {id:"d20-takeshita",n:"Takeshita Street"},
  {id:"d16-5",n:"Shibuya Scramble Crossing"},
  {id:"d20-1",n:"Shinjuku Gyoen",s:"door",p:"500 ¥ · ≈15 RON",note:"Închis luni, vineri e deschis."},
+ {id:"d16-7",n:"Yoyogi Forest of Lights",s:"buy",p:"2.400 ¥ / persoană, tarif promoțional în noiembrie",note:"Seara. Ai nevoie de un bilet valabil pentru 20 noiembrie.",links:["yoyogi"]},
  {id:"d16-8",n:"Omoide Yokocho",note:"Seara, în Shinjuku."},
  {id:"d16-9",n:"Golden Gai",note:"După Omoide Yokocho."}]},
 {d:21,wd:"Sâmbătă",cc:"kyoto",city:"Kyoto",code:"K",title:"Shinkansen spre Kyoto",hotel:"kyoto",stops:[
@@ -781,11 +785,12 @@ var HT=[
  steps:["Stații lângă hotel: JR Namba circa 7 min pe jos, Namba (Nankai) circa 8 min, Osaka-Namba circa 11 min. Timpii diferă între surse, verifică pe hartă.","De la Namba, metroul Midosuji Line merge direct spre Shin-Osaka, circa 15–20 min. Confirmă pe Google Maps în ziua plecării.","Check-out e la 11:00. Nozomi pleacă din Shin-Osaka, nu din Osaka Station."]}
 ];
 var COSTS=[
-{id:"c1",c:"Tokyo",a:"Tokyo DisneySea",y:10900,r:320,b:1},
-{id:"c2",c:"Tokyo",a:"Shibuya Sky",y:3400,r:78,b:1},
+{id:"c1",c:"Tokyo",a:"Tokyo DisneySea",y:21800,r:640,b:1},
+{id:"c-shibuya-nov20",c:"Tokyo",a:"Shibuya Sky",y:5400,r:159,b:0},
+{id:"c-yoyogi-nov20",c:"Tokyo",a:"Yoyogi Forest of Lights",y:4800,r:141,b:0},
 {id:"c3",c:"Tokyo",a:"Tokyo Skytree",y:3400,r:99,b:0},
-{id:"c4",c:"Tokyo",a:"Shinjuku Gyoen National Garden",y:500,r:15,b:0},
-{id:"c5",c:"Tokyo",a:"Tokyo Tower",y:2800,r:81,b:0},
+{id:"c4",c:"Tokyo",a:"Shinjuku Gyoen National Garden",y:1000,r:29,b:0},
+{id:"c5",c:"Tokyo",a:"Tokyo Tower",y:3000,r:88,b:0},
 {id:"c6",c:"Kyoto",a:"Shinkansen Tokyo → Kyoto",y:14000,r:445,b:1},
 {id:"c7",c:"Kyoto",a:"Kiyomizu-dera",y:400,r:12,b:0},
 {id:"c8",c:"Kyoto",a:"Nijo Castle",y:1300,r:38,b:0},
@@ -809,7 +814,7 @@ var COSTS=[
 {id:"c26",c:"Osaka",a:"Tempozan Ferris Wheel",y:1000,r:29,b:0},
 {id:"c27",c:"Osaka",a:"Tren Osaka → Narita",y:14300,r:445,b:1}
 ];
-var CM={c1:{d:18},c2:{d:16},c3:{d:17,s:"Online pe site-ul Tokyo Skytree sau la ghișeu. Prețul diferă după zi și oră (1.800–3.600 ¥).",u:"https://www.tokyo-skytree.jp/en/"},
+var CM={c1:{d:18},"c-shibuya-nov20":{d:20,s:"Online, interval înainte de 15:00.",u:"https://www.shibuya-scramble-square.com/sky/ticket/"},"c-yoyogi-nov20":{d:20,s:"Online, bilet pentru 20 noiembrie.",u:"https://www.yoyogiforestoflights.tokyo/en/"},c3:{d:17,s:"Online pe site-ul Tokyo Skytree sau la ghișeu. Prețul diferă după zi și oră (1.800–3.600 ¥).",u:"https://www.tokyo-skytree.jp/en/"},
 c4:{d:20,s:"La poartă, la intrare."},c5:{d:19,s:"Online sau la ghișeu.",u:"https://ticket.tokyotower.co.jp/en/"},c6:{d:21,u:"https://smart-ex.jp/en/",s:"SmartEX"},
 c7:{d:22,s:"La intrare."},c8:{d:21,s:"La intrare."},c9:{d:23,s:"La intrare."},c10:{d:24},c11:{d:24},
 c12:{d:27,s:"Online pe WILLER (1.900 ¥), cumpărat cu cel puțin 2 zile înainte, sau la ghișeu (2.000 ¥)."},c13:{d:26},
