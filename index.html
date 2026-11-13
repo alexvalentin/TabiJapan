@@ -578,7 +578,7 @@ function flCard(f){
 function flForm(f,dn){
   var dr=FDRAFT||{}, g=function(k,def){return dr[k]!=null?dr[k]:(f&&f[k]!=null?f[k]:def);};
   var isNew=!f, id=f?f.id:"new";
-  var opts=[14,15,30,31].map(function(n){return '<option value="'+n+'"'+(+g("d",dn||FDAY||14)===n?' selected':'')+'>'+flDayLab(n)+'</option>';}).join("");
+  var opts=[14,15,16,30,31].map(function(n){return '<option value="'+n+'"'+(+g("d",dn||FDAY||14)===n?' selected':'')+'>'+flDayLab(n)+'</option>';}).join("");
   var h='<div class="fcard fedit"><span class="kicker">'+(isNew?'Zbor nou':'Editează zborul')+'</span><div class="addf">'+
     '<label>De la<input type="text" id="fe-f" value="'+esc(g("f",""))+'" autocomplete="off" placeholder="ex. Doha"></label>'+
     '<label>La<input type="text" id="fe-t" value="'+esc(g("t",""))+'" autocomplete="off" placeholder="ex. Narita"></label>'+
