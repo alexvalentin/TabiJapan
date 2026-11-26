@@ -1168,6 +1168,22 @@ function wxKick(){
   wxChips();wxScroll();
   for(var c in WXC)wxFetch(c);
 }
+var IFK="japonia2026-info", IFN={};
+try{IFN=JSON.parse(localStorage.getItem(IFK)||"{}")||{};}catch(e){}
+function infoSave(){try{localStorage.setItem(IFK,JSON.stringify(IFN));}catch(e){}}
+function infoCards(){return Object.keys(IFN).sort().map(function(id){var x=IFN[id];return '<div class="card"><h3>'+esc(x.title)+'</h3><ul class="plain">'+x.items.map(function(t){return '<li>'+esc(t)+'</li>';}).join("")+'</ul></div>';}).join("");}
+function infoDialog(){
+ if(document.getElementById("info-dialog"))return;
+ var dlg=document.createElement("dialog");dlg.id="info-dialog";dlg.className="at-dialog";
+ dlg.innerHTML='<form><h3>Adaugă info nou</h3><label>Titlu<input id="if-title" maxlength="120" required placeholder="Titlul secțiunii"></label><div id="if-items"></div><button type="button" class="cbtn" id="if-more">+ Adaugă un punct</button><div class="acts"><button type="button" class="cbtn" id="if-cancel">Renunță</button><button type="submit" class="cbtn pri">Salvează</button></div></form>';
+ document.body.appendChild(dlg);
+ var items=dlg.querySelector("#if-items");
+ function add(){if(items.children.length>=50)return;var row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:8px;margin:8px 0";row.innerHTML='<span aria-hidden="true">•</span><textarea maxlength="1000" rows="2" aria-label="Idee" placeholder="Scrie o idee"></textarea><button type="button" class="at-x" aria-label="Elimină punctul">×</button>';row.querySelector("button").onclick=function(){if(items.children.length>1)row.remove();else row.querySelector("textarea").value="";};items.appendChild(row);}
+ add();dlg.querySelector("#if-more").onclick=add;dlg.querySelector("#if-cancel").onclick=function(){dlg.close();};dlg.addEventListener("close",function(){dlg.remove();});
+ dlg.querySelector("form").onsubmit=function(e){e.preventDefault();var title=dlg.querySelector("#if-title").value.trim(), points=Array.from(items.querySelectorAll("textarea")).map(function(x){return x.value.trim();}).filter(Boolean);if(!title||!points.length){toast("Scrie titlul și cel puțin un punct");return;}var id="i-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10), v={title:title,items:points};IFN[id]=v;infoSave();sbPush("info:"+id,v);dlg.close();render(true);toast("Info adăugată");};
+ dlg.showModal();
+}
+document.addEventListener("click",function(e){if(e.target.closest("[data-info-add]"))infoDialog();});
 function viewInfo(){
   return '<div class="stack"><div><h2 class="sec">Info</h2><p class="lead">Lucruri bune de știut pe drum.</p></div>'+
   '<div class="card"><h3>Intrare în țară</h3><ul class="plain"><li>Românii intră fără viză, pentru turism, până la 90 de zile.</li><li>Visit Japan Web nu e obligatoriu, dar e recomandat înainte de sosire.</li><li>Taxa de plecare, 3.000 ¥ (≈88 RON), e inclusă în biletul de avion.</li></ul></div>'+
@@ -1178,7 +1194,7 @@ function viewInfo(){
     '<li>Seara, cu bilet separat: Kiyomizu-dera (21 noiembrie – 30 noiembrie 2026), To-ji, Chion-in, Kodaiji.</li>'+
     '<li>Osaka Amazing Pass costă 3.500 ¥ (≈103 RON) pe o zi și nu se justifică pentru planul vostru.</li></ul></div>'+
   viewSync()+
-  '<div class="card"><h3>Cum merge aplicația</h3><p>Tema se alege separat pe fiecare telefon. Bifele „văzut” și „bilet cumpărat”, sumele din Cheltuieli și rândurile adăugate de voi se sincronizează între telefoane, dacă folosiți același cod de grup. Fără internet, schimbările se păstrează pe telefon și se trimit când revine semnalul.</p></div></div>';
+  '<div class="card"><h3>Cum merge aplicația</h3><p>Tema se alege separat pe fiecare telefon. Bifele „văzut” și „bilet cumpărat”, sumele din Cheltuieli și rândurile adăugate de voi se sincronizează între telefoane, dacă folosiți același cod de grup. Fără internet, schimbările se păstrează pe telefon și se trimit când revine semnalul.</p></div>'+infoCards()+'<button type="button" class="cbtn at-add" data-info-add="1">+ Adaugă info nou</button></div>';
 }
 
 /* ---------- RUTARE ---------- */
@@ -1514,6 +1530,8 @@ function sbApply(rows){
       var on=v.on?1:0;
       if(on&&!S[kind][id]){S[kind][id]=1;ch=true;}
       if(!on&&S[kind][id]){delete S[kind][id];ch=true;}
+    }else if(kind==="info"){
+      var iv={title:sbStr(v.title,120),items:Array.isArray(v.items)?v.items.slice(0,50).map(function(t){return sbStr(t,1000);}).filter(Boolean):[]};if(iv.title&&iv.items.length&&JSON.stringify(IFN[id])!==JSON.stringify(iv)){IFN[id]=iv;ch=true;}
     }else if(kind==="attraction"){
       var av=v.del?{del:1}:{d:+v.d,n:sbStr(v.n,120),t:sbTime(v.t),note:sbStr(v.note,500)};
       if((av.del||(id.indexOf("a-")===0&&av.d>=15&&av.d<=31&&av.n))&&JSON.stringify(AO[id])!==JSON.stringify(av)){AO[id]=av;attractionApply();ch=true;}
@@ -1559,13 +1577,14 @@ function sbSeed(rem){
   for(var hid in HO){var k8="ho:"+hid;if(!rem[k8]&&!sbQ.hasOwnProperty(k8))sbQ[k8]=HO[hid];}
   for(var bid in BT){var k7="bt:"+bid;if(!rem[k7]&&!sbQ.hasOwnProperty(k7))sbQ[k7]=BT[bid];}
   for(var xid in XC){var k6="xc:"+xid;if(!rem[k6]&&!sbQ.hasOwnProperty(k6))sbQ[k6]=XC[xid];}
+  for(var iid in IFN){var ik="info:"+iid;if(!rem[ik]&&!sbQ.hasOwnProperty(ik))sbQ[ik]=IFN[iid];}
   for(var aid in AO){var ak="attraction:"+aid;if(!rem[ak]&&!sbQ.hasOwnProperty(ak))sbQ[ak]=AO[aid];}
   for(var fid in FLO){var k4="flight:"+fid;if(!rem[k4]&&!sbQ.hasOwnProperty(k4))sbQ[k4]=FLO[fid];}
   sbSaveQ();
   try{localStorage.setItem(SBI,sbCode);}catch(e){}
 }
 function sbEditing(){
-  if(document.getElementById("at-dialog"))return true;
+  if(document.getElementById("at-dialog")||document.getElementById("info-dialog"))return true;
   var a=document.activeElement, tg=a&&a.tagName;
   if(tg==="INPUT"||tg==="TEXTAREA"||tg==="SELECT")return true;
   for(var k in CE)return true;
@@ -1575,7 +1594,7 @@ function sbEditing(){
 function sbPersist(){
   try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}
   try{localStorage.setItem(CK,JSON.stringify(CV));}catch(e){}
-  cxSave();flSave();xSave();attractionSave();
+  cxSave();flSave();xSave();attractionSave();infoSave();
 }
 async function sbSync(){
   if(!sbOn())return;
