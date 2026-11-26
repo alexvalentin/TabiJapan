@@ -491,8 +491,8 @@ attractionApply();
 function attractionDialog(d,stop){
  if(document.getElementById("at-dialog"))return;
  var dlg=document.createElement("dialog");dlg.id="at-dialog";dlg.className="at-dialog";
- var label=d.code+dlab(d.d)+" · "+tripDate(d.d);
- dlg.innerHTML='<form><h3>'+(stop?'Șterge atracția':'Adaugă atracție')+'</h3><p>'+(stop?'Ești de acord să ștergi <b>'+esc(stop.n)+'</b> din lista de atracții de pe ziua <b>'+esc(label)+'</b>?':'Ziua '+esc(label))+'</p>'+
+ var label=tripDate(d.d)+" ("+d.code+dlab(d.d)+")";
+ dlg.innerHTML='<form><h3>'+(stop?'Șterge atracția':'Adaugă atracție')+'</h3><p>'+(stop?'Ești de acord să ștergi <b>'+esc(stop.n)+'</b> din lista de atracții de pe ziua de <b>'+esc(label)+'</b>?':'Ziua '+esc(label))+'</p>'+
  (stop?'<label>Scrie exact numele atracției: <b>'+esc(stop.n)+'</b><input id="at-name" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>':'<label>Numele atracției<input id="at-name" maxlength="120" required></label><label>Ora (opțional)<input id="at-time" type="time"></label><label>Detalii (opțional)<textarea id="at-note" maxlength="500"></textarea></label>')+
  '<div class="acts"><button type="button" class="cbtn" id="at-cancel">Renunță</button><button type="submit" class="cbtn pri" id="at-submit" disabled>'+(stop?'Șterge':'Adaugă')+'</button></div></form>';
  document.body.appendChild(dlg);
